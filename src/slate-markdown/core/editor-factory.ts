@@ -1,6 +1,6 @@
 import { BlockEventHandler, CustomBlockElementEvents, ICustomBlockElementConfig, ICustomElementConfig, ICustomInlineElementConfig, ICustomTextConfig, RemarkBlockElement, RemarkInlineElement, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
 import { Editor, Element, Node, Path, Point, Range, Text, Transforms } from 'slate'
-import { EditableProps } from 'slate-react/dist/components/editable'
+import type { EditableProps } from 'slate-react/dist/components/editable'
 import { createElement, KeyboardEvent } from 'react'
 import isHotkey from 'is-hotkey'
 import { isElementType } from '/src/slate-markdown/slate-utils'
