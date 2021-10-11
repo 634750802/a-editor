@@ -1,6 +1,7 @@
 /* eslint-disable react/jsx-one-expression-per-line */
 import { defineNode, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
 import { Editor } from 'slate'
+import React from 'react'
 
 export default defineNode<RemarkText>({
   isLeaf: true,

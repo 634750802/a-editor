@@ -3,6 +3,7 @@ import { List, ListItem } from 'remark-slate-transformer/lib/transformers/mdast-
 import { Editor, Node, Path, Transforms } from 'slate'
 import { isElementType } from '/src/slate-markdown/slate-utils'
 import ListNode from '/src/slate-markdown/elements/list/ListNode'
+import React from 'react'
 
 const ListItemNode = defineNode<ListItem>({
   type: 'listItem',

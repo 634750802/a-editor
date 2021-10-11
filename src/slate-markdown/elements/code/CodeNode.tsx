@@ -1,5 +1,6 @@
 import { defineNode } from '/src/slate-markdown/core/elements'
 import { Code } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
+import React from 'react'
 
 const CodeNode = defineNode<Code>({
   type: 'code',

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { TiCommunityEditorInstance } from '/src/components/ti-editor/hooks'
 import './app.less'
 import TiEditor from '/src/components/ti-editor/TiEditor'

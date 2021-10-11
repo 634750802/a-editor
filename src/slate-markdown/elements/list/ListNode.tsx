@@ -2,6 +2,7 @@ import { defineNode, RemarkElementToggleParams, TypedRenderElementProps } from '
 import { List, ListItem } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import { Editor, Node, Path, Transforms } from 'slate'
 import { isElementType, previousSiblingLastChildPath } from '/src/slate-markdown/slate-utils'
+import React from 'react'
 
 const ListNode = defineNode<List>({
   type: 'list',

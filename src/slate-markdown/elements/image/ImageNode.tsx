@@ -1,6 +1,7 @@
 import { defineNode, ICustomInlineElementConfig, RemarkElementProps, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
 import { Image } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import { Editor, Transforms } from 'slate'
+import React from 'react'
 
 export default defineNode<Image>({
   type: 'image',

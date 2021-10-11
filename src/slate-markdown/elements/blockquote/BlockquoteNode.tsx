@@ -1,7 +1,8 @@
 import { defineNode } from '/src/slate-markdown/core/elements'
-import { Blockquote, Heading } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
+import { Blockquote } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import { Node, Path, Transforms } from 'slate'
 import { isElementType } from '/src/slate-markdown/slate-utils'
+import React from 'react'
 
 const BlockquoteNode = defineNode<Blockquote>({
   type: 'blockquote',

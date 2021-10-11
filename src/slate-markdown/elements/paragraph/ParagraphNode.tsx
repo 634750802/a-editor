@@ -1,6 +1,7 @@
 import { defineNode, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
 import { Paragraph } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import { Editor } from 'slate'
+import React from 'react'
 
 const ParagraphNode = defineNode<Paragraph>({
   type: 'paragraph',
