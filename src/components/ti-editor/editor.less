@@ -1,0 +1,77 @@
+.ti-community-editor {
+  padding: 8px;
+  border: 1px solid black;
+  font-size: 14px;
+
+  h1, h2, h3, h4, h5, h6 {
+    &:before {
+      color: gray;
+      margin-right: 8px;
+    }
+  }
+
+  h1 {
+    &:before {
+      content: '#';
+    }
+  }
+
+  h2 {
+    &:before {
+      content: '##';
+    }
+  }
+
+  h3 {
+    &:before {
+      content: '###';
+    }
+  }
+
+  h4 {
+    &:before {
+      content: '####';
+    }
+  }
+
+  h5 {
+    &:before {
+      content: '#####';
+    }
+  }
+
+  h6 {
+    &:before {
+      content: '######';
+    }
+  }
+
+  ul, ol {
+    padding-left: 16px;
+  }
+
+  p {
+    margin: 8px 0;
+  }
+
+  blockquote {
+    background: #efefef;
+    padding: 8px 8px 8px 16px;
+    margin: 0;
+    border-left: 4px solid #d8d8d8;
+  }
+
+  code {
+    background: #d8d8d8;
+    border-radius: 2px;
+    padding: 2px 4px;
+  }
+
+  pre {
+    code {
+      display: block;
+      padding: 8px;
+    }
+  }
+}
+

@@ -1,0 +1,8 @@
+- `defineRemarkNode`
+  - type: mdast.type
+  - isVoid?
+  - render
+- `defineRemarkInlineNode`
+  - insert(editor, location)
+- `defineRemarkBlockNode`
+  - toggle(editor, pathOfParagraph)
