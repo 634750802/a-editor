@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-one-expression-per-line */
 import { defineNode, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
-import { Editor, Node, Range, Text, Transforms } from 'slate'
+import { Editor, Range, Text, Transforms } from 'slate'
 import React from 'react'
 
 export const enum TextNodeDecorator {
@@ -40,7 +40,7 @@ export default defineNode<RemarkText, TextApi>({
     if (!editor.selection) {
       return
     }
-    if (isDecoratorActive(editor, decorator)) {
+    if (isDecoratorActive(editor, editor.selection, decorator)) {
       if (Range.isCollapsed(editor.selection)) {
         Editor.addMark(editor, decorator, false)
       } else {
@@ -53,13 +53,14 @@ export default defineNode<RemarkText, TextApi>({
         Transforms.setNodes(editor, { [decorator]: true }, { match: Text.isText, split: true })
       }
     }
+    editor.shouldUpdatePopper()
   },
 })
 
-function isDecoratorActive (editor: Editor, decorator: TextNodeDecorator) {
-  const { selection } = editor
-  if (!selection) return false
-
+export function isDecoratorActive (editor: Editor, selection: Range, decorator: TextNodeDecorator): boolean {
+  if (Range.isCollapsed(selection) && editor.marks && typeof editor.marks[decorator] !== 'undefined') {
+    return !!editor.marks[decorator]
+  }
   const [match] = Editor.nodes(editor, {
     at: Editor.unhangRange(editor, selection),
     match: n => !Editor.isEditor(n) && Text.isText(n) && !!n[decorator],

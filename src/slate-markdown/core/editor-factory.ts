@@ -39,6 +39,9 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
   wrapEditor<E extends Editor> (editor: E): E {
     const { isVoid, isInline, normalizeNode } = editor
 
+    editor.shouldUpdatePopper = () => {
+    }
+
     editor.isVoid = element => this.voidSet.has(element.type) || isVoid(element)
     editor.isInline = element => this.inlineSet.has(element.type) || isInline(element)
     editor.normalizeNode = (entry) => {
@@ -251,6 +254,9 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
             return
           }
         })
+      },
+      onSelect: event => {
+        editor.shouldUpdatePopper()
       },
     }
   }

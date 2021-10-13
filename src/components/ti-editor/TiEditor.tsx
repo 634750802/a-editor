@@ -9,12 +9,13 @@ import type { SlateNode as SlateMdastNode, Text as SlateMdastText } from 'remark
 import './editor.less'
 import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
 import register from '/src/slate-markdown/elements/register'
+import HoveringToolbar from '/src/components/hovering-toolbar/HoveringToolbar'
 
 
 // see https://docs.slatejs.org/walkthroughs/01-installing-slate
 declare module 'slate' {
   interface CustomTypes {
-    Editor: BaseEditor & ReactEditor
+    Editor: BaseEditor & ReactEditor & TiEditor
     Element: Exclude<SlateMdastNode, SlateMdastText>
     Text: SlateMdastText
   }
@@ -23,6 +24,10 @@ declare module 'slate' {
 export interface TiCommunityEditorProps {
   disabled?: boolean
   initialMarkdown?: string
+}
+
+export interface TiEditor {
+  shouldUpdatePopper: () => void
 }
 
 
@@ -62,6 +67,8 @@ const TiEditor = forwardRef<TiCommunityEditorInstance, TiCommunityEditorProps>((
       onChange={setValue}
       value={value}
     >
+      <HoveringToolbar />
+
       <Editable
         className="ti-community-editor"
         {...editableProps}
