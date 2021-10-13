@@ -2,8 +2,9 @@
   "name": "a-editor",
   "version": "0.0.0",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite -c vite.config.dev.ts",
     "build:gh-pages": "tsc && vite build -c vite.config.gh-pages.ts",
+    "build:lib": "tsc && vite build -c vite.config.lib.ts",
     "serve": "vite preview"
   },
   "devDependencies": {
