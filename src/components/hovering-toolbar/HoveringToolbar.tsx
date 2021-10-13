@@ -9,7 +9,7 @@ import ToolbarItem from '/src/components/hovering-toolbar/ToolbarItem'
 function HoveringToolbar (): JSX.Element {
   const editor = useSlateStatic()
 
-  const ref = useRef<HTMLDivElement>(undefined)
+  const ref = useRef<HTMLDivElement>(null)
   const [n, setN] = useState(0)
 
   editor.shouldUpdatePopper = () => setN(n => n + 1)
