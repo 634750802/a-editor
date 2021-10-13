@@ -28,7 +28,7 @@ jobs:
       - name: Build
         run: |
           npm ci
-          npm run build
+          npm run build:gh-pages
       - name: Deploy to GitHub Pages
         uses: Cecilapp/GitHub-Pages-deploy@v3
         env:
