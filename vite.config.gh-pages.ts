@@ -5,15 +5,5 @@ import plainText from 'vite-plugin-plain-text'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react({}), plainText(/\.md$/)],
-  define: {
-    process: {
-      env: {}
-    }
-  },
-  resolve: {
-    alias: {
-      'node:url': 'url',
-      'universal-deep-strict-equal': 'src/shim/universal-deep-strict-equal.js'
-    },
-  },
+  base: 'https://634750802.github.io/a-editor/',
 })

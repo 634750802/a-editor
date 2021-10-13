@@ -1,5 +1,5 @@
 import { Blockquote, Code, Heading, Image, InlineMath, List, ListItem, Paragraph, SlateNode, Text } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
-import { Editor, Location, Path, Range } from 'slate'
+import { Editor, Location, Path } from 'slate'
 import { RenderElementProps, RenderLeafProps } from 'slate-react'
 import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
 
@@ -85,7 +85,7 @@ type AnyConfig =
 
 export function defineNode<E extends RemarkBlockElement> (config: Omit<ICustomBlockElementConfig<E>, 'register'>): ICustomBlockElementConfig<E>
 export function defineNode<E extends RemarkInlineElement> (config: Omit<ICustomInlineElementConfig<E>, 'register'>): ICustomInlineElementConfig<E>
-export function defineNode<T extends RemarkText> (config: Omit<ICustomTextConfig<T>, 'register'>): ICustomTextConfig<T>
+export function defineNode<T extends RemarkText, P  = Record<string, unknown>> (config: Omit<ICustomTextConfig<T> & P, 'register'>): ICustomTextConfig<T> & P
 export function defineNode<C extends AnyConfig> (config: Omit<C, 'register'>): C {
   return {
     ...config,

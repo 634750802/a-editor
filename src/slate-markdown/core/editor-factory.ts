@@ -3,7 +3,7 @@ import { Editor, Element, Node, Path, Point, Range, Text, Transforms } from 'sla
 import type { EditableProps } from 'slate-react/dist/components/editable'
 import { createElement, KeyboardEvent } from 'react'
 import isHotkey from 'is-hotkey'
-import { isElementType } from '/src/slate-markdown/slate-utils'
+import TextNode, { TextNodeDecorator } from '/src/slate-markdown/elements/text/TextNode'
 
 export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkBlockElement = RemarkBlockElement, IE extends RemarkInlineElement = RemarkInlineElement> {
   private blockConfigs: ICustomBlockElementConfig<BE>[] = []
@@ -221,9 +221,11 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
         batch(editor, () => {
           if (isHotkey('tab', event)) {
             onTab(event)
+            return
           }
           if (isHotkey(['ctrl+enter'], event)) {
             Transforms.insertText(editor, '\n')
+            return
           }
           if (isHotkey('enter', event)) {
             if (editor.selection) {
@@ -233,9 +235,20 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
                 if (!/paragraph|heading/.test(el.type)) {
                   Transforms.insertText(editor, '\n')
                   event.preventDefault()
+                  return
                 }
               }
             }
+          }
+          if (isHotkey('meta+b', event)) {
+            TextNode.toggleDecorator(editor, TextNodeDecorator.strong)
+            event.preventDefault()
+            return
+          }
+          if (isHotkey('meta+i', event)) {
+            TextNode.toggleDecorator(editor, TextNodeDecorator.emphasis)
+            event.preventDefault()
+            return
           }
         })
       },
