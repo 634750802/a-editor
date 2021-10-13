@@ -28,6 +28,7 @@ export interface TiCommunityEditorProps {
 
 export interface TiEditor {
   shouldUpdatePopper: () => void
+  shouldHidePopper: () => void
 }
 
 

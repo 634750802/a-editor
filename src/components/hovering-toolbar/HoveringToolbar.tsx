@@ -11,8 +11,13 @@ function HoveringToolbar (): JSX.Element {
 
   const ref = useRef<HTMLDivElement>(null)
   const [n, setN] = useState(0)
+  const [hidden, setHidden] = useState(true)
 
-  editor.shouldUpdatePopper = () => setN(n => n + 1)
+  editor.shouldUpdatePopper = () => {
+    setN(n => n + 1)
+    setHidden(false)
+  }
+  editor.shouldHidePopper = () => setHidden(true)
 
   const ve = useMemo(() => {
     return {
@@ -41,12 +46,13 @@ function HoveringToolbar (): JSX.Element {
 
   const items = useHoveringToolItems(editor)
 
+  const invisible = hidden || items.length === 0
+
   return (
     <div
       className="ti-hovering-toolbar"
-      hidden={items.length === 0}
       ref={ref}
-      style={styles.popper}
+      style={{...styles.popper, opacity: invisible ? 0 : 1}}
       {...attributes.popper}
     >
 

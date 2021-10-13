@@ -255,9 +255,14 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
           }
         })
       },
-      onSelect: event => {
+      onContextMenu: event => {
         editor.shouldUpdatePopper()
+        event.preventDefault()
+        event.stopPropagation()
       },
+      onClick: event => {
+        editor.shouldHidePopper()
+      }
     }
   }
 }
