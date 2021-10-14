@@ -77,6 +77,8 @@ export interface ICustomInlineElementConfig<E extends RemarkInlineElement> exten
   insert: (editor: Editor, location: Location, params: RemarkElementToggleParams<E>) => void
 
   match?: CustomInlineMatch
+
+  toolbarItems: ToolbarItemConfig[]
 }
 
 export interface ICustomTextConfig<T extends RemarkText> extends ICustomConfig<T> {

@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-one-expression-per-line */
 import { defineNode, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
-import { Editor, Node, Path, Range, Text, Transforms } from 'slate'
+import { Editor, Element, Node, Path, Range, Text, Transforms } from 'slate'
 import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBold, faCode, faItalic, faStrikethrough, IconDefinition } from '@fortawesome/free-solid-svg-icons'
@@ -60,19 +60,22 @@ const TextNode = defineNode<RemarkText, TextApi>({
     {
       key: TextNodeDecorator.strong,
       icon: faBold,
-      tips: <p>加粗</p>,
+      tips: <>加粗</>,
     },
     {
       key: TextNodeDecorator.emphasis,
       icon: faItalic,
+      tips: <>斜体</>,
     },
     {
       key: TextNodeDecorator.inlineCode,
       icon: faCode,
+      tips: <>行内代码</>,
     },
     {
       key: TextNodeDecorator.delete,
       icon: faStrikethrough,
+      tips: <>删除</>,
     },
   ] as ToolbarItemConfig[]).map(({ key, icon, tips }) => ({
     key: key,
@@ -103,6 +106,16 @@ export function isDecoratorActive (editor: Editor, selection: Range, decorator: 
   }
 
   return !!marks[decorator]
+}
+
+export function isElementActive (editor: Editor, selection: Range, type: Element['type']): boolean {
+  const [match] = Editor.nodes(editor, {
+    at: Editor.unhangRange(editor, selection),
+    match: n =>
+      !Editor.isEditor(n) && Element.isElement(n) && n.type === type,
+  })
+
+  return !!match
 }
 
 export default TextNode

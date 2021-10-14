@@ -23,14 +23,17 @@ export default function useHoveringToolItems (editor: Editor, domRange: DOMRange
   }
   const range = ReactEditor.toSlateRange(editor, domRange, { exactMatch: true }) ?? editor.selection
 
-  const toolbarItems: ToolbarItemProps [] = TextNode.toolbarItems.map((
-    { key, isDisabled, isActive, action, icon, tips }) => ({
-    key,
-    disabled: range ? isDisabled(editor, range) : false,
-    active: range ? isActive(editor, range) : false,
-    icon,
-    action: range ? event => action(editor, range, event) : () => {},
-    tips,
-  }))
+  const toolbarItems: ToolbarItemProps [] = TextNode.toolbarItems
+    .concat(editor.factory.inlineConfigs.flatMap(config => config.toolbarItems))
+    .map((
+      { key, isDisabled, isActive, action, icon, tips }) => ({
+      key,
+      disabled: range ? isDisabled(editor, range) : false,
+      active: range ? isActive(editor, range) : false,
+      icon,
+      action: range ? event => action(editor, range, event) : () => {
+      },
+      tips,
+    }))
   return toolbarItems
 }

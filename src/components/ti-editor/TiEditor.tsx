@@ -30,6 +30,7 @@ export interface TiCommunityEditorProps {
 export interface TiEditor {
   updatePopper: (range?: DOMRange) => void
   hidePopper: () => void
+  factory: EditorFactory
 }
 
 

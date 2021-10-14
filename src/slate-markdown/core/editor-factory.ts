@@ -7,8 +7,8 @@ import TextNode, { TextNodeDecorator } from '/src/slate-markdown/elements/text/T
 import LinkNode from '/src/slate-markdown/elements/link/LinkNode'
 
 export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkBlockElement = RemarkBlockElement, IE extends RemarkInlineElement = RemarkInlineElement> {
-  private blockConfigs: ICustomBlockElementConfig<BE>[] = []
-  private inlineConfigs: ICustomInlineElementConfig<IE>[] = []
+  readonly blockConfigs: ICustomBlockElementConfig<BE>[] = []
+  readonly inlineConfigs: ICustomInlineElementConfig<IE>[] = []
   private textConfig!: ICustomTextConfig<T>
 
   private inlineSet: Set<string> = new Set()
@@ -39,6 +39,8 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
 
   wrapEditor<E extends Editor> (editor: E): E {
     const { isVoid, isInline, normalizeNode } = editor
+
+    editor.factory = this as never
 
     editor.updatePopper = () => {
     }

@@ -1,14 +1,15 @@
-import React, { SyntheticEvent, useCallback } from 'react'
+import React, { MouseEvent, useCallback } from 'react'
 import { ToolbarItemProps } from '/src/components/hovering-toolbar/useHoveringToolItems'
 import classNames from 'classnames'
 import Tippy from '@tippyjs/react'
 import { ReactEditor, useSlateStatic } from 'slate-react'
+import 'tippy.js/dist/tippy.css'; // optional
 
 function ToolbarItem ({ icon, active, action, tips }: ToolbarItemProps): JSX.Element {
   const editor = useSlateStatic()
 
-  const handleAction = useCallback((event: SyntheticEvent) => {
-    if (action) {
+  const handleAction = useCallback((event: MouseEvent) => {
+    if (action && event.button === 0) {
       action(event)
       event.preventDefault()
       event.stopPropagation()

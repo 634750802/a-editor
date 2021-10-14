@@ -74,6 +74,7 @@ function HoveringToolbar (): JSX.Element {
           disabled={item.disabled}
           icon={item.icon}
           key={item.key}
+          tips={item.tips}
         />
       ))}
     </div>
