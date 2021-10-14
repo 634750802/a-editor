@@ -1,5 +1,5 @@
 import { BlockEventHandler, CustomBlockElementEvents, ICustomBlockElementConfig, ICustomElementConfig, ICustomInlineElementConfig, ICustomTextConfig, RemarkBlockElement, RemarkInlineElement, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
-import { Editor, Element, Node, Path, Point, Range, Text, Transforms } from 'slate'
+import { Descendant, Editor, Element, Node, Path, Point, Range, Text, Transforms } from 'slate'
 import type { EditableProps } from 'slate-react/dist/components/editable'
 import { createElement, KeyboardEvent } from 'react'
 import isHotkey from 'is-hotkey'
@@ -39,7 +39,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
   wrapEditor<E extends Editor> (editor: E): E {
     const { isVoid, isInline, normalizeNode } = editor
 
-    editor.shouldUpdatePopper = () => {
+    editor.updatePopper = () => {
     }
 
     editor.isVoid = element => this.voidSet.has(element.type) || isVoid(element)
@@ -84,9 +84,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
                     continue
                   }
                 }
-                console.log(toggle.prefix, 'go', this.blockConfigs)
                 if (toggle.prefix?.test(prefix)) {
-                  console.log(toggle.prefix, 'go')
                   const params = toggle.onTrigger(prefix)
                   if (typeof params !== 'undefined') {
                     Transforms.delete(editor, {
@@ -243,25 +241,34 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
               }
             }
           }
-          if (isHotkey('meta+b', event)) {
-            TextNode.toggleDecorator(editor, TextNodeDecorator.strong)
-            event.preventDefault()
-            return
-          }
-          if (isHotkey('meta+i', event)) {
-            TextNode.toggleDecorator(editor, TextNodeDecorator.emphasis)
-            event.preventDefault()
-            return
+          if (editor.selection) {
+            if (isHotkey('meta+b', event)) {
+              TextNode.toggleDecorator(editor, editor.selection, TextNodeDecorator.strong)
+              event.preventDefault()
+              return
+            }
+            if (isHotkey('meta+i', event)) {
+              TextNode.toggleDecorator(editor, editor.selection, TextNodeDecorator.emphasis)
+              event.preventDefault()
+              return
+            }
           }
         })
       },
-      onContextMenu: event => {
-        editor.shouldUpdatePopper()
-        event.preventDefault()
-        event.stopPropagation()
+      onSelect: (e) => {
+        const selection = window.getSelection()
+        if (selection) {
+          if (selection.isCollapsed) {
+            editor.hidePopper()
+          } else {
+            editor.updatePopper(selection.getRangeAt(0))
+            e.preventDefault()
+            e.stopPropagation()
+          }
+        }
       },
-      onClick: event => {
-        editor.shouldHidePopper()
+      onBlur: (event) => {
+        editor.hidePopper()
       }
     }
   }

@@ -10,6 +10,7 @@ import './editor.less'
 import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
 import register from '/src/slate-markdown/elements/register'
 import HoveringToolbar from '/src/components/hovering-toolbar/HoveringToolbar'
+import { DOMRange } from 'slate-react/dist/utils/dom'
 
 
 // see https://docs.slatejs.org/walkthroughs/01-installing-slate
@@ -27,8 +28,8 @@ export interface TiCommunityEditorProps {
 }
 
 export interface TiEditor {
-  shouldUpdatePopper: () => void
-  shouldHidePopper: () => void
+  updatePopper: (range?: DOMRange) => void
+  hidePopper: () => void
 }
 
 

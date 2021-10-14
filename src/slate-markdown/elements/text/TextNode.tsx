@@ -2,6 +2,9 @@
 import { defineNode, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
 import { Editor, Range, Text, Transforms } from 'slate'
 import React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faBold, faCode, faItalic, faStrikethrough, IconDefinition } from '@fortawesome/free-solid-svg-icons'
+import { ReactEditor } from 'slate-react'
 
 export const enum TextNodeDecorator {
   strong = 'strong',
@@ -11,10 +14,10 @@ export const enum TextNodeDecorator {
 }
 
 interface TextApi {
-  toggleDecorator: (editor: Editor, decorator: TextNodeDecorator) => void
+  toggleDecorator: (editor: Editor, range: Range, decorator: TextNodeDecorator) => void
 }
 
-export default defineNode<RemarkText, TextApi>({
+const TextNode = defineNode<RemarkText, TextApi>({
   isLeaf: true,
   render (editor: Editor, { text, children, attributes }: TypedRenderLeafProps<RemarkText>): JSX.Element {
     let el = children
@@ -36,37 +39,68 @@ export default defineNode<RemarkText, TextApi>({
       </span>
     )
   },
-  toggleDecorator (editor: Editor, decorator: TextNodeDecorator) {
-    if (!editor.selection) {
-      return
-    }
-    if (isDecoratorActive(editor, editor.selection, decorator)) {
-      if (Range.isCollapsed(editor.selection)) {
+  toggleDecorator: (editor: Editor, range, decorator: TextNodeDecorator) => {
+    if (isDecoratorActive(editor, range, decorator)) {
+      if (Range.isCollapsed(range)) {
         Editor.addMark(editor, decorator, false)
       } else {
         Transforms.setNodes(editor, { [decorator]: false }, { match: Text.isText, split: true })
       }
     } else {
-      if (Range.isCollapsed(editor.selection)) {
+      if (Range.isCollapsed(range)) {
         Editor.addMark(editor, decorator, true)
       } else {
         Transforms.setNodes(editor, { [decorator]: true }, { match: Text.isText, split: true })
       }
     }
-    editor.shouldUpdatePopper()
   },
+  toolbarItems: ([
+    {
+      key: TextNodeDecorator.strong,
+      icon: faBold,
+      tips: <p>加粗</p>,
+    },
+    {
+      key: TextNodeDecorator.emphasis,
+      icon: faItalic,
+    },
+    {
+      key: TextNodeDecorator.inlineCode,
+      icon: faCode,
+    },
+    {
+      key: TextNodeDecorator.delete,
+      icon: faStrikethrough,
+    },
+  ] as ToolbarItemConfig[]).map(({ key, icon, tips }) => ({
+    key: key,
+    icon: <FontAwesomeIcon icon={icon} />,
+    isActive: (editor, range) => isDecoratorActive(editor, range, key),
+    isDisabled: () => false,
+    action: (editor, range, event) => {
+      TextNode.toggleDecorator(editor, range, key)
+    },
+    tips,
+  })),
 })
 
-export function isDecoratorActive (editor: Editor, selection: Range, decorator: TextNodeDecorator): boolean {
-  if (Range.isCollapsed(selection) && editor.marks && typeof editor.marks[decorator] !== 'undefined') {
-    return !!editor.marks[decorator]
-  }
-  const [match] = Editor.nodes(editor, {
-    at: Editor.unhangRange(editor, selection),
-    match: n => !Editor.isEditor(n) && Text.isText(n) && !!n[decorator],
-  })
-
-  return !!match
+type ToolbarItemConfig = {
+  key: TextNodeDecorator
+  icon: IconDefinition
+  tips?: JSX.Element
 }
 
+export function isDecoratorActive (editor: Editor, selection: Range, decorator: TextNodeDecorator): boolean {
+  if (!ReactEditor.hasRange(editor, selection)) {
+    return false
+  }
 
+  const marks = Editor.marks(editor)
+  if (!marks) {
+    return false
+  }
+
+  return !!marks[decorator]
+}
+
+export default TextNode

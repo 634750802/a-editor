@@ -1,7 +1,9 @@
 import { Blockquote, Code, Heading, Image, InlineMath, List, ListItem, Paragraph, SlateNode, Text } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
-import { Editor, Location, Path } from 'slate'
+import { Editor, Location, Path, Range } from 'slate'
 import { RenderElementProps, RenderLeafProps } from 'slate-react'
 import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
+import { ToolbarItemProps } from '/src/components/hovering-toolbar/useHoveringToolItems'
+import { SyntheticEvent } from 'react'
 
 export type RemarkElement = Exclude<SlateNode, Text>
 export type RemarkBlockElement = List | ListItem | Paragraph | Code | Heading | Blockquote
@@ -75,6 +77,14 @@ export interface ICustomTextConfig<T extends RemarkText> extends ICustomConfig {
   isLeaf: true
 
   render (editor: Editor, props: TypedRenderLeafProps<T>): JSX.Element
+
+  toolbarItems: ToolbarItemConfig[]
+}
+
+export interface ToolbarItemConfig extends Omit<ToolbarItemProps, 'active' | 'disabled' | 'action'> {
+  action: (editor: Editor, range: Range, event: SyntheticEvent) => void
+  isActive: (editor: Editor, range: Range) => boolean
+  isDisabled: (editor: Editor, range: Range) => boolean
 }
 
 type AnyConfig =
@@ -85,7 +95,7 @@ type AnyConfig =
 
 export function defineNode<E extends RemarkBlockElement> (config: Omit<ICustomBlockElementConfig<E>, 'register'>): ICustomBlockElementConfig<E>
 export function defineNode<E extends RemarkInlineElement> (config: Omit<ICustomInlineElementConfig<E>, 'register'>): ICustomInlineElementConfig<E>
-export function defineNode<T extends RemarkText, P  = Record<string, unknown>> (config: Omit<ICustomTextConfig<T> & P, 'register'>): ICustomTextConfig<T> & P
+export function defineNode<T extends RemarkText, P = Record<string, unknown>> (config: Omit<ICustomTextConfig<T> & P, 'register'>): ICustomTextConfig<T> & P
 export function defineNode<C extends AnyConfig> (config: Omit<C, 'register'>): C {
   return {
     ...config,

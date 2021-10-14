@@ -9,7 +9,7 @@ import remarkGfm from 'remark-gfm'
 
 
 export class TiCommunityEditorInstance {
-  private getMarkdownProcessor = unified().use(slateToRemark).use(remarkStringify, {
+  private getMarkdownProcessor = unified().use(remarkGfm).use(slateToRemark).use(remarkStringify, {
     bullet: '-',
     listItemIndent: 'one',
     fence: '`',
