@@ -40,6 +40,7 @@ const BlockquoteNode = defineNode<Blockquote>({
       return true
     }
   },
+  toolbarItems: []
 })
 
 export default BlockquoteNode

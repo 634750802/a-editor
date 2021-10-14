@@ -4,7 +4,7 @@ import { VirtualElement } from '@popperjs/core'
 import { usePopper } from 'react-popper'
 import './style.less'
 import useHoveringToolItems from '/src/components/hovering-toolbar/useHoveringToolItems'
-import ToolbarItem from '/src/components/hovering-toolbar/ToolbarItem'
+import ToolbarItem from '/src/components/toolbar-item/ToolbarItem'
 import { DOMRange } from 'slate-react/dist/utils/dom'
 import useForceUpdate from '/src/hooks/forceUpdate'
 

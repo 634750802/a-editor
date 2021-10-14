@@ -1,8 +1,14 @@
-import { defineNode, RemarkElementToggleParams, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
+import { defineNode, RemarkElementToggleParams, ToolbarItemConfig, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
 import { List, ListItem } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import { Editor, Node, Path, Transforms } from 'slate'
 import { isElementType, previousSiblingLastChildPath } from '/src/slate-markdown/slate-utils'
 import React from 'react'
+import { isElementActive } from '/src/slate-markdown/elements/text/TextNode'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faListOl, faListUl } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
+library.add(faListOl, faListUl)
 
 const ListNode = defineNode<List>({
   type: 'list',
@@ -111,6 +117,25 @@ const ListNode = defineNode<List>({
     },
   },
   events: {},
+  toolbarItems: [true, false].map(ordered => {
+    const isListActive: ToolbarItemConfig<Path>['isActive'] = (editor, path) => path.length > 2 && isElementActive<List>(editor, Path.parent(Path.parent(path)), 'list', list => list.ordered === ordered)
+    return {
+      key: `list-${ordered ? 'ordered' : 'unordered'}`,
+      // eslint-disable-next-line react/jsx-one-expression-per-line
+      icon: <FontAwesomeIcon icon={ordered ? faListOl : faListUl} />,
+      isActive: isListActive,
+      isDisabled: () => false,
+      action: (editor, path, event) => {
+        if (isListActive(editor, path)) {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          ListNode.toggle.toggle!(editor, path, false)
+        } else {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          ListNode.toggle.toggle!(editor, path, { ordered, start: undefined, spread: undefined })
+        }
+      },
+    }
+  }),
 })
 
 export default ListNode

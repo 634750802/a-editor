@@ -52,6 +52,7 @@ const ListItemNode = defineNode<ListItem>({
       }
     },
   },
+  toolbarItems: []
 })
 
 export default ListItemNode

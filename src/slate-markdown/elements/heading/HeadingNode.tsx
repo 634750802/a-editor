@@ -1,8 +1,10 @@
-import { defineNode } from '/src/slate-markdown/core/elements'
+import { defineNode, ToolbarItemConfig } from '/src/slate-markdown/core/elements'
 import { Heading } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import { createElement } from 'react'
-import { Node, Path, Transforms } from 'slate'
+import { Editor, Node, Path, Transforms } from 'slate'
 import { isElementType } from '/src/slate-markdown/slate-utils'
+import LineWrapper from '/src/components/line-wrapper/LineWrapper'
+import { isElementActive } from '/src/slate-markdown/elements/text/TextNode'
 
 const HeadingNode = defineNode<Heading>({
   type: 'heading',
@@ -11,7 +13,11 @@ const HeadingNode = defineNode<Heading>({
   isVoid: false,
   wrappingParagraph: false,
   render: (editor, { element, children, attributes }) => {
-    return createElement(`h${element.depth}`, attributes, children)
+    return (
+      <LineWrapper element={element}>
+        {createElement(`h${element.depth}`, attributes, children)}
+      </LineWrapper>
+    )
   },
   toggle: {
     prefix: /^#{1,6}$/,
@@ -60,6 +66,25 @@ const HeadingNode = defineNode<Heading>({
       return true
     }
   },
+  toolbarItems: [1, 2, 3, 4, 5, 6].map(depth => {
+    const isHeadingActive: ToolbarItemConfig<Path>['isActive'] = (editor, path) => isElementActive<Heading>(editor, path, 'heading', heading => heading.depth === depth)
+    return {
+      key: `heading-level-${depth}`,
+      // eslint-disable-next-line react/jsx-one-expression-per-line
+      icon: <>H{depth}</>,
+      isActive: isHeadingActive,
+      isDisabled: () => false,
+      action: (editor, path, event) => {
+        if (isHeadingActive(editor, path)) {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          HeadingNode.toggle.toggle!(editor, path, false)
+        } else {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          HeadingNode.toggle.toggle!(editor, path, { depth } as never)
+        }
+      },
+    }
+  }),
 })
 
 export default HeadingNode

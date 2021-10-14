@@ -4,16 +4,20 @@ import classNames from 'classnames'
 import Tippy from '@tippyjs/react'
 import { ReactEditor, useSlateStatic } from 'slate-react'
 import 'tippy.js/dist/tippy.css'; // optional
+import './style.less'
+import { Editor } from 'slate'
 
 function ToolbarItem ({ icon, active, action, tips }: ToolbarItemProps): JSX.Element {
   const editor = useSlateStatic()
 
   const handleAction = useCallback((event: MouseEvent) => {
     if (action && event.button === 0) {
-      action(event)
-      event.preventDefault()
-      event.stopPropagation()
-      ReactEditor.focus(editor)
+      Editor.withoutNormalizing(editor, () => {
+        action(event)
+        event.preventDefault()
+        event.stopPropagation()
+        ReactEditor.focus(editor)
+      })
     }
   }, [action])
 

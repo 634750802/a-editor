@@ -1,12 +1,11 @@
 /* eslint-disable react/jsx-one-expression-per-line */
 import { defineNode, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
-import { Editor, Element, Node, Path, Range, Text, Transforms } from 'slate'
+import { Editor, Element, Location, Node, Path, Range, Text, Transforms } from 'slate'
 import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBold, faCode, faItalic, faStrikethrough, IconDefinition } from '@fortawesome/free-solid-svg-icons'
 import { ReactEditor } from 'slate-react'
 import { isElementType } from '/src/slate-markdown/slate-utils'
-import { Link } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 
 export const enum TextNodeDecorator {
   strong = 'strong',
@@ -108,11 +107,16 @@ export function isDecoratorActive (editor: Editor, selection: Range, decorator: 
   return !!marks[decorator]
 }
 
-export function isElementActive (editor: Editor, selection: Range, type: Element['type']): boolean {
+type NodePredicate<E> = (element: E) => boolean
+
+export function isElementActive<E extends Element> (editor: Editor, location: Location, type: E['type'], matcher?: NodePredicate<E>): boolean {
+  if (Path.isPath(location)) {
+    const n = Node.get(editor, location)
+    return isElementType<E>(n, type) && (matcher ? matcher(n) : true)
+  }
   const [match] = Editor.nodes(editor, {
-    at: Editor.unhangRange(editor, selection),
-    match: n =>
-      !Editor.isEditor(n) && Element.isElement(n) && n.type === type,
+    at: Range.isRange(location) ? Editor.unhangRange(editor, location) : location,
+    match: n => !Editor.isEditor(n) && isElementType<E>(n, type) && (matcher ? matcher(n) : true),
   })
 
   return !!match

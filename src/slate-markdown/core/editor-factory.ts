@@ -5,6 +5,7 @@ import { createElement, KeyboardEvent } from 'react'
 import isHotkey from 'is-hotkey'
 import TextNode, { TextNodeDecorator } from '/src/slate-markdown/elements/text/TextNode'
 import LinkNode from '/src/slate-markdown/elements/link/LinkNode'
+import LineWrapper from '/src/components/line-wrapper/LineWrapper'
 
 export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkBlockElement = RemarkBlockElement, IE extends RemarkInlineElement = RemarkInlineElement> {
   readonly blockConfigs: ICustomBlockElementConfig<BE>[] = []
@@ -59,6 +60,17 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
           const normalize = this.customElementMap.get(node.type)?.normalize
           if (normalize) {
             normalize(editor, node as never, path, preventDefaults)
+          }
+          if (Editor.isBlock(editor, node)) {
+            if (path.length === 1) {
+              if (!(node as RemarkBlockElement).isTopLevelBlock) {
+                Transforms.setNodes(editor, { isTopLevelBlock: true }, { at: path })
+              }
+            } else {
+              if ((node as RemarkBlockElement).isTopLevelBlock) {
+                Transforms.unsetNodes(editor, 'isTopLevelBlock', { at: path })
+              }
+            }
           }
         }
         if (Text.isText(node)) {

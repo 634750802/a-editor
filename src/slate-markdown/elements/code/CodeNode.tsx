@@ -1,6 +1,7 @@
 import { defineNode } from '/src/slate-markdown/core/elements'
 import { Code } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import React from 'react'
+import LineWrapper from '/src/components/line-wrapper/LineWrapper'
 
 const CodeNode = defineNode<Code>({
   type: 'code',
@@ -8,17 +9,20 @@ const CodeNode = defineNode<Code>({
   isLeaf: false,
   isVoid: false,
   wrappingParagraph: false,
-  render: (editor, { children, attributes }) => {
+  render: (editor, { element, children, attributes }) => {
     return (
-      <pre {...attributes}>
-        <code>
-          {children}
-        </code>
-      </pre>
+      <LineWrapper element={element}>
+        <pre {...attributes}>
+          <code>
+            {children}
+          </code>
+        </pre>
+      </LineWrapper>
     )
   },
   toggle: {},
   events: {},
+  toolbarItems: []
 })
 
 export default CodeNode

@@ -5,9 +5,13 @@ import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
 import { ToolbarItemProps } from '/src/components/hovering-toolbar/useHoveringToolItems'
 import { SyntheticEvent } from 'react'
 
-export type RemarkElement = Exclude<SlateNode, Text>
-export type RemarkBlockElement = List | ListItem | Paragraph | Code | Heading | Blockquote
+type CustomExtension = {
+  isTopLevelBlock?: boolean
+}
+
+export type RemarkBlockElement = (List | ListItem | Paragraph | Code | Heading | Blockquote) & CustomExtension
 export type RemarkInlineElement = InlineMath | Image | Link
+export type RemarkElement = RemarkBlockElement | RemarkInlineElement
 export type RemarkText = Text
 export type RemarkElementToggleParams<E extends RemarkElement, P extends Omit<E, 'type' | 'children'> = Omit<E, 'type' | 'children'>> =
   P extends Record<string, never> ? boolean : P | false
@@ -65,6 +69,7 @@ export interface ICustomBlockElementConfig<E extends RemarkBlockElement> extends
 
   // heading is not while blockquote and listItem are.
   wrappingParagraph: boolean
+  toolbarItems: ToolbarItemConfig<Path>[]
 }
 
 export type CustomInlineMatch = {
@@ -89,10 +94,10 @@ export interface ICustomTextConfig<T extends RemarkText> extends ICustomConfig<T
   toolbarItems: ToolbarItemConfig[]
 }
 
-export interface ToolbarItemConfig extends Omit<ToolbarItemProps, 'active' | 'disabled' | 'action'> {
-  action: (editor: Editor, range: Range, event: SyntheticEvent) => void
-  isActive: (editor: Editor, range: Range) => boolean
-  isDisabled: (editor: Editor, range: Range) => boolean
+export interface ToolbarItemConfig<R = Range> extends Omit<ToolbarItemProps, 'active' | 'disabled' | 'action'> {
+  action: (editor: Editor, range: R, event: SyntheticEvent) => void
+  isActive: (editor: Editor, range: R) => boolean
+  isDisabled: (editor: Editor, range: R) => boolean
 }
 
 type AnyConfig =

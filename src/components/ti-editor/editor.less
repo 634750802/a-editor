@@ -1,7 +1,9 @@
+@default-indent: 16px;
+
 .ti-community-editor {
-  padding: 8px;
   border: 1px solid black;
   font-size: 14px;
+  padding: 8px 8px 8px 40px;
 
   h1, h2, h3, h4, h5, h6 {
     &:before {
@@ -47,7 +49,16 @@
   }
 
   ul, ol {
-    padding-left: 16px;
+    padding-left: 0;
+
+    li {
+      margin-left: 16px;
+
+      > * {
+        margin-left: -16px;
+        padding-left: 16px;
+      }
+    }
   }
 
   p {
@@ -56,9 +67,14 @@
 
   blockquote {
     background: #efefef;
-    padding: 8px 8px 8px 16px;
+    padding: 0;
     margin: 0;
     border-left: 4px solid #d8d8d8;
+
+    > p {
+      padding-left: 18px;
+      margin-left: -2px;
+    }
   }
 
   code {

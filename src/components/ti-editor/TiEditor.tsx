@@ -5,20 +5,20 @@ import { BaseEditor, createEditor } from 'slate'
 import { withHistory } from 'slate-history'
 import PropTypes from 'prop-types'
 import { TiCommunityEditorInstance, useInstance } from '/src/components/ti-editor/hooks'
-import type { SlateNode as SlateMdastNode, Text as SlateMdastText } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import './editor.less'
 import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
 import register from '/src/slate-markdown/elements/register'
 import HoveringToolbar from '/src/components/hovering-toolbar/HoveringToolbar'
 import { DOMRange } from 'slate-react/dist/utils/dom'
+import { RemarkBlockElement, RemarkInlineElement, RemarkText } from '/src/slate-markdown/core/elements'
 
 
 // see https://docs.slatejs.org/walkthroughs/01-installing-slate
 declare module 'slate' {
   interface CustomTypes {
     Editor: BaseEditor & ReactEditor & TiEditor
-    Element: Exclude<SlateMdastNode, SlateMdastText>
-    Text: SlateMdastText
+    Element: RemarkBlockElement | RemarkInlineElement
+    Text: RemarkText
   }
 }
 
@@ -73,6 +73,7 @@ const TiEditor = forwardRef<TiCommunityEditorInstance, TiCommunityEditorProps>((
       <HoveringToolbar />
 
       <Editable
+        as="article"
         className="ti-community-editor"
         {...editableProps}
       />
