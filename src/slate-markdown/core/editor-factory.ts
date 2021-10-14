@@ -60,17 +60,6 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
           if (normalize) {
             normalize(editor, node as never, path, preventDefaults)
           }
-          if (Editor.isBlock(editor, node)) {
-            if (path.length === 1) {
-              if (!(node as RemarkBlockElement).isTopLevelBlock) {
-                Transforms.setNodes(editor, { isTopLevelBlock: true }, { at: path })
-              }
-            } else {
-              if ((node as RemarkBlockElement).isTopLevelBlock) {
-                Transforms.unsetNodes(editor, 'isTopLevelBlock', { at: path })
-              }
-            }
-          }
         }
         if (Text.isText(node)) {
           if (this.textConfig.normalize) {

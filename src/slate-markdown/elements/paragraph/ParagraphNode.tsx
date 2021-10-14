@@ -3,6 +3,7 @@ import { Paragraph } from 'remark-slate-transformer/lib/transformers/mdast-to-sl
 import { Editor } from 'slate'
 import React from 'react'
 import LineWrapper from '/src/components/line-wrapper/LineWrapper'
+import classNames from 'classnames'
 
 const ParagraphNode = defineNode<Paragraph>({
   type: 'paragraph',
@@ -15,12 +16,14 @@ const ParagraphNode = defineNode<Paragraph>({
   render (editor: Editor, { element, attributes, children }: TypedRenderElementProps<Paragraph>): JSX.Element {
     return (
       <LineWrapper element={element}>
-        <p
-          {...attributes}
-          data-top-level={element.isTopLevelBlock}
-        >
-          {children}
-        </p>
+        {({ active }) => (
+          <p
+            className={classNames({ active })}
+            {...attributes}
+          >
+            {children}
+          </p>
+        )}
       </LineWrapper>
     )
   },

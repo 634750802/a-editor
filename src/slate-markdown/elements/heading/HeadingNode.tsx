@@ -1,10 +1,11 @@
 import { defineNode, ToolbarItemConfig } from '/src/slate-markdown/core/elements'
 import { Heading } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import { createElement } from 'react'
-import { Editor, Node, Path, Transforms } from 'slate'
+import { Node, Path, Transforms } from 'slate'
 import { isElementType } from '/src/slate-markdown/slate-utils'
 import LineWrapper from '/src/components/line-wrapper/LineWrapper'
 import { isElementActive } from '/src/slate-markdown/elements/text/TextNode'
+import classNames from 'classnames'
 
 const HeadingNode = defineNode<Heading>({
   type: 'heading',
@@ -15,7 +16,7 @@ const HeadingNode = defineNode<Heading>({
   render: (editor, { element, children, attributes }) => {
     return (
       <LineWrapper element={element}>
-        {createElement(`h${element.depth}`, attributes, children)}
+        {({ active }) => createElement(`h${element.depth}`, Object.assign(attributes, { className: classNames({ active })}), children)}
       </LineWrapper>
     )
   },

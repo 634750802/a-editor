@@ -1,4 +1,4 @@
-@default-indent: 16px;
+@default-indent: 20px;
 
 .ti-community-editor {
   border: 1px solid black;
@@ -52,11 +52,11 @@
     padding-left: 0;
 
     li {
-      margin-left: 16px;
+      margin-left: @default-indent;
 
       > * {
-        margin-left: -16px;
-        padding-left: 16px;
+        margin-left: -@default-indent;
+        padding-left: @default-indent;
       }
     }
   }
@@ -72,7 +72,7 @@
     border-left: 4px solid #d8d8d8;
 
     > * {
-      padding-left: 18px;
+      padding-left: @default-indent + 2;
       margin-left: -2px;
     }
   }
@@ -88,6 +88,10 @@
       display: block;
       padding: 8px;
     }
+  }
+
+  .active {
+    background: rgba(23, 66, 160, .4);
   }
 }
 

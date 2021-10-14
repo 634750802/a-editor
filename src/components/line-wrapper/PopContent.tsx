@@ -1,31 +1,37 @@
 import { RemarkBlockElement } from '/src/slate-markdown/core/elements'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBars } from '@fortawesome/free-solid-svg-icons'
+import { faBars, faPlus } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { ToolbarItemProps } from '/src/components/line-wrapper/useBlockToolItems'
 import Tippy from '@tippyjs/react'
 import ToolbarItem from '/src/components/toolbar-item/ToolbarItem'
 import React from 'react'
 
-library.add(faBars)
+library.add(faBars, faPlus)
 
 export interface PopContentProps {
   element: RemarkBlockElement,
-  items: ToolbarItemProps[]
+  items: ToolbarItemProps[],
+  setActive: (active: boolean) => void,
+  isEmpty: boolean
 }
 
-export default function PopContent ({ element, items }: PopContentProps): JSX.Element {
+export default function PopContent ({ isEmpty, element, items, setActive }: PopContentProps): JSX.Element {
 
   return (
     <Tippy
+      appendTo='parent'
       content={renderItems(items)}
+      hideOnClick={false}
       interactive
+      onHide={() => setActive(false)}
+      onShow={() => setActive(true)}
     >
       <span
         className="line-operations"
         contentEditable={false}
       >
-        <FontAwesomeIcon icon={faBars} />
+        <FontAwesomeIcon icon={isEmpty ? faPlus : faBars} />
       </span>
     </Tippy>
   )

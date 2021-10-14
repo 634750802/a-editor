@@ -5,15 +5,20 @@ import PopContent from '/src/components/line-wrapper/PopContent'
 import './style.less'
 import { useLayoutEffect, useRef, useState } from 'react'
 import { ReactEditor, useSlateStatic } from 'slate-react'
-import { Editor, Node, Path } from 'slate'
+import { Editor, Element, Node, Path } from 'slate'
 import useBlockToolItems from '/src/components/line-wrapper/useBlockToolItems'
 import useForceUpdate from '/src/hooks/forceUpdate'
 
+const EOF = String.fromCharCode(0xfe, 0xff)
+
 export interface TopLevelBlockProps {
   element: RemarkBlockElement
-  children: JSX.Element
+  children: (ctx: LineWrapperContext) => JSX.Element
 }
 
+interface LineWrapperContext {
+  active: boolean
+}
 
 export default function LineWrapper ({ element, children }: TopLevelBlockProps): JSX.Element {
 
@@ -45,6 +50,12 @@ export default function LineWrapper ({ element, children }: TopLevelBlockProps):
     }
   }, [el])
 
+  const [active, setActive] = useState(false)
+
+  const isEmpty = (() => {
+    return element.children.length === 1 && element.children[0].text === ''
+  })()
+
   return (
     <Tippy
       appendTo={document.body}
@@ -68,11 +79,13 @@ export default function LineWrapper ({ element, children }: TopLevelBlockProps):
       render={() => (
         <PopContent
           element={element}
+          isEmpty={isEmpty}
           items={items}
+          setActive={setActive}
         />
       )}
     >
-      {children}
+      {children({ active })}
     </Tippy>
   )
 }

@@ -5,10 +5,6 @@ import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
 import { ToolbarItemProps } from '/src/components/hovering-toolbar/useHoveringToolItems'
 import { SyntheticEvent } from 'react'
 
-type CustomExtension = {
-  isTopLevelBlock?: boolean
-}
-
 export type RemarkBlockElement = (List | ListItem | Paragraph | Code | Heading | Blockquote) & CustomExtension
 export type RemarkInlineElement = InlineMath | Image | Link
 export type RemarkElement = RemarkBlockElement | RemarkInlineElement

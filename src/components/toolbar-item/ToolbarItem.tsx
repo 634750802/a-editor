@@ -17,7 +17,6 @@ function ToolbarItem ({ icon, active, disabled, action, tips }: ToolbarItemProps
       if (!disabled) {
         Editor.withoutNormalizing(editor, () => {
           action(event)
-          ReactEditor.focus(editor)
         })
       }
     }
