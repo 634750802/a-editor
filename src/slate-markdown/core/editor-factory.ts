@@ -115,13 +115,21 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
                 const url = matched[0]
                 const start = matched.index
                 const end = matched.index + url.length
-                const range = { anchor: { path: point.path, offset: start }, focus: { path: point.path, offset: end}}
+                const range = { anchor: { path: point.path, offset: start }, focus: { path: point.path, offset: end } }
                 LinkNode.insert(editor, range, { url, title: url })
                 event.preventDefault()
                 return
               }
             }
           }
+        }
+        // like links, if you input at the end of a link, slate will add the text to next text node.
+        if (Editor.isInline(editor, parentNode)) {
+          const path = Path.parent(point.path).concat(parentNode.children.length)
+          Transforms.insertNodes(editor, { text: event.data || '' }, { at: path })
+          Transforms.move(editor, { distance: 1 })
+          event.preventDefault()
+          return
         }
       }
     }

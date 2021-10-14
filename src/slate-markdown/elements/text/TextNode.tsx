@@ -21,17 +21,6 @@ interface TextApi {
 
 const TextNode = defineNode<RemarkText, TextApi>({
   isLeaf: true,
-  normalize: (editor, node, path, preventDefaults) => {
-    if (node.text.length === 1 && node.text !== ' ' && Path.hasPrevious(path)) {
-      const prev = Node.get(editor, Path.previous(path))
-      if (isElementType<Link>(prev, 'link')) {
-        const newPos = Path.previous(path).concat(prev.children.length)
-        Transforms.moveNodes(editor, { at: path, to: newPos })
-        editor.normalizeNode([prev, Path.previous(path)])
-        preventDefaults()
-      }
-    }
-  },
   render (editor: Editor, { text, children, attributes }: TypedRenderLeafProps<RemarkText>): JSX.Element {
     let el = children
     if (text.delete) {
