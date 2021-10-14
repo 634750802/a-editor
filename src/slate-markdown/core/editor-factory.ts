@@ -1,9 +1,10 @@
 import { BlockEventHandler, CustomBlockElementEvents, ICustomBlockElementConfig, ICustomElementConfig, ICustomInlineElementConfig, ICustomTextConfig, RemarkBlockElement, RemarkInlineElement, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
-import { Descendant, Editor, Element, Node, Path, Point, Range, Text, Transforms } from 'slate'
+import { Editor, Element, Node, Path, Point, Range, Text, Transforms } from 'slate'
 import type { EditableProps } from 'slate-react/dist/components/editable'
 import { createElement, KeyboardEvent } from 'react'
 import isHotkey from 'is-hotkey'
 import TextNode, { TextNodeDecorator } from '/src/slate-markdown/elements/text/TextNode'
+import LinkNode from '/src/slate-markdown/elements/link/LinkNode'
 
 export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkBlockElement = RemarkBlockElement, IE extends RemarkInlineElement = RemarkInlineElement> {
   private blockConfigs: ICustomBlockElementConfig<BE>[] = []
@@ -46,15 +47,21 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
     editor.isInline = element => this.inlineSet.has(element.type) || isInline(element)
     editor.normalizeNode = (entry) => {
       let shouldNormalizeDefaults = true
+      const preventDefaults = () => {
+        shouldNormalizeDefaults = false
+      }
       Editor.withoutNormalizing(editor, () => {
         debugPrintTree(editor)
         const [node, path] = entry
         if (Element.isElement(node)) {
           const normalize = this.customElementMap.get(node.type)?.normalize
           if (normalize) {
-            normalize(editor, node as never, path, () => {
-              shouldNormalizeDefaults = false
-            })
+            normalize(editor, node as never, path, preventDefaults)
+          }
+        }
+        if (Text.isText(node)) {
+          if (this.textConfig.normalize) {
+            this.textConfig.normalize(editor, node as never, path, preventDefaults)
           }
         }
       })
@@ -96,6 +103,22 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
                     return
                   }
                 }
+              }
+            }
+          }
+        }
+        if (Text.isText(node) && event.data === ' ') {
+          for (const inlineConfig of this.inlineConfigs) {
+            if (inlineConfig.match) {
+              const matched = inlineConfig.match.regexp.exec(node.text.slice(0, point.offset))
+              if (matched) {
+                const url = matched[0]
+                const start = matched.index
+                const end = matched.index + url.length
+                const range = { anchor: { path: point.path, offset: start }, focus: { path: point.path, offset: end}}
+                LinkNode.insert(editor, range, { url, title: url })
+                event.preventDefault()
+                return
               }
             }
           }

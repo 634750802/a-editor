@@ -1,5 +1,5 @@
-import { Blockquote, Code, Heading, Image, InlineMath, List, ListItem, Paragraph, SlateNode, Text } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
-import { Editor, Location, Path, Range } from 'slate'
+import { Blockquote, Code, Heading, Image, InlineMath, Link, List, ListItem, Paragraph, SlateNode, Text } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
+import { Editor, Location, Path, Range, Node, Element as SlateElement, Text as SlateText } from 'slate'
 import { RenderElementProps, RenderLeafProps } from 'slate-react'
 import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
 import { ToolbarItemProps } from '/src/components/hovering-toolbar/useHoveringToolItems'
@@ -7,14 +7,14 @@ import { SyntheticEvent } from 'react'
 
 export type RemarkElement = Exclude<SlateNode, Text>
 export type RemarkBlockElement = List | ListItem | Paragraph | Code | Heading | Blockquote
-export type RemarkInlineElement = InlineMath | Image
+export type RemarkInlineElement = InlineMath | Image | Link
 export type RemarkText = Text
 export type RemarkElementToggleParams<E extends RemarkElement, P extends Omit<E, 'type' | 'children'> = Omit<E, 'type' | 'children'>> =
   P extends Record<string, never> ? boolean : P | false
 export type RemarkElementProps<E extends RemarkElement, P extends Omit<E, 'type' | 'children'> = Omit<E, 'type' | 'children'>> =
   P extends Record<string, never> ? void : P
 
-export type CustomElementNormalizer<E extends RemarkElement> = (editor: Editor, element: E, path: Path, preventDefaults: () => void) => void
+export type CustomElementNormalizer<E extends SlateElement | SlateText> = (editor: Editor, element: E, path: Path, preventDefaults: () => void) => void
 export type TypedRenderElementProps<E extends RemarkElement> = RenderElementProps & {
   element: E
 }
@@ -42,16 +42,16 @@ export type CustomBlockElementToggle<T> = {
   toggle: (editor: Editor, path: Path, params: T) => void
 } | Record<string, never>
 
-export interface ICustomConfig {
+export interface ICustomConfig<E extends SlateElement | SlateText> {
   isLeaf: boolean
 
+  normalize?: CustomElementNormalizer<E>
   register (editorFactory: EditorFactory): void
 }
 
-export interface ICustomElementConfig<E extends RemarkElement> extends ICustomConfig {
+export interface ICustomElementConfig<E extends RemarkElement> extends ICustomConfig<E> {
   isLeaf: false
   type: E['type']
-  normalize?: CustomElementNormalizer<E>
   isInline: boolean
   isVoid: boolean
 
@@ -67,13 +67,19 @@ export interface ICustomBlockElementConfig<E extends RemarkBlockElement> extends
   wrappingParagraph: boolean
 }
 
+export type CustomInlineMatch = {
+  regexp: RegExp
+} | Record<string, never>
+
 export interface ICustomInlineElementConfig<E extends RemarkInlineElement> extends ICustomElementConfig<E> {
   isInline: true
 
   insert: (editor: Editor, location: Location, params: RemarkElementToggleParams<E>) => void
+
+  match?: CustomInlineMatch
 }
 
-export interface ICustomTextConfig<T extends RemarkText> extends ICustomConfig {
+export interface ICustomTextConfig<T extends RemarkText> extends ICustomConfig<T> {
   isLeaf: true
 
   render (editor: Editor, props: TypedRenderLeafProps<T>): JSX.Element
