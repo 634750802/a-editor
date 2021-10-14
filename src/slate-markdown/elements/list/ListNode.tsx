@@ -52,7 +52,7 @@ const ListNode = defineNode<List>({
     }
   },
   toggle: {
-    prefix: /^-|\d+\.$/,
+    prefix: /^(?:-|\d+\.)$/,
     toggle: (editor, path, params) => {
       // node must be paragraph
       if (!isElementType(Node.get(editor, path), 'paragraph')) {

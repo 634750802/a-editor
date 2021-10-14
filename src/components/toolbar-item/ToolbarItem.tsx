@@ -7,23 +7,25 @@ import 'tippy.js/dist/tippy.css'; // optional
 import './style.less'
 import { Editor } from 'slate'
 
-function ToolbarItem ({ icon, active, action, tips }: ToolbarItemProps): JSX.Element {
+function ToolbarItem ({ icon, active, disabled, action, tips }: ToolbarItemProps): JSX.Element {
   const editor = useSlateStatic()
 
   const handleAction = useCallback((event: MouseEvent) => {
     if (action && event.button === 0) {
-      Editor.withoutNormalizing(editor, () => {
-        action(event)
-        event.preventDefault()
-        event.stopPropagation()
-        ReactEditor.focus(editor)
-      })
+      event.preventDefault()
+      event.stopPropagation()
+      if (!disabled) {
+        Editor.withoutNormalizing(editor, () => {
+          action(event)
+          ReactEditor.focus(editor)
+        })
+      }
     }
   }, [action])
 
   const el = (
     <span
-      className={classNames('toolbar-item', { active })}
+      className={classNames('toolbar-item', { active, disabled })}
       onMouseDown={handleAction}
     >
       {icon}

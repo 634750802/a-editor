@@ -1,0 +1,19 @@
+{
+  "title": "添加超链接",
+  "type": "object",
+  "properties": {
+    "src": {
+      "title": "链接",
+      "type": "string",
+      "format": "url"
+    },
+    "text": {
+      "title": "显示文本",
+      "type": "string"
+    }
+  },
+  "required": [
+    "src",
+    "text"
+  ]
+}

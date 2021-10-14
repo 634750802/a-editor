@@ -5,7 +5,6 @@ import { createElement, KeyboardEvent } from 'react'
 import isHotkey from 'is-hotkey'
 import TextNode, { TextNodeDecorator } from '/src/slate-markdown/elements/text/TextNode'
 import LinkNode from '/src/slate-markdown/elements/link/LinkNode'
-import LineWrapper from '/src/components/line-wrapper/LineWrapper'
 
 export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkBlockElement = RemarkBlockElement, IE extends RemarkInlineElement = RemarkInlineElement> {
   readonly blockConfigs: ICustomBlockElementConfig<BE>[] = []
@@ -130,7 +129,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
                 const start = matched.index
                 const end = matched.index + url.length
                 const range = { anchor: { path: point.path, offset: start }, focus: { path: point.path, offset: end } }
-                LinkNode.insert(editor, range, { url, title: url })
+                LinkNode.insert(editor, range, { url, title: '', text: url })
                 event.preventDefault()
                 return
               }
@@ -305,7 +304,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
         if (selection) {
           if (selection.isCollapsed) {
             editor.hidePopper()
-          } else {
+          } else if (selection.rangeCount > 0) {
             editor.updatePopper(selection.getRangeAt(0))
             e.preventDefault()
             e.stopPropagation()

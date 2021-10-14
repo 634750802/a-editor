@@ -1,5 +1,5 @@
 /* eslint-disable react/forbid-component-props */
-import React, { forwardRef, useEffect, useMemo } from 'react'
+import React, { forwardRef, HTMLProps, useEffect, useMemo, useState } from 'react'
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react'
 import { BaseEditor, createEditor } from 'slate'
 import { withHistory } from 'slate-history'
@@ -11,6 +11,7 @@ import register from '/src/slate-markdown/elements/register'
 import HoveringToolbar from '/src/components/hovering-toolbar/HoveringToolbar'
 import { DOMRange } from 'slate-react/dist/utils/dom'
 import { RemarkBlockElement, RemarkInlineElement, RemarkText } from '/src/slate-markdown/core/elements'
+import { createPortal } from 'react-dom'
 
 
 // see https://docs.slatejs.org/walkthroughs/01-installing-slate
@@ -31,6 +32,7 @@ export interface TiEditor {
   updatePopper: (range?: DOMRange) => void
   hidePopper: () => void
   factory: EditorFactory
+  setActionForm: (form: JSX.Element | undefined) => void
 }
 
 
@@ -63,6 +65,18 @@ const TiEditor = forwardRef<TiCommunityEditorInstance, TiCommunityEditorProps>((
     instance.markdown = initialMarkdown
   }, [editor])
 
+  const [form, setForm] = useState<JSX.Element>()
+
+  editor.setActionForm = setForm
+
+  const formPortal = useMemo(() => {
+    if (form) {
+      return createPortal(form, document.body)
+    } else {
+      return undefined
+    }
+  }, [form])
+
   return (
     // Add the editable component inside the context.
     <Slate
@@ -73,10 +87,12 @@ const TiEditor = forwardRef<TiCommunityEditorInstance, TiCommunityEditorProps>((
       <HoveringToolbar />
 
       <Editable
-        as="article"
+        as='article'
         className="ti-community-editor"
         {...editableProps}
       />
+
+      {formPortal}
     </Slate>
   )
 })

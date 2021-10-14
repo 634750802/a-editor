@@ -79,7 +79,7 @@ export type CustomInlineMatch = {
 export interface ICustomInlineElementConfig<E extends RemarkInlineElement> extends ICustomElementConfig<E> {
   isInline: true
 
-  insert: (editor: Editor, location: Location, params: RemarkElementToggleParams<E>) => void
+  insert: (editor: Editor, location: Location, params: RemarkElementToggleParams<E> & { text: string }) => void
 
   match?: CustomInlineMatch
 

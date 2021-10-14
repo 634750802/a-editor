@@ -35,34 +35,12 @@ const HeadingNode = defineNode<Heading>({
     },
   },
   events: {
-    onStartDelete: (editor, path) => {
-      const heading = Node.parent(editor, path)
-      if (!isElementType<Heading>(heading, 'heading')) {
-        return false
-      }
-      if (heading.depth > 1) {
-        HeadingNode.toggle.toggle(editor, Path.parent(path), { depth: heading.depth - 1 as never })
-      } else {
-        HeadingNode.toggle.toggle(editor, Path.parent(path), false)
-      }
-      return true
-    },
     onStartEnter: (editor, path) => {
       const heading = Node.parent(editor, path)
       if (!isElementType<Heading>(heading, 'heading')) {
         return false
       }
       HeadingNode.toggle.toggle(editor, Path.parent(path), false)
-      return true
-    },
-    onTab: (editor, path) => {
-      const heading = Node.parent(editor, path)
-      if (!isElementType<Heading>(heading, 'heading')) {
-        return false
-      }
-      if (heading.depth < 6) {
-        HeadingNode.toggle.toggle(editor, Path.parent(path), { depth: heading.depth + 1 as never })
-      }
       return true
     }
   },

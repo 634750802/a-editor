@@ -1,12 +1,16 @@
 import { defineNode, ICustomInlineElementConfig, RemarkElementProps, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
 import { Link } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
-import { Editor, Element, Node, Point, Transforms } from 'slate'
+import { Editor, Element, Node, Path, Point, Transforms } from 'slate'
 import React from 'react'
 import createUrlRegExp from 'url-regex-safe'
 import { faLink } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { isElementActive } from '/src/slate-markdown/elements/text/TextNode'
+import { requireFields } from '/src/components/form'
+import createSchema from './create-schema.json'
+import { JSONSchema7 } from 'json-schema'
+import { ReactEditor } from 'slate-react'
 
 library.add(faLink)
 
@@ -33,15 +37,16 @@ const LinkNode = defineNode<Link>({
       </a>
     )
   },
-  insert: (editor, location, params: RemarkElementProps<Link>) => {
+  insert: (editor, location, { text, ...params }: RemarkElementProps<Link> & { text: string }) => {
+    console.log(location)
     Transforms.insertNodes(editor, [
       {
         type: 'link', children: [{
-          text: params.url,
+          text: text,
         }], ...params,
       },
       { text: ' ' },
-    ], { at: location, select: true })
+    ], { at: location })
     if (Point.isPoint(location)) {
       Transforms.move(editor, { distance: 1 })
     }
@@ -56,7 +61,7 @@ const LinkNode = defineNode<Link>({
       // eslint-disable-next-line react/jsx-one-expression-per-line
       tips: <>超链接</>,
       isActive: (editor, range) => isElementActive(editor, range, 'link'),
-      isDisabled: () => false,
+      isDisabled: (editor, range) => !Path.equals(Path.parent(range.focus.path), Path.parent(range.anchor.path)),
       action: (editor, range, event) => {
         if (isElementActive(editor, range, 'link')) {
           Transforms.unwrapNodes(editor, {
@@ -65,7 +70,18 @@ const LinkNode = defineNode<Link>({
               !Editor.isEditor(n) && Element.isElement(n) && n.type === 'link',
           })
         } else {
-          alert('TODO: ')
+          requireFields<{ src: string, text: string }>(editor, event.target as HTMLElement, createSchema as JSONSchema7, {
+            text: Editor.string(editor, range),
+            src: '',
+          })
+            .then((data) => {
+              if (data) {
+                const { src, text } = data
+                Editor.withoutNormalizing(editor, () => {
+                  LinkNode.insert(editor, range, { url: src, title: '', text })
+                })
+              }
+            })
         }
       },
     },

@@ -20,6 +20,15 @@ interface TextApi {
 
 const TextNode = defineNode<RemarkText, TextApi>({
   isLeaf: true,
+  normalize: (editor, node, path, preventDefaults) => {
+    if (node.text === '') {
+      const deleting: TextNodeDecorator[] = [TextNodeDecorator.strong, TextNodeDecorator.emphasis, TextNodeDecorator.delete, TextNodeDecorator.inlineCode]
+        .filter(decorator => !!node[decorator])
+      if (deleting.length > 0) {
+        Transforms.unsetNodes(editor, deleting, { at: path })
+      }
+    }
+  },
   render (editor: Editor, { text, children, attributes }: TypedRenderLeafProps<RemarkText>): JSX.Element {
     let el = children
     if (text.delete) {
