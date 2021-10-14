@@ -1,5 +1,5 @@
-import { Blockquote, Code, Heading, Image, InlineMath, Link, List, ListItem, Paragraph, SlateNode, Text } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
-import { Editor, Location, Path, Range, Node, Element as SlateElement, Text as SlateText } from 'slate'
+import { Blockquote, Code, Heading, Image, InlineMath, Link, List, ListItem, Paragraph, Text } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
+import { Editor, Element as SlateElement, Location, Path, Range, Text as SlateText } from 'slate'
 import { RenderElementProps, RenderLeafProps } from 'slate-react'
 import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
 import { ToolbarItemProps } from '/src/components/hovering-toolbar/useHoveringToolItems'
@@ -76,10 +76,10 @@ export type CustomInlineMatch = {
   regexp: RegExp
 } | Record<string, never>
 
-export interface ICustomInlineElementConfig<E extends RemarkInlineElement> extends ICustomElementConfig<E> {
+export interface ICustomInlineElementConfig<E extends RemarkInlineElement, P = Record<string, unknown>> extends ICustomElementConfig<E> {
   isInline: true
 
-  insert: (editor: Editor, location: Location, params: RemarkElementToggleParams<E> & { text: string }) => void
+  insert: (editor: Editor, location: Location, params: RemarkElementProps<E & P>) => void
 
   match?: CustomInlineMatch
 
@@ -107,7 +107,7 @@ type AnyConfig =
 
 
 export function defineNode<E extends RemarkBlockElement> (config: Omit<ICustomBlockElementConfig<E>, 'register'>): ICustomBlockElementConfig<E>
-export function defineNode<E extends RemarkInlineElement> (config: Omit<ICustomInlineElementConfig<E>, 'register'>): ICustomInlineElementConfig<E>
+export function defineNode<E extends RemarkInlineElement, P = Record<string, unknown>> (config: Omit<ICustomInlineElementConfig<E, P>, 'register'>): ICustomInlineElementConfig<E, P>
 export function defineNode<T extends RemarkText, P = Record<string, unknown>> (config: Omit<ICustomTextConfig<T> & P, 'register'>): ICustomTextConfig<T> & P
 export function defineNode<C extends AnyConfig> (config: Omit<C, 'register'>): C {
   return {

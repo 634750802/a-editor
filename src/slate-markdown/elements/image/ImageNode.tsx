@@ -26,4 +26,4 @@ export default defineNode<Image>({
     ], { at: location })
   },
   toolbarItems: []
-} as Omit<ICustomInlineElementConfig<Image>, 'register'>)
+} as Omit<ICustomInlineElementConfig<Image, Record<string, unknown>>, 'register'>)

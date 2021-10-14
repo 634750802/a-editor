@@ -1,11 +1,11 @@
-import React, { useLayoutEffect, useRef } from 'react'
+import React from 'react'
 import Form, { FormProps } from '@rjsf/core'
 import './style.less'
 
 export interface ActionFormProps<T> {
   schema: FormProps<T>['schema']
   onSubmit: (data: T) => void
-  defaultValues: Partial<T>
+  defaultValues: T
 }
 
 export default function ActionForm<T> ({ schema, onSubmit, defaultValues }: ActionFormProps<T>): JSX.Element {

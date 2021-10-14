@@ -1,6 +1,6 @@
-import { defineNode, ICustomInlineElementConfig, RemarkElementProps, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
+import { defineNode, ICustomInlineElementConfig, RemarkElementProps, RemarkElementToggleParams, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
 import { Link } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
-import { Editor, Element, Node, Path, Point, Transforms } from 'slate'
+import { Editor, Element, Location, Node, Path, Point, Transforms } from 'slate'
 import React from 'react'
 import createUrlRegExp from 'url-regex-safe'
 import { faLink } from '@fortawesome/free-solid-svg-icons'
@@ -14,7 +14,7 @@ import { ReactEditor } from 'slate-react'
 
 library.add(faLink)
 
-const LinkNode = defineNode<Link>({
+const LinkNode = defineNode({
   type: 'link',
   isInline: true,
   isVoid: false,
@@ -37,7 +37,7 @@ const LinkNode = defineNode<Link>({
       </a>
     )
   },
-  insert: (editor, location, { text, ...params }: RemarkElementProps<Link> & { text: string }) => {
+  insert: ((editor: Editor, location: Location, { text, ...params }: RemarkElementProps<Link & { text: string }>) => {
     console.log(location)
     Transforms.insertNodes(editor, [
       {
@@ -50,7 +50,7 @@ const LinkNode = defineNode<Link>({
     if (Point.isPoint(location)) {
       Transforms.move(editor, { distance: 1 })
     }
-  },
+  }) as never,
   match: {
     regexp: createUrlRegExp(),
   },
@@ -86,6 +86,6 @@ const LinkNode = defineNode<Link>({
       },
     },
   ],
-} as Omit<ICustomInlineElementConfig<Link>, 'register'>)
+} as Omit<ICustomInlineElementConfig<Link, { text: string }>, 'register'>)
 
 export default LinkNode
