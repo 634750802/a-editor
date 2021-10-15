@@ -14,6 +14,7 @@ import 'prism-themes/themes/prism-vs.css'
 import { faCode } from '@fortawesome/free-solid-svg-icons'
 import { isElementActive } from '/src/slate-markdown/elements/text/TextNode'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import classNames from 'classnames'
 
 const options = [
   'markdown',
@@ -35,10 +36,10 @@ const CodeNode = defineNode<Code>({
   render: (editor, { element, children, attributes }) => {
     return (
       <LineWrapper element={element}>
-        {({ path }) => (
+        {({ active, path }) => (
           <pre
             {...attributes}
-            className={element.lang ? `language-${element.lang}` : undefined}
+            className={classNames({ active }, element.lang ? `language-${element.lang}` : undefined)}
           >
             <code className="prism-code">
               {children}
@@ -51,6 +52,7 @@ const CodeNode = defineNode<Code>({
               onChange={(e: ChangeEvent<HTMLSelectElement>) => {
                 Transforms.setNodes(editor, { lang: e.currentTarget.value }, { at: path })
               }}
+              tabIndex={undefined}
               value={element.lang || undefined}
             >
               {options.map(op => (
@@ -93,7 +95,9 @@ const CodeNode = defineNode<Code>({
     icon: <FontAwesomeIcon icon={faCode} />,
     isActive: (editor, range) => isElementActive(editor, range, 'code'),
     isDisabled: (editor, range) => range.length > 1,
-    tips: <>代码块</>,
+    tips: <>
+      代码块
+          </>,
     action: (editor, range, e) => {
       if (isElementActive(editor, range, 'code')) {
         CodeNode.toggle.toggle(editor, range, false)

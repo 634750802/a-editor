@@ -31,6 +31,7 @@ export interface TiCommunityEditorProps {
 export interface TiEditor {
   updatePopper: (range?: DOMRange) => void
   hidePopper: () => void
+  togglePopper: (range?: DOMRange) => void
   factory: EditorFactory
   setActionForm: (form: JSX.Element | undefined) => void
 }

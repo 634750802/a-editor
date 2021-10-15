@@ -2,8 +2,8 @@ import React, { MouseEvent, useCallback } from 'react'
 import { ToolbarItemProps } from '/src/components/hovering-toolbar/useHoveringToolItems'
 import classNames from 'classnames'
 import Tippy from '@tippyjs/react'
-import { ReactEditor, useSlateStatic } from 'slate-react'
-import 'tippy.js/dist/tippy.css'; // optional
+import { useSlateStatic } from 'slate-react'
+import 'tippy.js/dist/tippy.css' // optional
 import './style.less'
 import { Editor } from 'slate'
 
@@ -32,7 +32,12 @@ function ToolbarItem ({ icon, active, disabled, action, tips }: ToolbarItemProps
   )
   if (tips) {
     return (
-      <Tippy content={tips}>
+      <Tippy content={(
+        <span className="toolbar-item-tips">
+          {tips}
+        </span>
+      )}
+      >
         {el}
       </Tippy>
     )

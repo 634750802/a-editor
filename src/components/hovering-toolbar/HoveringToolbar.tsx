@@ -59,6 +59,14 @@ function HoveringToolbar (): JSX.Element {
     forceUpdate()
   }
 
+  editor.togglePopper = (range) => {
+    if (hidden) {
+      editor.updatePopper(range)
+    } else {
+      editor.hidePopper()
+    }
+  }
+
   return (
     <div
       className="ti-hovering-toolbar"

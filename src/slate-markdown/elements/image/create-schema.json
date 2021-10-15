@@ -1,0 +1,19 @@
+{
+  "title": "添加图片",
+  "type": "object",
+  "properties": {
+    "src": {
+      "title": "链接",
+      "type": "string",
+      "format": "url"
+    },
+    "alt": {
+      "title": "替代文本（alt）",
+      "type": "string"
+    }
+  },
+  "required": [
+    "src",
+    "alt"
+  ]
+}

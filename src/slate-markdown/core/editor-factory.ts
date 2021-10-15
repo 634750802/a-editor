@@ -6,6 +6,7 @@ import isHotkey from 'is-hotkey'
 import TextNode, { TextNodeDecorator } from '/src/slate-markdown/elements/text/TextNode'
 import LinkNode from '/src/slate-markdown/elements/link/LinkNode'
 import DecorationStack from '/src/slate-markdown/core/decoration-stack'
+import { ReactEditor } from 'slate-react'
 
 export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkBlockElement = RemarkBlockElement, IE extends RemarkInlineElement = RemarkInlineElement> {
   readonly blockConfigs: ICustomBlockElementConfig<BE>[] = []
@@ -43,7 +44,8 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
 
     editor.factory = this as never
 
-    editor.updatePopper = () => {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    editor.updatePopper = editor.hidePopper = editor.togglePopper = () => {
     }
 
     editor.isVoid = element => this.voidSet.has(element.type) || isVoid(element)
@@ -304,14 +306,23 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
             editor.hidePopper()
           } else if (selection.rangeCount > 0) {
             editor.updatePopper(selection.getRangeAt(0))
-            e.preventDefault()
-            e.stopPropagation()
           }
         }
       },
       onBlur: (event) => {
         editor.hidePopper()
-      }    }
+      },
+      onClick: () => {
+        const selection = window.getSelection()
+        if (selection && selection.isCollapsed && selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0)
+          const slateRange = ReactEditor.toSlateRange(editor, range, { exactMatch: true })
+          if (slateRange && editor.selection && Range.equals(slateRange, editor.selection)) {
+            editor.togglePopper(range)
+          }
+        }
+      },
+    }
   }
 }
 
