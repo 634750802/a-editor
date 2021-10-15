@@ -15,6 +15,7 @@ import { faCode } from '@fortawesome/free-solid-svg-icons'
 import { isElementActive } from '/src/slate-markdown/elements/text/TextNode'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import classNames from 'classnames'
+import Tippy from '@tippyjs/react'
 
 const options = [
   'markdown',
@@ -32,36 +33,46 @@ const CodeNode = defineNode<Code>({
   isInline: false,
   isLeaf: false,
   isVoid: false,
+  isDisallowTextDecorators: true,
+  isHiddenHoverToolbar: true,
   wrappingParagraph: false,
   render: (editor, { element, children, attributes }) => {
     return (
       <LineWrapper element={element}>
         {({ active, path }) => (
-          <pre
-            {...attributes}
-            className={classNames({ active }, element.lang ? `language-${element.lang}` : undefined)}
+          <Tippy
+            appendTo={document.body}
+            content={(
+              <select
+                className="lang-selector"
+                contentEditable={false}
+                /* eslint-disable-next-line react/jsx-no-bind */
+                onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                  Transforms.setNodes(editor, { lang: e.currentTarget.value }, { at: path })
+                }}
+                tabIndex={undefined}
+                value={element.lang || undefined}
+              >
+                {options.map(op => (
+                  <option key={op}>
+                    {op}
+                  </option>
+                ))}
+              </select>
+            )}
+            interactive
+            placement='top-start'
           >
-            <code className="prism-code">
-              {children}
-            </code>
-
-            <select
-              className="lang-selector"
-              contentEditable={false}
-              /* eslint-disable-next-line react/jsx-no-bind */
-              onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                Transforms.setNodes(editor, { lang: e.currentTarget.value }, { at: path })
-              }}
-              tabIndex={undefined}
-              value={element.lang || undefined}
+            <pre
+              {...attributes}
+              className={classNames({ active }, element.lang ? `language-${element.lang}` : undefined)}
             >
-              {options.map(op => (
-                <option key={op}>
-                  {op}
-                </option>
-              ))}
-            </select>
-          </pre>
+              <code className="prism-code">
+                {children}
+              </code>
+            </pre>
+          </Tippy>
+
         )}
       </LineWrapper>
     )

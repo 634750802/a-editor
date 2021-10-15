@@ -3,7 +3,7 @@ import { useSlateStatic } from 'slate-react'
 import { VirtualElement } from '@popperjs/core'
 import { usePopper } from 'react-popper'
 import './style.less'
-import useHoveringToolItems from '/src/components/hovering-toolbar/useHoveringToolItems'
+import getHoveringToolItems, { ToolbarItemProps } from '/src/components/hovering-toolbar/getHoveringToolItems'
 import ToolbarItem from '/src/components/toolbar-item/ToolbarItem'
 import { DOMRange } from 'slate-react/dist/utils/dom'
 import useForceUpdate from '/src/hooks/forceUpdate'
@@ -15,6 +15,7 @@ function HoveringToolbar (): JSX.Element {
   const rangeRef = useRef<DOMRange>()
   const [hidden, setHidden] = useState(true)
   const forceUpdate = useForceUpdate()
+  const [items, setItems] = useState<ToolbarItemProps[]>([])
 
   editor.hidePopper = () => setHidden(true)
 
@@ -38,8 +39,6 @@ function HoveringToolbar (): JSX.Element {
     ],
   })
 
-  const items = useHoveringToolItems(editor, rangeRef.current)
-
   editor.updatePopper = (range) => {
     if (range) {
       const isFirstRange = !rangeRef.current
@@ -50,7 +49,10 @@ function HoveringToolbar (): JSX.Element {
         }, 0)
       }
     }
-    if (items.length > 0) {
+    const nowItems = getHoveringToolItems(editor, rangeRef.current)
+    setItems(nowItems)
+
+    if (nowItems.length > 0) {
       setHidden(false)
       update && update()
     } else {

@@ -1,12 +1,12 @@
 import { defineNode, ICustomInlineElementConfig, RemarkElementProps, RemarkElementToggleParams, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
 import { Link } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
-import { Editor, Element, Location, Node, Path, Point, Transforms } from 'slate'
+import { Editor, Element, Location, Node, Path, Point, Range, Transforms } from 'slate'
 import React from 'react'
 import createUrlRegExp from 'url-regex-safe'
 import { faLink } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { isElementActive } from '/src/slate-markdown/elements/text/TextNode'
+import { isElementActive, isRangeCustomTextPropsEnabled } from '/src/slate-markdown/elements/text/TextNode'
 import { requireFields } from '/src/components/form'
 import createSchema from './create-schema.json'
 import { JSONSchema7 } from 'json-schema'
@@ -38,7 +38,6 @@ const LinkNode = defineNode({
     )
   },
   insert: ((editor: Editor, location: Location, { text, ...params }: RemarkElementProps<Link & { text: string }>) => {
-    console.log(location)
     Transforms.insertNodes(editor, [
       {
         type: 'link', children: [{
@@ -46,7 +45,7 @@ const LinkNode = defineNode({
         }], ...params,
       },
       { text: ' ' },
-    ], { at: location })
+    ], { at: location, select: true })
     if (Point.isPoint(location)) {
       Transforms.move(editor, { distance: 1 })
     }
@@ -61,7 +60,7 @@ const LinkNode = defineNode({
       // eslint-disable-next-line react/jsx-one-expression-per-line
       tips: <>超链接</>,
       isActive: (editor, range) => isElementActive(editor, range, 'link'),
-      isDisabled: (editor, range) => !Path.equals(Path.parent(range.focus.path), Path.parent(range.anchor.path)),
+      isDisabled: (editor, range) => !Path.equals(Path.parent(range.focus.path), Path.parent(range.anchor.path)) || !isRangeCustomTextPropsEnabled(editor, range),
       action: (editor, range, event) => {
         if (isElementActive(editor, range, 'link')) {
           Transforms.unwrapNodes(editor, {

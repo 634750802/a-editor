@@ -1,6 +1,6 @@
 import { defineNode, RemarkElementToggleParams, ToolbarItemConfig, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
 import { List, ListItem } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
-import { Editor, Node, Path, Transforms } from 'slate'
+import { Editor, Element, Node, Path, Transforms } from 'slate'
 import { isElementType, previousSiblingLastChildPath } from '/src/slate-markdown/slate-utils'
 import React from 'react'
 import { isElementActive } from '/src/slate-markdown/elements/text/TextNode'
@@ -124,7 +124,7 @@ const ListNode = defineNode<List>({
       // eslint-disable-next-line react/jsx-one-expression-per-line
       icon: <FontAwesomeIcon icon={ordered ? faListOl : faListUl} />,
       isActive: isListActive,
-      isDisabled: () => false,
+      isDisabled: (editor, range) => (Node.get(editor, range) as Element).type !== 'paragraph',
       action: (editor, path, event) => {
         if (isListActive(editor, path)) {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

@@ -7,6 +7,7 @@ import TextNode, { TextNodeDecorator } from '/src/slate-markdown/elements/text/T
 import LinkNode from '/src/slate-markdown/elements/link/LinkNode'
 import DecorationStack from '/src/slate-markdown/core/decoration-stack'
 import { ReactEditor } from 'slate-react'
+import { isElementType } from '/src/slate-markdown/slate-utils'
 
 export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkBlockElement = RemarkBlockElement, IE extends RemarkInlineElement = RemarkInlineElement> {
   readonly blockConfigs: ICustomBlockElementConfig<BE>[] = []
@@ -112,7 +113,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
             }
           }
         }
-        if (Text.isText(node) && event.data === ' ') {
+        if (Text.isText(node) && !isElementType(parentNode, 'link') && event.data === ' ') {
           for (const inlineConfig of this.inlineConfigs) {
             if (inlineConfig.match) {
               const matched = inlineConfig.match.regexp.exec(node.text.slice(0, point.offset))

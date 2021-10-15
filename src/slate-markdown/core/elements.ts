@@ -2,7 +2,7 @@ import { Blockquote, Code, Heading, Image, InlineMath, Link, List, ListItem, Par
 import { Editor, Element as SlateElement, Location, Node, NodeEntry, Path, Range, Text as SlateText } from 'slate'
 import { RenderElementProps, RenderLeafProps } from 'slate-react'
 import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
-import { ToolbarItemProps } from '/src/components/hovering-toolbar/useHoveringToolItems'
+import { ToolbarItemProps } from '/src/components/hovering-toolbar/getHoveringToolItems'
 import { SyntheticEvent } from 'react'
 import { SYMBOL_PRISM_TOKEN } from '/src/slate-markdown/elements/code/CodeNode'
 
@@ -61,6 +61,9 @@ export interface ICustomElementConfig<E extends RemarkElement> extends ICustomCo
 
 export interface ICustomBlockElementConfig<E extends RemarkBlockElement> extends ICustomElementConfig<E> {
   isInline: false
+  isDisallowTextDecorators?: true
+  isHiddenHoverToolbar?: true
+
   toggle: CustomBlockElementToggle<RemarkElementToggleParams<E>>
   events: CustomBlockElementEvents
 

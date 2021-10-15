@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-one-expression-per-line */
-import { defineNode, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
+import { defineNode, ICustomBlockElementConfig, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
 import { Editor, Element, Location, Node, Path, Range, Text, Transforms } from 'slate'
 import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -8,6 +8,7 @@ import { ReactEditor } from 'slate-react'
 import { isElementType } from '/src/slate-markdown/slate-utils'
 import { SYMBOL_PRISM_TOKEN } from '/src/slate-markdown/elements/code/CodeNode'
 import classNames from 'classnames'
+import { NodeMatch } from 'slate/dist/interfaces/editor'
 
 export const enum TextNodeDecorator {
   strong = 'strong',
@@ -55,17 +56,23 @@ const TextNode = defineNode<RemarkText, TextApi>({
     )
   },
   toggleDecorator: (editor: Editor, range, decorator: TextNodeDecorator) => {
+    const nodeMatch = isCustomTextPropsEnabled(editor)
+    const rangeMatch = (range: Range) => nodeMatch(Node.get(editor, range.anchor.path), range.anchor.path)
     if (isDecoratorActive(editor, range, decorator)) {
       if (Range.isCollapsed(range)) {
-        Editor.addMark(editor, decorator, false)
+        if (rangeMatch(range)) {
+          Editor.addMark(editor, decorator, false)
+        }
       } else {
-        Transforms.setNodes(editor, { [decorator]: false }, { match: Text.isText, split: true })
+        Transforms.setNodes(editor, { [decorator]: false }, { match: nodeMatch, split: true })
       }
     } else {
       if (Range.isCollapsed(range)) {
-        Editor.addMark(editor, decorator, true)
+        if (rangeMatch(range)) {
+          Editor.addMark(editor, decorator, true)
+        }
       } else {
-        Transforms.setNodes(editor, { [decorator]: true }, { match: Text.isText, split: true })
+        Transforms.setNodes(editor, { [decorator]: true }, { match: nodeMatch, split: true })
       }
     }
   },
@@ -94,7 +101,7 @@ const TextNode = defineNode<RemarkText, TextApi>({
     key: key,
     icon: <FontAwesomeIcon icon={icon} />,
     isActive: (editor, range) => isDecoratorActive(editor, range, key),
-    isDisabled: () => false,
+    isDisabled: (editor, range) => !isRangeCustomTextPropsEnabled(editor, range),
     action: (editor, range, event) => {
       TextNode.toggleDecorator(editor, range, key)
     },
@@ -121,9 +128,61 @@ export function isDecoratorActive (editor: Editor, selection: Range, decorator: 
   return !!marks[decorator]
 }
 
+export const isRangeCustomTextPropsEnabled = (editor: Editor, range: Range) => {
+  const isNotEnabled = isCustomTextPropsNotEnabled(editor)
+  const [nodes] = Editor.nodes(editor, { at: range, match: isNotEnabled})
+  return !nodes
+}
+
+export const isCustomTextPropsEnabled = (editor: Editor): NodeMatch<Node> => (node, path) => {
+  if (!Text.isText(node)) {
+    return false
+  }
+  const parentNode = Node.parent(editor, path)
+  if (Element.isElement(parentNode)) {
+    const config = editor.factory.customElementMap.get(parentNode.type)
+    if (!config) {
+      return false
+    }
+    return !(config as ICustomBlockElementConfig<never>).isDisallowTextDecorators
+  } else {
+    return false
+  }
+}
+
+export const isCustomTextPropsNotEnabled = (editor: Editor): NodeMatch<Node> => (node, path) => {
+  if (!Text.isText(node)) {
+    return false
+  }
+  const parentNode = Node.parent(editor, path)
+  if (Element.isElement(parentNode)) {
+    const config = editor.factory.customElementMap.get(parentNode.type)
+    if (!config) {
+      return true
+    }
+    return !!(config as ICustomBlockElementConfig<never>).isDisallowTextDecorators
+  } else {
+    return true
+  }
+}
+
 type NodePredicate<E> = (element: E) => boolean
 
 export function isElementActive<E extends Element> (editor: Editor, location: Location, type: E['type'], matcher?: NodePredicate<E>): boolean {
+  if (Range.isRange(location)) {
+    if (!ReactEditor.hasRange(editor, location)) {
+      return false
+    }
+  } else if (Path.isPath(location)) {
+    if (!Editor.hasPath(editor, location)) {
+      return false
+    }
+  } else {
+    if (!ReactEditor.hasRange(editor, { anchor: location, focus: location })) {
+      return false
+    }
+  }
+
   if (Path.isPath(location)) {
     const n = Node.get(editor, location)
     return isElementType<E>(n, type) && (matcher ? matcher(n) : true)
