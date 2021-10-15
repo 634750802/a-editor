@@ -5,6 +5,7 @@
     "dev": "vite -c vite.config.dev.ts",
     "build:gh-pages": "tsc && vite build -c vite.config.gh-pages.ts",
     "build:lib": "tsc && vite build -c vite.config.lib.ts",
+    "build:check": "tsc",
     "serve": "vite preview"
   },
   "devDependencies": {

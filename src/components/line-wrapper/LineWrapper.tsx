@@ -5,7 +5,7 @@ import PopContent from '/src/components/line-wrapper/PopContent'
 import './style.less'
 import { useLayoutEffect, useRef, useState } from 'react'
 import { ReactEditor, useSlateStatic } from 'slate-react'
-import { Editor, Element, Node, Path } from 'slate'
+import { Editor, Node, Path, Text } from 'slate'
 import useBlockToolItems from '/src/components/line-wrapper/useBlockToolItems'
 import useForceUpdate from '/src/hooks/forceUpdate'
 
@@ -53,7 +53,8 @@ export default function LineWrapper ({ element, children }: TopLevelBlockProps):
   const [active, setActive] = useState(false)
 
   const isEmpty = (() => {
-    return element.children.length === 1 && element.children[0].text === ''
+    const node = element.children[0]
+    return element.children.length === 1 && Text.isText(node) && node.text === ''
   })()
 
   return (

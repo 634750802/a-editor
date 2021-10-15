@@ -5,7 +5,7 @@ import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
 import { ToolbarItemProps } from '/src/components/hovering-toolbar/useHoveringToolItems'
 import { SyntheticEvent } from 'react'
 
-export type RemarkBlockElement = (List | ListItem | Paragraph | Code | Heading | Blockquote) & CustomExtension
+export type RemarkBlockElement = List | ListItem | Paragraph | Code | Heading | Blockquote
 export type RemarkInlineElement = InlineMath | Image | Link
 export type RemarkElement = RemarkBlockElement | RemarkInlineElement
 export type RemarkText = Text
