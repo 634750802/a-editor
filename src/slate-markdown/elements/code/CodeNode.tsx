@@ -39,7 +39,7 @@ const CodeNode = defineNode<Code>({
   render: (editor, { element, children, attributes }) => {
     return (
       <LineWrapper element={element}>
-        {({ active, path }) => (
+        {({ active, pathRef }) => (
           <Tippy
             appendTo={document.body}
             content={(
@@ -48,7 +48,9 @@ const CodeNode = defineNode<Code>({
                 contentEditable={false}
                 /* eslint-disable-next-line react/jsx-no-bind */
                 onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                  Transforms.setNodes(editor, { lang: e.currentTarget.value }, { at: path })
+                  if (pathRef?.current) {
+                    Transforms.setNodes(editor, { lang: e.currentTarget.value }, { at: pathRef.current })
+                  }
                 }}
                 tabIndex={undefined}
                 value={element.lang || undefined}

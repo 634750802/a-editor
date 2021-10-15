@@ -52,7 +52,7 @@ const HeadingNode = defineNode<Heading>({
       // eslint-disable-next-line react/jsx-one-expression-per-line
       icon: <>H{depth}</>,
       isActive: isHeadingActive,
-      isDisabled: () => false,
+      isDisabled: (editor, range) => !isElementType(Node.get(editor, range), ['paragraph', 'heading']),
       action: (editor, path, event) => {
         if (isHeadingActive(editor, path)) {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

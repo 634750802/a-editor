@@ -5,7 +5,7 @@ import PopContent from '/src/components/line-wrapper/PopContent'
 import './style.less'
 import { useLayoutEffect, useRef, useState } from 'react'
 import { ReactEditor, useSlateStatic } from 'slate-react'
-import { Editor, Node, Path, Text } from 'slate'
+import { Editor, Node, Path, PathRef, Text } from 'slate'
 import useBlockToolItems from '/src/components/line-wrapper/useBlockToolItems'
 import useForceUpdate from '/src/hooks/forceUpdate'
 
@@ -18,13 +18,13 @@ export interface TopLevelBlockProps {
 
 interface LineWrapperContext {
   active: boolean
-  path: Path | undefined
+  pathRef: PathRef | undefined
 }
 
 export default function LineWrapper ({ element, children }: TopLevelBlockProps): JSX.Element {
 
   const [el, setEl] = useState<Element | null>(null)
-  const pathRef = useRef<Path>()
+  const pathRef = useRef<PathRef>()
 
   const editor = useSlateStatic()
 
@@ -41,12 +41,15 @@ export default function LineWrapper ({ element, children }: TopLevelBlockProps):
       let path = Path.common(range.anchor.path, range.focus.path)
       while (path.length !== 0) {
         if (Editor.isBlock(editor, Node.get(editor, path))) {
-          pathRef.current = path
+          pathRef.current = Editor.pathRef(editor, path)
           break
         }
         path = Path.parent(path)
       }
     } else {
+      if (pathRef.current) {
+        pathRef.current.unref?.()
+      }
       pathRef.current = undefined
     }
   }, [el])
@@ -87,7 +90,7 @@ export default function LineWrapper ({ element, children }: TopLevelBlockProps):
         />
       )}
     >
-      {children({ active, path: pathRef.current })}
+      {children({ active, pathRef: pathRef.current })}
     </Tippy>
   )
 }

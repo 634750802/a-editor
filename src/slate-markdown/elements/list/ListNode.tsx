@@ -1,6 +1,6 @@
 import { defineNode, RemarkElementToggleParams, ToolbarItemConfig, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
 import { List, ListItem } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
-import { Editor, Element, Node, Path, Transforms } from 'slate'
+import { Editor, Node, Path, Transforms } from 'slate'
 import { isElementType, previousSiblingLastChildPath } from '/src/slate-markdown/slate-utils'
 import React from 'react'
 import { isElementActive } from '/src/slate-markdown/elements/text/TextNode'
@@ -53,53 +53,8 @@ const ListNode = defineNode<List>({
   },
   toggle: {
     prefix: /^(?:-|\d+\.)$/,
-    toggle: (editor, path, params) => {
-      // node must be paragraph
-      if (!isElementType(Node.get(editor, path), 'paragraph')) {
-        throw new Error('can only call ListNode.toggle on a paragraph node.')
-      }
-      if (params === false) {
-        const fromPath = Path.parent(path) // li
-        const toPath = Path.next(Path.parent(fromPath))
-        Transforms.splitNodes(editor, { at: fromPath })
-        Transforms.moveNodes(editor, { at: toPath.concat(0), to: toPath })
-        Transforms.unwrapNodes(editor, { at: toPath })
-        Transforms.select(editor, { path: toPath, offset: 0 })
-      } else {
-        const parentPath = Path.parent(path)
-        const parent = Node.get(editor, parentPath)
-        // inside a list
-        if (isElementType<ListItem>(parent, 'listItem')) {
-          if (Path.hasPrevious(parentPath)) {
-            const newPath = previousSiblingLastChildPath(editor, parentPath)
-            Transforms.moveNodes(editor, { at: parentPath, to: newPath })
-            Transforms.wrapNodes(editor, {
-              type: 'list',
-              children: [],
-              ...params,
-            }, {
-              at: newPath,
-            })
-          }
-        } else {
-          Transforms.wrapNodes(editor, {
-            type: 'listItem',
-            checked: undefined,
-            spread: params.spread,
-            children: [],
-          }, {
-            at: path,
-          })
-          Transforms.wrapNodes(editor, {
-            type: 'list',
-            children: [],
-            ...params,
-          }, {
-            at: path,
-          })
-        }
-      }
-    },
+    indent: indentList,
+    toggle: toggleList,
     onTrigger: (prefix: string): RemarkElementToggleParams<List> | undefined => {
       if (prefix === '-') {
         return {
@@ -124,18 +79,85 @@ const ListNode = defineNode<List>({
       // eslint-disable-next-line react/jsx-one-expression-per-line
       icon: <FontAwesomeIcon icon={ordered ? faListOl : faListUl} />,
       isActive: isListActive,
-      isDisabled: (editor, range) => (Node.get(editor, range) as Element).type !== 'paragraph',
+      isDisabled: (editor, range) => !isElementType(Node.get(editor, range), ['paragraph', 'heading']),
       action: (editor, path, event) => {
         if (isListActive(editor, path)) {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          ListNode.toggle.toggle!(editor, path, false)
+          toggleList(editor, path, false)
         } else {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          ListNode.toggle.toggle!(editor, path, { ordered, start: undefined, spread: undefined })
+          toggleList(editor, path, { ordered, start: undefined, spread: undefined })
         }
       },
     }
   }),
 })
+
+export function indentList (editor: Editor, path: Path, delta: 1 | -1): void {
+  if (delta < 0) {
+    return toggleList(editor, path, false)
+  } else {
+    const parentPath = Path.parent(path)
+    const parent = Node.get(editor, parentPath)
+    if (isElementType<ListItem>(parent, 'listItem')) {
+      if (Path.hasPrevious(parentPath)) {
+        const grandParent = Node.parent(editor, parentPath) as List
+        const newPath = previousSiblingLastChildPath(editor, parentPath)
+        Transforms.moveNodes(editor, { at: parentPath, to: newPath })
+        Transforms.wrapNodes(editor, {
+          type: 'list',
+          children: [],
+          ordered: grandParent.ordered,
+          start: undefined,
+          spread: undefined,
+        }, {
+          at: newPath,
+        })
+      }
+    }
+  }
+}
+
+export function toggleList (editor: Editor, path: Path, params: RemarkElementToggleParams<List>): void {
+  // node must be paragraph
+  if (!isElementType(Node.get(editor, path), ['paragraph', 'heading'])) {
+    throw new Error('can only call ListNode.toggle on a paragraph or heading node.')
+  }
+  if (params === false) {
+    const fromPath = Path.parent(path) // li
+    const toPath = Path.next(Path.parent(fromPath))
+    Transforms.splitNodes(editor, { at: fromPath })
+    Transforms.moveNodes(editor, { at: toPath.concat(0), to: toPath })
+    Transforms.unwrapNodes(editor, { at: toPath })
+    Transforms.select(editor, { path: toPath, offset: 0 })
+  } else {
+    const parentPath = Path.parent(path)
+    const parent = Node.get(editor, parentPath)
+    // inside a list
+    if (isElementType<ListItem>(parent, 'listItem')) {
+      Transforms.setNodes(editor, {
+        type: 'list',
+        ...params,
+      }, {
+        at: Path.parent(parentPath),
+      })
+    } else {
+      Transforms.wrapNodes(editor, {
+        type: 'listItem',
+        checked: undefined,
+        spread: params.spread,
+        children: [],
+      }, {
+        at: path,
+      })
+      Transforms.wrapNodes(editor, {
+        type: 'list',
+        children: [],
+        ...params,
+      }, {
+        at: path,
+      })
+    }
+  }
+}
 
 export default ListNode

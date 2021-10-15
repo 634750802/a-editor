@@ -1,5 +1,5 @@
 import { Blockquote, Code, Heading, Image, InlineMath, Link, List, ListItem, Paragraph, Text } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
-import { Editor, Element as SlateElement, Location, Node, NodeEntry, Path, Range, Text as SlateText } from 'slate'
+import { Editor, Element as SlateElement, Location, NodeEntry, Path, Range, Text as SlateText } from 'slate'
 import { RenderElementProps, RenderLeafProps } from 'slate-react'
 import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
 import { ToolbarItemProps } from '/src/components/hovering-toolbar/getHoveringToolItems'
@@ -40,6 +40,7 @@ export type CustomBlockElementToggle<T> = {
   estimatePrefixLength?: number
   prefix: RegExp
   onTrigger: (prefix: string) => T | undefined
+  indent?: (editor: Editor, path: Path, delta: 1 | -1) => void
   toggle: (editor: Editor, path: Path, params: T) => void
 } | Record<string, never>
 

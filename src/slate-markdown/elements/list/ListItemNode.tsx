@@ -2,7 +2,7 @@ import { defineNode } from '/src/slate-markdown/core/elements'
 import { List, ListItem } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import { Editor, Node, Path, Transforms } from 'slate'
 import { isElementType } from '/src/slate-markdown/slate-utils'
-import ListNode from '/src/slate-markdown/elements/list/ListNode'
+import ListNode, { indentList, toggleList } from '/src/slate-markdown/elements/list/ListNode'
 import React from 'react'
 
 const ListItemNode = defineNode<ListItem>({
@@ -29,12 +29,12 @@ const ListItemNode = defineNode<ListItem>({
   toggle: {},
   events: {
     onStartDelete: (editor, path) => {
-      ListNode.toggle.toggle(editor, Path.parent(path), false)
+      toggleList(editor, Path.parent(path), false)
       return true
     },
     onStartEnter: (editor, path) => {
       if (!Node.string(Node.get(editor, path))) {
-        ListNode.toggle.toggle(editor, Path.parent(path), false)
+        toggleList(editor, Path.parent(path), false)
         return true
       } else {
         return false
@@ -43,8 +43,7 @@ const ListItemNode = defineNode<ListItem>({
     onTab: (editor, path) => {
       const grandParent = Node.parent(editor, Path.parent(Path.parent(path)))
       if (isElementType<List>(grandParent, 'list')) {
-        const { spread, ordered } = grandParent
-        ListNode.toggle.toggle(editor, Path.parent(path), { spread, ordered, start: undefined })
+        indentList(editor, Path.parent(path), 1)
         return true
       } else {
         console.warn(`bad structure, expect a list at ${path}-2`)
