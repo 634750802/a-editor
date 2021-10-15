@@ -6,6 +6,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBold, faCode, faItalic, faStrikethrough, IconDefinition } from '@fortawesome/free-solid-svg-icons'
 import { ReactEditor } from 'slate-react'
 import { isElementType } from '/src/slate-markdown/slate-utils'
+import { SYMBOL_PRISM_TOKEN } from '/src/slate-markdown/elements/code/CodeNode'
+import classNames from 'classnames'
 
 export const enum TextNodeDecorator {
   strong = 'strong',
@@ -29,18 +31,21 @@ const TextNode = defineNode<RemarkText, TextApi>({
       }
     }
   },
-  render (editor: Editor, { text, children, attributes }: TypedRenderLeafProps<RemarkText>): JSX.Element {
+  render (editor: Editor, { leaf, children, attributes }: TypedRenderLeafProps<RemarkText>): JSX.Element {
     let el = children
-    if (text.delete) {
+    if (leaf[SYMBOL_PRISM_TOKEN]) {
+      el = <span className={classNames(leaf[SYMBOL_PRISM_TOKEN] ? `token ${leaf[SYMBOL_PRISM_TOKEN]}` : undefined, (attributes as any).className)}>{el}</span>
+    }
+    if (leaf.delete) {
       el = <del>{el}</del>
     }
-    if (text.emphasis) {
+    if (leaf.emphasis) {
       el = <em>{el}</em>
     }
-    if (text.strong) {
+    if (leaf.strong) {
       el = <strong>{el}</strong>
     }
-    if (text.inlineCode) {
+    if (leaf.inlineCode) {
       el = <code>{el}</code>
     }
     return (

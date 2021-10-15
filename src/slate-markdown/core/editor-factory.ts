@@ -1,10 +1,11 @@
 import { BlockEventHandler, CustomBlockElementEvents, ICustomBlockElementConfig, ICustomElementConfig, ICustomInlineElementConfig, ICustomTextConfig, RemarkBlockElement, RemarkInlineElement, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
-import { Editor, Element, Node, Path, Point, Range, Text, Transforms } from 'slate'
+import { Editor, Element, Node, NodeEntry, Path, Point, Range, Text, Transforms } from 'slate'
 import type { EditableProps } from 'slate-react/dist/components/editable'
 import { createElement, KeyboardEvent } from 'react'
 import isHotkey from 'is-hotkey'
 import TextNode, { TextNodeDecorator } from '/src/slate-markdown/elements/text/TextNode'
 import LinkNode from '/src/slate-markdown/elements/link/LinkNode'
+import DecorationStack from '/src/slate-markdown/core/decoration-stack'
 
 export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkBlockElement = RemarkBlockElement, IE extends RemarkInlineElement = RemarkInlineElement> {
   readonly blockConfigs: ICustomBlockElementConfig<BE>[] = []
@@ -14,7 +15,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
   private inlineSet: Set<string> = new Set()
   private voidSet: Set<string> = new Set()
 
-  private customElementMap: Map<string, ICustomElementConfig<IE | BE>> = new Map()
+  readonly customElementMap: Map<string, ICustomElementConfig<IE | BE>> = new Map()
 
   define (config: ICustomInlineElementConfig<IE>): this
   define<T> (config: ICustomBlockElementConfig<BE>): this
@@ -215,6 +216,12 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
 
     const onTab = withCommonEventBlockHandler(toggle => toggle.onTab)
 
+    const decorationStack = new DecorationStack(this, editor)
+
+    const decorate = (entry: NodeEntry) => {
+      return decorationStack.process(entry)
+    }
+
     return {
       renderElement: (props) => {
         const config = this.customElementMap.get(props.element.type)
@@ -232,6 +239,8 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
           return createElement('span', props.attributes, props.children)
         }
       },
+      decorate
+      ,
       onDOMBeforeInput: event => {
         batch(editor, () => {
           console.log(event.inputType)
@@ -302,8 +311,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
       },
       onBlur: (event) => {
         editor.hidePopper()
-      }
-    }
+      }    }
   }
 }
 

@@ -1,14 +1,15 @@
 import { Blockquote, Code, Heading, Image, InlineMath, Link, List, ListItem, Paragraph, Text } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
-import { Editor, Element as SlateElement, Location, Path, Range, Text as SlateText } from 'slate'
+import { Editor, Element as SlateElement, Location, Node, NodeEntry, Path, Range, Text as SlateText } from 'slate'
 import { RenderElementProps, RenderLeafProps } from 'slate-react'
 import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
 import { ToolbarItemProps } from '/src/components/hovering-toolbar/useHoveringToolItems'
 import { SyntheticEvent } from 'react'
+import { SYMBOL_PRISM_TOKEN } from '/src/slate-markdown/elements/code/CodeNode'
 
 export type RemarkBlockElement = List | ListItem | Paragraph | Code | Heading | Blockquote
 export type RemarkInlineElement = InlineMath | Image | Link
 export type RemarkElement = RemarkBlockElement | RemarkInlineElement
-export type RemarkText = Text
+export type RemarkText = Text & { [SYMBOL_PRISM_TOKEN]?: string }
 export type RemarkElementToggleParams<E extends RemarkElement, P extends Omit<E, 'type' | 'children'> = Omit<E, 'type' | 'children'>> =
   P extends Record<string, never> ? boolean : P | false
 export type RemarkElementProps<E extends RemarkElement, P extends Omit<E, 'type' | 'children'> = Omit<E, 'type' | 'children'>> =
@@ -66,6 +67,8 @@ export interface ICustomBlockElementConfig<E extends RemarkBlockElement> extends
   // heading is not while blockquote and listItem are.
   wrappingParagraph: boolean
   toolbarItems: ToolbarItemConfig<Path>[]
+
+  decorate?: (editor: Editor, entry: NodeEntry, el: E) => Range[]
 }
 
 export type CustomInlineMatch = {

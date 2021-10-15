@@ -77,16 +77,24 @@
     }
   }
 
-  code {
+  code:not(.prism-code) {
     background: #d8d8d8;
     border-radius: 2px;
     padding: 2px 4px;
   }
 
   pre {
+    position: relative;
+
     code {
       display: block;
       padding: 8px;
+    }
+
+    .lang-selector {
+      position: absolute;
+      right: 4px;
+      top: 4px;
     }
   }
 

@@ -18,6 +18,7 @@ export interface TopLevelBlockProps {
 
 interface LineWrapperContext {
   active: boolean
+  path: Path | undefined
 }
 
 export default function LineWrapper ({ element, children }: TopLevelBlockProps): JSX.Element {
@@ -86,7 +87,7 @@ export default function LineWrapper ({ element, children }: TopLevelBlockProps):
         />
       )}
     >
-      {children({ active })}
+      {children({ active, path: pathRef.current })}
     </Tippy>
   )
 }
