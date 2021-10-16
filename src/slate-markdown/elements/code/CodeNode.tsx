@@ -6,24 +6,34 @@ import { Node, Range, Text, Transforms } from 'slate'
 import Prism, { Token } from 'prismjs'
 import 'prismjs/components/prism-markdown.js'
 import 'prismjs/components/prism-javascript.js'
+import 'prismjs/components/prism-typescript.js'
 import 'prismjs/components/prism-sql.js'
 import 'prismjs/components/prism-bash.js'
 import 'prismjs/components/prism-go.js'
 import 'prismjs/components/prism-rust.js'
-import 'prism-themes/themes/prism-vs.css'
+import 'prismjs/components/prism-jsx.js'
+import 'prismjs/components/prism-tsx.js'
+import 'prismjs/components/prism-json.js'
+import 'prismjs/components/prism-log.js'
 import { faCode } from '@fortawesome/free-solid-svg-icons'
 import { isElementActive } from '/src/slate-markdown/elements/text/TextNode'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import classNames from 'classnames'
 import Tippy from '@tippyjs/react'
+import './style.less'
 
 const options = [
   'markdown',
   'javascript',
+  'typescript',
+  'jsx',
+  'tsx',
   'sql',
   'bash',
   'go',
   'rust',
+  'json',
+  'log'
 ]
 
 export const SYMBOL_PRISM_TOKEN = Symbol('prism_token')
