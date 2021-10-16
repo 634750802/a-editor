@@ -98,7 +98,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
                   }
                 }
                 if (toggle.prefix?.test(prefix)) {
-                  const params = toggle.onTrigger(prefix)
+                  const params = toggle.onTrigger(prefix, editor, point.path)
                   if (typeof params !== 'undefined') {
                     Transforms.delete(editor, {
                       at: { path: point.path, offset: 0 },
@@ -242,8 +242,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
           return createElement('span', props.attributes, props.children)
         }
       },
-      decorate
-      ,
+      decorate,
       onDOMBeforeInput: event => {
         batch(editor, () => {
           console.log(event.inputType)

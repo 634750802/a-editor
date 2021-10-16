@@ -89,11 +89,14 @@ const CodeNode = defineNode<Code>({
         Transforms.insertNodes(editor, { type: 'code', ...params, children: [{ text }] }, { at: path })
         Transforms.select(editor, path.concat(0))
       } else {
-        Transforms.unsetNodes(editor, ['meta', 'lang'] , { at: path })
-        Transforms.setNodes(editor, { type: 'paragraph' } , { at: path })
+        Transforms.unsetNodes(editor, ['meta', 'lang'], { at: path })
+        Transforms.setNodes(editor, { type: 'paragraph' }, { at: path })
       }
     },
-    onTrigger: prefix => {
+    onTrigger: (prefix, editor, path) => {
+      if (path.length > 1) {
+        return undefined
+      }
       const matched = /^`{3}(?: (\w+))?$/.exec(prefix)
       if (matched) {
         return { lang: matched[1] || 'markdown', meta: undefined }

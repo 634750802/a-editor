@@ -18,6 +18,9 @@ const ListItemNode = defineNode<ListItem>({
       Transforms.moveNodes(editor, { at: path.concat(lastIndex), to: newPath })
       Transforms.wrapNodes(editor, { type: 'listItem', checked: node.checked, spread: node.spread, children: [] }, { at: newPath })
     }
+    if (node.children.length === 1 && !isElementType(node.children[lastIndex], ['paragraph', 'heading'])) {
+      Transforms.unwrapNodes(editor, { at: path })
+    }
   },
   render (editor: Editor, { element, attributes, children }): JSX.Element {
     return (

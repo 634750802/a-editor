@@ -13,7 +13,7 @@ const EOF = String.fromCharCode(0xfe, 0xff)
 
 export interface TopLevelBlockProps {
   element: RemarkBlockElement
-  children: (ctx: LineWrapperContext) => JSX.Element
+  children: JSX.Element | ((ctx: LineWrapperContext) => JSX.Element)
 }
 
 interface LineWrapperContext {
@@ -90,7 +90,7 @@ export default function LineWrapper ({ element, children }: TopLevelBlockProps):
         />
       )}
     >
-      {children({ active, pathRef: pathRef.current })}
+      {typeof children === 'function' ? children({ active, pathRef: pathRef.current }) : children}
     </Tippy>
   )
 }
