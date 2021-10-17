@@ -3,11 +3,12 @@ import { RemarkBlockElement } from '/src/slate-markdown/core/elements'
 import Tippy from '@tippyjs/react/headless'
 import PopContent from '/src/components/line-wrapper/PopContent'
 import './style.less'
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useContext, useLayoutEffect, useRef, useState } from 'react'
 import { ReactEditor, useSlateStatic } from 'slate-react'
 import { Editor, Node, Path, PathRef, Text } from 'slate'
 import useBlockToolItems from '/src/components/line-wrapper/useBlockToolItems'
 import useForceUpdate from '/src/hooks/forceUpdate'
+import UIContext from '/src/components/ti-editor/ui-context'
 
 const EOF = String.fromCharCode(0xfe, 0xff)
 
@@ -31,6 +32,13 @@ export default function LineWrapper ({ element, children }: TopLevelBlockProps):
   const items = useBlockToolItems(editor, pathRef.current)
 
   const forceUpdate = useForceUpdate()
+
+  const { getEditorDOMRect } = useContext(UIContext)
+  const getRect = useCallback(() => {
+    const { y = 0, height = 0 } = el?.getBoundingClientRect() ?? {}
+    const { x, width } = getEditorDOMRect()
+    return new DOMRect(x, y, width, height)
+  }, [getEditorDOMRect, el])
 
   useLayoutEffect(() => {
     if (el) {
@@ -65,6 +73,8 @@ export default function LineWrapper ({ element, children }: TopLevelBlockProps):
     <Tippy
       appendTo={document.body}
       arrow={false}
+      delay={200}
+      getReferenceClientRect={getRect}
       hideOnClick={false}
       interactive
       interactiveBorder={12}

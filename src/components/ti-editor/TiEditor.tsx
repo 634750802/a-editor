@@ -1,5 +1,5 @@
 /* eslint-disable react/forbid-component-props */
-import React, { forwardRef, useEffect, useMemo, useState } from 'react'
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react'
 import { BaseEditor, createEditor, Editor, Element, Node, NodeEntry, Text } from 'slate'
 import { withHistory } from 'slate-history'
@@ -13,6 +13,7 @@ import { DOMRange } from 'slate-react/dist/utils/dom'
 import { ICustomElementConfig, MdastContentType, RemarkBlockElement, RemarkElement, RemarkElementProps, RemarkInlineElement, RemarkText } from '/src/slate-markdown/core/elements'
 import { createPortal } from 'react-dom'
 import 'github-markdown-css/github-markdown.css'
+import UIContext, { UIContextProps } from '/src/components/ti-editor/ui-context'
 
 // see https://docs.slatejs.org/walkthroughs/01-installing-slate
 declare module 'slate' {
@@ -112,6 +113,13 @@ const TiEditor = forwardRef<TiCommunityEditorInstance, TiCommunityEditorProps>((
   }, [])
   const [instance, value, setValue] = useInstance(editor)
 
+  const containerRef = useRef<HTMLDivElement>(null)
+  const uiContextProps = useMemo<UIContextProps>(() => ({
+    getEditorDOMRect (): DOMRect {
+      return containerRef.current?.getBoundingClientRect() ?? new DOMRect()
+    },
+  }), [containerRef])
+
   useEffect(() => {
     if (ref) {
       if (typeof ref === 'function') {
@@ -144,11 +152,18 @@ const TiEditor = forwardRef<TiCommunityEditorInstance, TiCommunityEditorProps>((
     >
       <HoveringToolbar />
 
-      <Editable
-        as="article"
-        className="ti-community-editor markdown-body"
-        {...editableProps}
-      />
+      <UIContext.Provider value={uiContextProps}>
+        <div
+          className="ti-community-editor-container"
+          ref={containerRef}
+        >
+          <Editable
+            as="article"
+            className="ti-community-editor markdown-body"
+            {...editableProps}
+          />
+        </div>
+      </UIContext.Provider>
 
       {formPortal}
     </Slate>

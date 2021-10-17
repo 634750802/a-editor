@@ -27,7 +27,8 @@ module.exports = {
         'prop': 'parens-new-line'
       }],
     'react/jsx-no-literals': 0,
-    'react/jsx-props-no-spreading': 0
+    'react/jsx-props-no-spreading': 0,
+    'react/jsx-max-depth': [2, { 'max': 5 }]
   },
   settings: {
     react: {

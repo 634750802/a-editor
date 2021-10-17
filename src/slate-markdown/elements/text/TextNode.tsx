@@ -82,9 +82,22 @@ const TextNode = defineNode<RemarkText, TextApi>({
       if (Range.isCollapsed(range)) {
         if (rangeMatch(range)) {
           Editor.addMark(editor, decorator, true)
+          // accroding to mdast, inlineCode cannot have formatted content.
+          if (decorator === TextNodeDecorator.inlineCode) {
+            Editor.addMark(editor, TextNodeDecorator.inlineCode, false)
+            Editor.addMark(editor, TextNodeDecorator.emphasis, false)
+            Editor.addMark(editor, TextNodeDecorator.delete, false)
+          } else {
+            Editor.addMark(editor, TextNodeDecorator.inlineCode, false)
+          }
         }
       } else {
         Transforms.setNodes(editor, { [decorator]: true }, { match: nodeMatch, split: true })
+        if (decorator === TextNodeDecorator.inlineCode) {
+          Transforms.unsetNodes(editor, [TextNodeDecorator.delete, TextNodeDecorator.emphasis, TextNodeDecorator.strong], { match: nodeMatch, split: true })
+        } else {
+          Transforms.unsetNodes(editor, TextNodeDecorator.inlineCode, { match: nodeMatch, split: true })
+        }
       }
     }
   },
