@@ -98,7 +98,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
                   }
                 }
                 if (toggle.prefix?.test(prefix)) {
-                  const params = toggle.onTrigger(prefix, editor, point.path)
+                  const params = toggle.onTrigger(prefix, editor, Path.parent(point.path))
                   if (typeof params !== 'undefined') {
                     Transforms.delete(editor, {
                       at: { path: point.path, offset: 0 },
