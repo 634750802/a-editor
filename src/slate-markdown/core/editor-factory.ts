@@ -308,6 +308,16 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
             this.textConfig.normalize(editor, node as never, path, preventDefaults)
           }
         }
+        if (Editor.isEditor(node)) {
+          if (node.children.length === 0) {
+            Transforms.insertNodes(editor, { type: 'paragraph', children: [{text: ''}]}, { at: [0] })
+          } else {
+
+            if (!isElementType(node.children[node.children.length - 1], 'paragraph')) {
+              Transforms.insertNodes(editor, { type: 'paragraph', children: [{text: ''}]}, { at: [node.children.length] })
+            }
+          }
+        }
       })
       if (shouldNormalizeDefaults) {
         normalizeNode(entry)
