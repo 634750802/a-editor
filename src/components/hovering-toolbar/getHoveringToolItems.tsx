@@ -5,7 +5,7 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { faBold, faCode, faItalic, faStrikethrough } from '@fortawesome/free-solid-svg-icons'
 import { ReactEditor } from 'slate-react'
 import { DOMRange } from 'slate-react/dist/utils/dom'
-import { ICustomBlockElementConfig } from '/src/slate-markdown/core/elements'
+import { MdastContentType } from '/src/slate-markdown/core/elements'
 
 library.add(faBold, faItalic, faStrikethrough, faCode)
 
@@ -31,14 +31,14 @@ export default function getHoveringToolItems (editor: Editor, domRange: DOMRange
         const type = (node as Element).type
         if (type) {
           const config = editor.factory.customElementMap.get(type)
-          if (config && (config as ICustomBlockElementConfig<never>).isHiddenHoverToolbar) {
+          if (config && config.contentModelType !== MdastContentType.value) {
             return true
           }
         }
         return false
       },
     })
-    if (matched) {
+    if (!matched) {
       return []
     }
   }

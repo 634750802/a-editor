@@ -9,12 +9,9 @@ export default defineNode<ThematicBreak>({
   type: 'thematicBreak',
   isLeaf: false,
   isInline: false,
-  isVoid: true,
   wrappingParagraph: false,
   contentType: MdastContentType.flow,
   contentModelType: null,
-  isDisallowTextDecorators: true,
-  isHiddenHoverToolbar: true,
   render (editor: Editor, { element, children, attributes }: TypedRenderElementProps<ThematicBreak>): JSX.Element {
     return (
       <LineWrapper element={element}>

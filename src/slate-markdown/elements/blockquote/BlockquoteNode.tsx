@@ -46,7 +46,6 @@ const BlockquoteNode = defineNode<Blockquote>({
   type: 'blockquote',
   isInline: false,
   isLeaf: false,
-  isVoid: false,
   wrappingParagraph: true,
   contentType: MdastContentType.flow,
   contentModelType: MdastContentType.flow,

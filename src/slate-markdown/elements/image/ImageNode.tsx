@@ -9,24 +9,28 @@ import { requireFields } from '/src/components/form'
 import createSchema from './create-schema.json'
 import { JSONSchema7 } from 'json-schema'
 import { library } from '@fortawesome/fontawesome-svg-core'
+import VoidElement from '/src/components/void-element/void-element'
 
 library.add(faImage)
 
 const ImageNode = defineNode<Image>({
   type: 'image',
   isInline: true,
-  isVoid: false,
   isLeaf: false,
   contentType: MdastContentType.staticPhrasing,
   contentModelType: null,
-  render: (editor: Editor, { element, attributes }: TypedRenderElementProps<Image>): JSX.Element => {
+  render: (editor: Editor, { element, attributes, children }: TypedRenderElementProps<Image>): JSX.Element => {
     return (
-      <img
-        alt={element.alt}
-        src={element.url}
-        title={element.title}
-        {...attributes}
-      />
+      <VoidElement>
+        <img
+          alt={element.alt}
+          src={element.url}
+          title={element.title}
+          {...attributes}
+        />
+
+        {children}
+      </VoidElement>
     )
   },
   insert: (editor, location, params: RemarkElementProps<Image>) => {

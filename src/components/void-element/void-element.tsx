@@ -7,13 +7,13 @@ interface VoidElementProps {
 
 const VoidElement = forwardRef<HTMLDivElement, VoidElementProps>(function ({ children }: VoidElementProps, ref): JSX.Element {
   return (
-    <div
+    <span
       className="void-element"
       contentEditable={false}
       ref={ref}
     >
       {children}
-    </div>
+    </span>
   )
 })
 

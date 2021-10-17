@@ -6,7 +6,6 @@ const TableCellNode = defineNode<TableCell>({
   type: 'tableCell',
   isInline: false,
   isLeaf: false,
-  isVoid: false,
   contentType: MdastContentType.tableRow,
   contentModelType: MdastContentType.phrasing,
   wrappingParagraph: false,

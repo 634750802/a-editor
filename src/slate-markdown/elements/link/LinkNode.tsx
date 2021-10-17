@@ -16,7 +16,6 @@ library.add(faLink)
 const LinkNode = defineNode({
   type: 'link',
   isInline: true,
-  isVoid: false,
   isLeaf: false,
   contentType: MdastContentType.phrasing,
   contentModelType: MdastContentType.staticPhrasing,

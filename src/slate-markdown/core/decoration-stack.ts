@@ -39,7 +39,7 @@ export default class DecorationStack<A extends RemarkText, B extends RemarkBlock
     if (this.state.length > 0) {
       for (const frame of this.state.reverse()) {
         if (Path.isAncestor(frame.path, path)) {
-          // FIXME: do we need nesting decoration?
+          // do we need nesting decoration?
           return frame.config.decorate(this.editor, entry, frame.element as never)
         }
       }

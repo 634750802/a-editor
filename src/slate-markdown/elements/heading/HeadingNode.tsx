@@ -46,7 +46,6 @@ const HeadingNode = defineNode<Heading>({
   type: 'heading',
   isInline: false,
   isLeaf: false,
-  isVoid: false,
   wrappingParagraph: false,
   contentType: MdastContentType.flow,
   contentModelType: MdastContentType.phrasing,

@@ -38,7 +38,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
       this.customElementMap.set(config.type, config as never)
       this.contentModelTypeMap.set(config.type, config.contentModelType)
       this.contentTypeMap.set(config.type, config.contentType)
-      if (config.isVoid) {
+      if (config.contentModelType === null) {
         this.voidSet.add(config.type)
       }
     }
@@ -46,7 +46,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
   }
 
   wrapEditor<E extends Editor> (editor: E): E {
-    const { isVoid, isInline, normalizeNode } = editor
+    const { isVoid, isInline, normalizeNode, insertBreak } = editor
 
     editor.factory = this as never
 
@@ -286,7 +286,6 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
       return undefined
     }
 
-    // TODO: uses canContainsContent === null
     editor.isVoid = element => this.voidSet.has(element.type) || isVoid(element)
     editor.isInline = element => this.inlineSet.has(element.type) || isInline(element)
     editor.normalizeNode = (entry) => {
@@ -322,6 +321,19 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
       if (shouldNormalizeDefaults) {
         normalizeNode(entry)
       }
+    }
+
+    editor.insertBreak = () => {
+      if (editor.selection) {
+        const el = Node.parent(editor, editor.selection.anchor.path)
+        const cmt = editor.getContentModelType(el)
+        if (cmt !== MdastContentType.phrasing) {
+          Transforms.insertText(editor, '\n')
+          return
+        }
+      }
+
+      insertBreak()
     }
 
     return editor
@@ -447,6 +459,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
                 }
               }
             }
+            // TODO: refactor by mdast content rules
             if (parentNode.type === 'paragraph') {
               const grandParentNode = Node.parent(editor, parentPath)
               if (Element.isElement(grandParentNode)) {
@@ -519,19 +532,6 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
           if (isHotkey(['ctrl+enter'], event)) {
             Transforms.insertText(editor, '\n')
             return
-          }
-          if (isHotkey('enter', event)) {
-            if (editor.selection) {
-              const el = Node.parent(editor, editor.selection.anchor.path)
-              if (Editor.isBlock(editor, el)) {
-                // TODO add by element config
-                if (!/paragraph|heading/.test(el.type)) {
-                  Transforms.insertText(editor, '\n')
-                  event.preventDefault()
-                  return
-                }
-              }
-            }
           }
           if (editor.selection) {
             if (isHotkey('meta+b', event)) {

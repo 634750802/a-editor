@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-one-expression-per-line */
-import { defineNode, ICustomBlockElementConfig, MdastContentType, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
+import { defineNode, ICustomBlockElementConfig, isContentTypeConforms, MdastContentType, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
 import { Editor, Element, Location, Node, Path, Range, Text, Transforms } from 'slate'
 import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -154,40 +154,33 @@ export function isDecoratorActive (editor: Editor, selection: Range, decorator: 
 }
 
 export const isRangeCustomTextPropsEnabled = (editor: Editor, range: Range) => {
-  const isNotEnabled = isCustomTextPropsNotEnabled(editor)
-  const [nodes] = Editor.nodes(editor, { at: range, match: isNotEnabled})
-  return !nodes
+  const match = isPhrasing(editor)
+  const [nodes] = Editor.nodes(editor, { at: range, match })
+  return !!nodes
 }
 
 export const isCustomTextPropsEnabled = (editor: Editor): NodeMatch<Node> => (node, path) => {
+  const match = isPhrasing(editor)
   if (!Text.isText(node)) {
     return false
   }
   const parentNode = Node.parent(editor, path)
   if (Element.isElement(parentNode)) {
-    const config = editor.factory.customElementMap.get(parentNode.type)
-    if (!config) {
-      return false
-    }
-    return !(config as ICustomBlockElementConfig<never>).isDisallowTextDecorators
+    return match(parentNode, Path.parent(path))
   } else {
     return false
   }
 }
 
-export const isCustomTextPropsNotEnabled = (editor: Editor): NodeMatch<Node> => (node, path) => {
-  if (!Text.isText(node)) {
-    return false
-  }
-  const parentNode = Node.parent(editor, path)
-  if (Element.isElement(parentNode)) {
-    const config = editor.factory.customElementMap.get(parentNode.type)
+export const isPhrasing = (editor: Editor): NodeMatch<Node> => (node, path) => {
+  if (Element.isElement(node)) {
+    const config = editor.factory.customElementMap.get(node.type)
     if (!config) {
-      return true
+      return false
     }
-    return !!(config as ICustomBlockElementConfig<never>).isDisallowTextDecorators
+    return config.contentModelType ? isContentTypeConforms(config.contentModelType, MdastContentType.phrasing) : false
   } else {
-    return true
+    return false
   }
 }
 

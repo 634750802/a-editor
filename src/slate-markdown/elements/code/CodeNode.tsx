@@ -78,12 +78,9 @@ const CodeNode = defineNode<Code>({
   type: 'code',
   isInline: false,
   isLeaf: false,
-  isVoid: false,
-  isDisallowTextDecorators: true,
-  isHiddenHoverToolbar: true,
   wrappingParagraph: false,
   contentType: MdastContentType.flow,
-  contentModelType: MdastContentType.flow,
+  contentModelType: MdastContentType.value,
   render: (editor, { element, children, attributes }) => {
     return (
       <LineWrapper element={element}>

@@ -79,7 +79,6 @@ const ListItemNode = defineNode<ListItem>({
   type: 'listItem',
   isLeaf: false,
   isInline: false,
-  isVoid: false,
   wrappingParagraph: true, // only for block event handlers; do not add trigger. add them in list item.
   contentType: MdastContentType.list,
   contentModelType: MdastContentType.flow,

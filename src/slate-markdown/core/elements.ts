@@ -74,15 +74,12 @@ export interface ICustomElementConfig<E extends RemarkElement> extends ICustomCo
   isLeaf: false
   type: E['type']
   isInline: boolean
-  isVoid: boolean
 
   render (editor: Editor, props: TypedRenderElementProps<E>): JSX.Element
 }
 
 export interface ICustomBlockElementConfig<E extends RemarkBlockElement> extends ICustomElementConfig<E> {
   isInline: false
-  isDisallowTextDecorators?: true
-  isHiddenHoverToolbar?: true
 
   toggle: CustomBlockElementToggle<RemarkElementToggleParams<E>>
   events: CustomBlockElementEvents

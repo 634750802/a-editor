@@ -217,7 +217,6 @@ const TableNode = defineNode<Table>({
   type: 'table',
   isInline: false,
   isLeaf: false,
-  isVoid: false,
   contentType: MdastContentType.flow,
   contentModelType: MdastContentType.table,
   wrappingParagraph: false,

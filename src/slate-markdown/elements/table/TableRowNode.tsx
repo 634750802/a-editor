@@ -5,7 +5,6 @@ const TableRowNode = defineNode<TableRow>({
   type: 'tableRow',
   isInline: false,
   isLeaf: false,
-  isVoid: false,
   contentType: MdastContentType.table,
   contentModelType: MdastContentType.tableRow,
   wrappingParagraph: false,

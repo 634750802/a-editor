@@ -14,7 +14,6 @@ const ParagraphNode = defineNode<Paragraph>({
   type: 'paragraph',
   isLeaf: false,
   isInline: false,
-  isVoid: false,
   wrappingParagraph: false, // only for trigger; do not add block event handlers. add them in list item.
   contentType: MdastContentType.flow,
   contentModelType: MdastContentType.phrasing,
