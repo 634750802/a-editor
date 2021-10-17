@@ -33,7 +33,7 @@ const toolbarItems: ToolbarItemConfig<Path>[] = ([1, 2, 3, 4, 5, 6] as Heading['
     action: (editor, path, event) => {
       const entry: NodeEntry = [Node.get(editor, path), path]
       const headingEntry = editor.nearest(entry, HeadingNode)
-      if (headingEntry) {
+      if (headingEntry && headingEntry[0].depth === depth) {
         editor.toggle(headingEntry, ParagraphNode, undefined)
       } else {
         editor.toggle<Heading>(entry, HeadingNode, { depth })
