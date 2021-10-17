@@ -10,29 +10,38 @@ import React from 'react'
 library.add(faBars, faPlus)
 
 export interface PopContentProps {
+  extraWidth?: number,
   element: RemarkBlockElement,
   items: ToolbarItemProps[][],
   setActive: (active: boolean) => void,
   isEmpty: boolean
 }
 
-export default function PopContent ({ isEmpty, element, items, setActive }: PopContentProps): JSX.Element {
+export default function PopContent ({ extraWidth, isEmpty, element, items, setActive }: PopContentProps): JSX.Element {
 
   return (
     <Tippy
-      appendTo='parent'
+      appendTo="parent"
+      arrow={false}
       content={renderItems(items)}
       hideOnClick={false}
       interactive
       onHide={() => setActive(false)}
       onShow={() => setActive(true)}
     >
-      <span
+      <div
         className="line-operations"
         contentEditable={false}
       >
-        <FontAwesomeIcon icon={isEmpty ? faPlus : faBars} />
-      </span>
+        <span className="icon">
+          <FontAwesomeIcon icon={isEmpty ? faPlus : faBars} />
+        </span>
+
+        <div
+          className="spacer"
+          style={{ width: extraWidth, height: '100%' }}
+        />
+      </div>
     </Tippy>
   )
 }

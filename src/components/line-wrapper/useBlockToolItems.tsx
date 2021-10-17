@@ -23,8 +23,14 @@ export default function useBlockToolItems (editor: Editor, pathRef: PathRef | un
       disabled: path ? isDisabled(editor, path) : false,
       active: path ? isActive(editor, path) : false,
       icon,
-      action: path ? event => action(editor, path, event) : () => {
-      },
+      action: path
+        ? event => {
+          action(editor, path, event)
+          event.preventDefault()
+          event.stopPropagation()
+        }
+        : () => {
+        },
       tips,
     } as ToolbarItemProps)))
     .filter(items => items.length > 0)

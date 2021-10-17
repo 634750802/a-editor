@@ -33,11 +33,15 @@ export default function LineWrapper ({ element, children }: TopLevelBlockProps):
 
   const forceUpdate = useForceUpdate()
 
+  const [extraWidth, setExtraWidth] = useState(0)
+
   const { getEditorDOMRect } = useContext(UIContext)
   const getRect = useCallback(() => {
-    const { y = 0, height = 0 } = el?.getBoundingClientRect() ?? {}
-    const { x, width } = getEditorDOMRect()
-    return new DOMRect(x, y, width, height)
+    const elRect: DOMRect = el?.getBoundingClientRect() ?? new DOMRect()
+    const { x: lineX = 0 } = elRect
+    const { x } = getEditorDOMRect()
+    setExtraWidth(lineX - x)
+    return elRect
   }, [getEditorDOMRect, el])
 
   useLayoutEffect(() => {
@@ -73,7 +77,6 @@ export default function LineWrapper ({ element, children }: TopLevelBlockProps):
     <Tippy
       appendTo={document.body}
       arrow={false}
-      delay={200}
       getReferenceClientRect={getRect}
       hideOnClick={false}
       interactive
@@ -94,6 +97,7 @@ export default function LineWrapper ({ element, children }: TopLevelBlockProps):
       render={() => (
         <PopContent
           element={element}
+          extraWidth={extraWidth}
           isEmpty={isEmpty}
           items={items}
           setActive={setActive}
