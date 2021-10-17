@@ -1,4 +1,4 @@
-import { defineNode, ICustomInlineElementConfig, RemarkElementProps, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
+import { defineNode, ICustomInlineElementConfig, MdastContentType, RemarkElementProps, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
 import { Image } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import { Editor, Element, Path, Transforms } from 'slate'
 import React from 'react'
@@ -17,6 +17,8 @@ const ImageNode = defineNode<Image>({
   isInline: true,
   isVoid: false,
   isLeaf: false,
+  contentType: MdastContentType.staticPhrasing,
+  contentModelType: null,
   render: (editor: Editor, { element, attributes }: TypedRenderElementProps<Image>): JSX.Element => {
     return (
       <img

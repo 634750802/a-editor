@@ -24,6 +24,19 @@ export type TypedRenderLeafProps<T extends RemarkText> = RenderLeafProps & {
   text: T
 }
 
+
+export const enum MdastContentType {
+  flow = 0x10,
+  list = 0x20,
+  phrasing = 0x30, // should it be same with inline?
+  staticPhrasing = 0x31, // should it be same with inline?
+  value = 0x40 // has raw text value
+}
+
+export function isContentTypeConforms (type: MdastContentType, toType: MdastContentType): boolean {
+  return type === toType || (type < toType && (type ^ toType) < 0x10)
+}
+
 // returns true represents this event was consumed
 export type BlockEventHandler = (editor: Editor, path: Path) => boolean
 
@@ -46,8 +59,11 @@ export type CustomBlockElementToggle<T> = {
 
 export interface ICustomConfig<E extends SlateElement | SlateText> {
   isLeaf: boolean
+  contentType: MdastContentType
+  contentModelType: MdastContentType | null
 
   normalize?: CustomElementNormalizer<E>
+
   register (editorFactory: EditorFactory): void
 }
 
@@ -69,6 +85,7 @@ export interface ICustomBlockElementConfig<E extends RemarkBlockElement> extends
   events: CustomBlockElementEvents
 
   // heading is not while blockquote and listItem are.
+  // deprecated: uses contentModelType: 'phrasing'
   wrappingParagraph: boolean
   toolbarItems: ToolbarItemConfig<Path>[]
 

@@ -1,4 +1,4 @@
-import { defineNode } from '/src/slate-markdown/core/elements'
+import { defineNode, MdastContentType } from '/src/slate-markdown/core/elements'
 import { Code } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import React, { ChangeEvent } from 'react'
 import LineWrapper from '/src/components/line-wrapper/LineWrapper'
@@ -46,6 +46,8 @@ const CodeNode = defineNode<Code>({
   isDisallowTextDecorators: true,
   isHiddenHoverToolbar: true,
   wrappingParagraph: false,
+  contentType: MdastContentType.flow,
+  contentModelType: MdastContentType.flow,
   render: (editor, { element, children, attributes }) => {
     return (
       <LineWrapper element={element}>

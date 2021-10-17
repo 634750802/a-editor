@@ -1,4 +1,4 @@
-import { defineNode } from '/src/slate-markdown/core/elements'
+import { defineNode, MdastContentType } from '/src/slate-markdown/core/elements'
 import { Blockquote } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import { Editor, Node, Path, Transforms } from 'slate'
 import { hasAncestor, isElementType } from '/src/slate-markdown/slate-utils'
@@ -15,6 +15,8 @@ const BlockquoteNode = defineNode<Blockquote>({
   isLeaf: false,
   isVoid: false,
   wrappingParagraph: true,
+  contentType: MdastContentType.flow,
+  contentModelType: MdastContentType.flow,
   render: (editor, { children, attributes }) => {
     return (
       <blockquote {...attributes}>

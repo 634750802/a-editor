@@ -1,7 +1,7 @@
 /* eslint-disable react/forbid-component-props */
 import React, { forwardRef, useEffect, useMemo, useState } from 'react'
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react'
-import { BaseEditor, createEditor } from 'slate'
+import { BaseEditor, createEditor, Editor, Element, Node, Text } from 'slate'
 import { withHistory } from 'slate-history'
 import PropTypes from 'prop-types'
 import { TiCommunityEditorInstance, useInstance } from '/src/components/ti-editor/hooks'
@@ -10,7 +10,7 @@ import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
 import register from '/src/slate-markdown/elements/register'
 import HoveringToolbar from '/src/components/hovering-toolbar/HoveringToolbar'
 import { DOMRange } from 'slate-react/dist/utils/dom'
-import { RemarkBlockElement, RemarkInlineElement, RemarkText } from '/src/slate-markdown/core/elements'
+import { MdastContentType, RemarkBlockElement, RemarkInlineElement, RemarkText } from '/src/slate-markdown/core/elements'
 import { createPortal } from 'react-dom'
 import 'github-markdown-css/github-markdown.css'
 
@@ -28,12 +28,17 @@ export interface TiCommunityEditorProps {
   initialMarkdown?: string
 }
 
+
 export interface TiEditor {
   updatePopper: (range?: DOMRange) => void
   hidePopper: () => void
   togglePopper: (range?: DOMRange) => void
   factory: EditorFactory
   setActionForm: (form: JSX.Element | undefined) => void
+
+  // https://github.com/634750802/a-editor/issues/5
+  isContent: (node: Node, type: MdastContentType) => node is Element | Text
+  canContainsContent: (node: Node, type: MdastContentType) => node is Editor | Element | Text
 }
 
 

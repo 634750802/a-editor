@@ -1,4 +1,4 @@
-import { BlockEventHandler, CustomBlockElementEvents, ICustomBlockElementConfig, ICustomElementConfig, ICustomInlineElementConfig, ICustomTextConfig, RemarkBlockElement, RemarkInlineElement, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
+import { BlockEventHandler, CustomBlockElementEvents, ICustomBlockElementConfig, ICustomElementConfig, ICustomInlineElementConfig, ICustomTextConfig, isContentTypeConforms, MdastContentType, RemarkBlockElement, RemarkInlineElement, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
 import { Editor, Element, Node, NodeEntry, Path, Point, Range, Text, Transforms } from 'slate'
 import type { EditableProps } from 'slate-react/dist/components/editable'
 import { createElement, KeyboardEvent } from 'react'
@@ -18,6 +18,8 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
   private voidSet: Set<string> = new Set()
 
   readonly customElementMap: Map<string, ICustomElementConfig<IE | BE>> = new Map()
+  readonly contentTypeMap: Map<string, MdastContentType> = new Map()
+  readonly contentModelTypeMap: Map<string, MdastContentType> = new Map()
 
   define (config: ICustomInlineElementConfig<IE>): this
   define<T> (config: ICustomBlockElementConfig<BE>): this
@@ -49,6 +51,34 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
     editor.updatePopper = editor.hidePopper = editor.togglePopper = () => {
     }
 
+    editor.isContent = (node, type): node is Element | Text => {
+      if (Element.isElement(node)) {
+        return this.contentTypeMap.get(node.type) === type
+      } else if (Text.isText(node)) {
+        return this.textConfig.contentType === type
+      } else {
+        return false
+      }
+    }
+
+    editor.canContainsContent = (node, type): node is Element | Editor | Text => {
+      if (Editor.isEditor(node)) {
+        // https://github.com/syntax-tree/mdast#root
+        return type === MdastContentType.flow
+      } else if (Element.isElement(node)) {
+        const nodeContentModelType = this.contentModelTypeMap.get(node.type)
+        if (!nodeContentModelType) {
+          return false
+        }
+        return isContentTypeConforms(type, nodeContentModelType)
+      } else if (Text.isText(node)) {
+        return isContentTypeConforms(type, TextNode.canContainsContentModelTypeOf(node))
+      } else {
+        return false
+      }
+    }
+
+    // TODO: uses canContainsContent === null
     editor.isVoid = element => this.voidSet.has(element.type) || isVoid(element)
     editor.isInline = element => this.inlineSet.has(element.type) || isInline(element)
     editor.normalizeNode = (entry) => {

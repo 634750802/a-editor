@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-one-expression-per-line */
-import { defineNode, ICustomBlockElementConfig, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
+import { defineNode, ICustomBlockElementConfig, MdastContentType, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
 import { Editor, Element, Location, Node, Path, Range, Text, Transforms } from 'slate'
 import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -19,10 +19,22 @@ export const enum TextNodeDecorator {
 
 interface TextApi {
   toggleDecorator: (editor: Editor, range: Range, decorator: TextNodeDecorator) => void
+  canContainsContentModelTypeOf: (text: Text) => MdastContentType
 }
 
 const TextNode = defineNode<RemarkText, TextApi>({
   isLeaf: true,
+  contentType: MdastContentType.staticPhrasing,
+  contentModelType: MdastContentType.value,
+  canContainsContentModelTypeOf: text => {
+    if (text.inlineCode) {
+      return MdastContentType.value
+    } else if (text.strong || text.emphasis || text.delete) {
+      return MdastContentType.phrasing
+    } else {
+      return MdastContentType.phrasing
+    }
+  },
   normalize: (editor, node, path, preventDefaults) => {
     if (node.text === '') {
       const deleting: TextNodeDecorator[] = [TextNodeDecorator.strong, TextNodeDecorator.emphasis, TextNodeDecorator.delete, TextNodeDecorator.inlineCode]

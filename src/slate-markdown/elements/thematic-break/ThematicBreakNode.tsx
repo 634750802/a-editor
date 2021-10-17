@@ -1,4 +1,4 @@
-import { defineNode, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
+import { defineNode, MdastContentType, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
 import { ThematicBreak } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import { Editor, Path, Transforms } from 'slate'
 import VoidElement from '/src/components/void-element/void-element'
@@ -11,6 +11,8 @@ export default defineNode<ThematicBreak>({
   isInline: false,
   isVoid: true,
   wrappingParagraph: false,
+  contentType: MdastContentType.flow,
+  contentModelType: null,
   isDisallowTextDecorators: true,
   isHiddenHoverToolbar: true,
   render (editor: Editor, { element, children, attributes }: TypedRenderElementProps<ThematicBreak>): JSX.Element {

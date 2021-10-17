@@ -1,6 +1,6 @@
-import { defineNode, ICustomInlineElementConfig, RemarkElementProps, RemarkElementToggleParams, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
+import { defineNode, ICustomInlineElementConfig, MdastContentType, RemarkElementProps, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
 import { Link } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
-import { Editor, Element, Location, Node, Path, Point, Range, Transforms } from 'slate'
+import { Editor, Element, Location, Node, Path, Point, Transforms } from 'slate'
 import React from 'react'
 import createUrlRegExp from 'url-regex-safe'
 import { faLink } from '@fortawesome/free-solid-svg-icons'
@@ -10,7 +10,6 @@ import { isElementActive, isRangeCustomTextPropsEnabled } from '/src/slate-markd
 import { requireFields } from '/src/components/form'
 import createSchema from './create-schema.json'
 import { JSONSchema7 } from 'json-schema'
-import { ReactEditor } from 'slate-react'
 
 library.add(faLink)
 
@@ -19,6 +18,8 @@ const LinkNode = defineNode({
   isInline: true,
   isVoid: false,
   isLeaf: false,
+  contentType: MdastContentType.phrasing,
+  contentModelType: MdastContentType.staticPhrasing,
   normalize: (editor, element, path, preventDefaults) => {
     if (Node.string(element).trim().length === 0) {
       Transforms.removeNodes(editor, { at: path })

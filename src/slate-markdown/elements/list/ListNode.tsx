@@ -1,4 +1,4 @@
-import { defineNode, RemarkElementToggleParams, ToolbarItemConfig, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
+import { defineNode, MdastContentType, RemarkElementToggleParams, ToolbarItemConfig, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
 import { List, ListItem } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import { Editor, Node, Path, Transforms } from 'slate'
 import { isElementType, previousSiblingLastChildPath } from '/src/slate-markdown/slate-utils'
@@ -16,6 +16,8 @@ const ListNode = defineNode<List>({
   isInline: false,
   isVoid: false,
   wrappingParagraph: true, // only for trigger; do not add block event handlers. add them in list item.
+  contentType: MdastContentType.flow,
+  contentModelType: MdastContentType.list,
   normalize: (editor, node, path, preventDefaults) => {
     if (node.children.length === 0) {
       Transforms.removeNodes(editor, { at: path })
@@ -79,7 +81,7 @@ const ListNode = defineNode<List>({
       // eslint-disable-next-line react/jsx-one-expression-per-line
       icon: <FontAwesomeIcon icon={ordered ? faListOl : faListUl} />,
       isActive: isListActive,
-      isDisabled: (editor, range) => !isElementType(Node.get(editor, range), ['paragraph', 'heading']),
+      isDisabled: (editor, range) => !isElementType(Node.get(editor, range), ['paragraph', 'heading', 'listItem']),
       action: (editor, path, event) => {
         if (isListActive(editor, path)) {
           toggleList(editor, path, false)

@@ -1,8 +1,8 @@
-import { defineNode } from '/src/slate-markdown/core/elements'
+import { defineNode, MdastContentType } from '/src/slate-markdown/core/elements'
 import { List, ListItem } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import { Editor, Node, Path, Transforms } from 'slate'
 import { isElementType } from '/src/slate-markdown/slate-utils'
-import ListNode, { indentList, toggleList } from '/src/slate-markdown/elements/list/ListNode'
+import { indentList, toggleList } from '/src/slate-markdown/elements/list/ListNode'
 import React from 'react'
 
 const ListItemNode = defineNode<ListItem>({
@@ -11,6 +11,8 @@ const ListItemNode = defineNode<ListItem>({
   isInline: false,
   isVoid: false,
   wrappingParagraph: true, // only for block event handlers; do not add trigger. add them in list item.
+  contentType: MdastContentType.list,
+  contentModelType: MdastContentType.flow,
   normalize: (editor, node, path) => {
     const lastIndex = node.children.length - 1
     if (node.children.length > 1 && isElementType(node.children[lastIndex], 'paragraph')) {

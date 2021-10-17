@@ -1,4 +1,4 @@
-import { defineNode, ToolbarItemConfig } from '/src/slate-markdown/core/elements'
+import { defineNode, MdastContentType, ToolbarItemConfig } from '/src/slate-markdown/core/elements'
 import { Heading } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import { createElement } from 'react'
 import { Node, Path, Transforms } from 'slate'
@@ -13,6 +13,8 @@ const HeadingNode = defineNode<Heading>({
   isLeaf: false,
   isVoid: false,
   wrappingParagraph: false,
+  contentType: MdastContentType.flow,
+  contentModelType: MdastContentType.phrasing,
   render: (editor, { element, children, attributes }) => {
     return (
       <LineWrapper element={element}>
