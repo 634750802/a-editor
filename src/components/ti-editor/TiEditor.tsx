@@ -69,6 +69,8 @@ export interface TiEditor {
 
   unwrap<E1 extends RemarkElement, E2 extends RemarkElement> (entry: NodeEntry, config: [ICustomElementConfig<E1>, ICustomElementConfig<E2>]): boolean
 
+  unwrap<E1 extends RemarkElement, E2 extends RemarkElement, E3 extends RemarkElement> (entry: NodeEntry, config: [ICustomElementConfig<E1>, ICustomElementConfig<E2>, ICustomElementConfig<E3>]): boolean
+
   unwrap (entry: NodeEntry, config: ICustomElementConfig<RemarkElement>[]): boolean
 
   canUnwrap<E1 extends RemarkElement> (entry: NodeEntry, config: [ICustomElementConfig<E1>]): boolean

@@ -1,4 +1,4 @@
-import { Blockquote, Code, Heading, Image, InlineMath, Link, List, ListItem, Paragraph, Text, ThematicBreak } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
+import { Blockquote, Code, Heading, Image, InlineMath, Link, List, ListItem, Paragraph, Table, TableCell, TableRow, Text, ThematicBreak } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import { Editor, Element as SlateElement, Location, NodeEntry, Path, Range, Text as SlateText } from 'slate'
 import { RenderElementProps, RenderLeafProps } from 'slate-react'
 import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
@@ -6,7 +6,7 @@ import { ToolbarItemProps } from '/src/components/hovering-toolbar/getHoveringTo
 import { SyntheticEvent } from 'react'
 import { SYMBOL_PRISM_TOKEN } from '/src/slate-markdown/elements/code/CodeNode'
 
-export type RemarkBlockElement = List | ListItem | Paragraph | Code | Heading | Blockquote | ThematicBreak
+export type RemarkBlockElement = List | ListItem | Paragraph | Code | Heading | Blockquote | ThematicBreak | Table | TableRow | TableCell
 export type RemarkInlineElement = InlineMath | Image | Link
 export type RemarkElement = RemarkBlockElement | RemarkInlineElement
 export type RemarkText = Text & { [SYMBOL_PRISM_TOKEN]?: string }
@@ -30,7 +30,10 @@ export const enum MdastContentType {
   list = 0x20,
   phrasing = 0x30, // should it be same with inline?
   staticPhrasing = 0x31, // should it be same with inline?
-  value = 0x40 // has raw text value
+  value = 0x40, // has raw text value
+  // gfm table
+  table = 0x50,
+  tableRow = 0x60
 }
 
 export function isContentTypeConforms (type: MdastContentType, toType: MdastContentType): boolean {

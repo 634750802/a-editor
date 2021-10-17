@@ -1,0 +1,20 @@
+{
+  "title": "添加图片",
+  "type": "object",
+  "properties": {
+    "cols": {
+      "title": "列数",
+      "type": "number",
+      "min": 2
+    },
+    "rows": {
+      "title": "行数",
+      "type": "number",
+      "min": 2
+    }
+  },
+  "required": [
+    "cols",
+    "rows"
+  ]
+}
