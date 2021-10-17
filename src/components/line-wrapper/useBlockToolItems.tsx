@@ -1,9 +1,7 @@
 import React, { SyntheticEvent } from 'react'
-import { Editor, Path, PathRef, Range } from 'slate'
+import { Editor, PathRef } from 'slate'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faBold, faCode, faItalic, faStrikethrough } from '@fortawesome/free-solid-svg-icons'
-import { ReactEditor } from 'slate-react'
-import { DOMRange } from 'slate-react/dist/utils/dom'
 
 library.add(faBold, faItalic, faStrikethrough, faCode)
 
@@ -16,10 +14,10 @@ export type ToolbarItemProps = {
   tips?: JSX.Element
 }
 
-export default function useBlockToolItems (editor: Editor, pathRef: PathRef | undefined): ToolbarItemProps[] {
+export default function useBlockToolItems (editor: Editor, pathRef: PathRef | undefined): ToolbarItemProps[][] {
   const path = pathRef?.current
-  const toolbarItems: ToolbarItemProps [] = editor.factory.blockConfigs.flatMap(config => config.toolbarItems)
-    .map((
+  return editor.factory.blockConfigs
+    .map(config => config.toolbarItems.map((
       { key, isDisabled, isActive, action, icon, tips }) => ({
       key,
       disabled: path ? isDisabled(editor, path) : false,
@@ -28,6 +26,6 @@ export default function useBlockToolItems (editor: Editor, pathRef: PathRef | un
       action: path ? event => action(editor, path, event) : () => {
       },
       tips,
-    }))
-  return toolbarItems
+    } as ToolbarItemProps)))
+    .filter(items => items.length > 0)
 }

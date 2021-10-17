@@ -1,14 +1,55 @@
-import { defineNode, MdastContentType, RemarkElementToggleParams, ToolbarItemConfig, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
+import { defineNode, MdastContentType, RemarkElementProps, RemarkElementToggleParams, ToolbarItemConfig, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
 import { List, ListItem } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
-import { Editor, Node, Path, Transforms } from 'slate'
+import { Editor, Node, NodeEntry, Path, Transforms } from 'slate'
 import { isElementType, previousSiblingLastChildPath } from '/src/slate-markdown/slate-utils'
 import React from 'react'
-import { isElementActive } from '/src/slate-markdown/elements/text/TextNode'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faListOl, faListUl } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import ListItemNode from '/src/slate-markdown/elements/list/ListItemNode'
 
 library.add(faListOl, faListUl)
+
+
+const toolbarItems: ToolbarItemConfig<Path>[] = [true, false].map(ordered => {
+  const listParam: RemarkElementProps<List> = { ordered, spread: undefined, start: undefined }
+  const listItemParam: RemarkElementProps<ListItem> = { spread: undefined, checked: undefined }
+  return {
+    key: `list-${ordered ? 'ordered' : 'unordered'}`,
+    // eslint-disable-next-line react/jsx-one-expression-per-line
+    icon: <FontAwesomeIcon icon={ordered ? faListOl : faListUl} />,
+    isActive: (editor: Editor, path: Path): boolean => {
+      const entry: NodeEntry = [Node.get(editor, path), path]
+      const nearestList = editor.nearest(entry, ListNode)
+      return nearestList ? (Boolean(nearestList[0].ordered) === Boolean(ordered)) : false
+    },
+    isDisabled: (editor, path) => {
+      const entry: NodeEntry = [Node.get(editor, path), path]
+      const nearest = editor.nearest(entry, ListNode)
+      if (nearest) {
+        return !editor.canUnwrap(nearest, [ListNode, ListItemNode])
+      } else {
+        return !editor.canWrap(entry, [ListNode, ListItemNode], [listParam, listItemParam])
+      }
+    },
+    action: (editor, path, event) => {
+      // TODO: this is dirty
+      const start: number | undefined = editor.getAndRemoveMark('start') as never
+      const entry: NodeEntry = [Node.get(editor, path), path]
+      const nearest = editor.nearest(entry, ListNode)
+      if (nearest) {
+        const [list, path] = nearest
+        if (list.ordered === ordered) {
+          editor.unwrap(nearest, [ListNode, ListItemNode])
+        } else {
+          Transforms.setNodes(editor, { ordered, start }, { at: path })
+        }
+      } else {
+        editor.wrap(entry, [ListNode, ListItemNode], [Object.assign({}, listParam, { start }), listItemParam])
+      }
+    },
+  }
+})
 
 const ListNode = defineNode<List>({
   type: 'list',
@@ -27,7 +68,7 @@ const ListNode = defineNode<List>({
     if (Path.hasPrevious(path)) {
       const prev = Node.get(editor, Path.previous(path))
       if (isElementType<List>(prev, 'list')) {
-        if (prev.ordered === node.ordered && prev.spread === node.spread && prev.start === undefined) {
+        if (Boolean(prev.ordered) === Boolean(node.ordered) && prev.start === undefined && node.start === undefined) {
           Transforms.mergeNodes(editor, { at: path })
           preventDefaults()
           return
@@ -55,7 +96,6 @@ const ListNode = defineNode<List>({
   },
   toggle: {
     prefix: /^(?:-|\d+\.)$/,
-    indent: indentList,
     toggle: toggleList,
     onTrigger: (prefix: string): RemarkElementToggleParams<List> | undefined => {
       if (prefix === '-') {
@@ -65,99 +105,31 @@ const ListNode = defineNode<List>({
           spread: undefined,
         }
       } else {
+        const start = parseInt(prefix)
         return {
           ordered: true,
-          start: parseInt(prefix),
+          start: start === 1 ? undefined : start,
           spread: undefined,
         }
       }
     },
   },
   events: {},
-  toolbarItems: [true, false].map(ordered => {
-    const isListActive: ToolbarItemConfig<Path>['isActive'] = (editor, path) => path.length > 2 && isElementActive<List>(editor, Path.parent(Path.parent(path)), 'list', list => list.ordered === ordered)
-    return {
-      key: `list-${ordered ? 'ordered' : 'unordered'}`,
-      // eslint-disable-next-line react/jsx-one-expression-per-line
-      icon: <FontAwesomeIcon icon={ordered ? faListOl : faListUl} />,
-      isActive: isListActive,
-      isDisabled: (editor, range) => !isElementType(Node.get(editor, range), ['paragraph', 'heading', 'listItem']),
-      action: (editor, path, event) => {
-        if (isListActive(editor, path)) {
-          toggleList(editor, path, false)
-        } else {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          toggleList(editor, path, { ordered, start: undefined, spread: undefined })
-        }
-      },
-    }
-  }),
+  toolbarItems,
 })
-
-export function indentList (editor: Editor, path: Path, delta: 1 | -1): void {
-  if (delta < 0) {
-    return toggleList(editor, path, false)
-  } else {
-    const parentPath = Path.parent(path)
-    const parent = Node.get(editor, parentPath)
-    if (isElementType<ListItem>(parent, 'listItem')) {
-      if (Path.hasPrevious(parentPath)) {
-        const grandParent = Node.parent(editor, parentPath) as List
-        const newPath = previousSiblingLastChildPath(editor, parentPath)
-        Transforms.moveNodes(editor, { at: parentPath, to: newPath })
-        Transforms.wrapNodes(editor, {
-          type: 'list',
-          children: [],
-          ordered: grandParent.ordered,
-          start: undefined,
-          spread: undefined,
-        }, {
-          at: newPath,
-        })
-      }
-    }
-  }
-}
 
 export function toggleList (editor: Editor, path: Path, params: RemarkElementToggleParams<List>): void {
   // node must be paragraph
-  if (!isElementType(Node.get(editor, path), ['paragraph', 'heading'])) {
-    throw new Error('can only call ListNode.toggle on a paragraph or heading node.')
-  }
   if (params === false) {
-    const fromPath = Path.parent(path) // li
-    const toPath = Path.next(Path.parent(fromPath))
-    Transforms.splitNodes(editor, { at: fromPath })
-    Transforms.moveNodes(editor, { at: toPath.concat(0), to: toPath })
-    Transforms.unwrapNodes(editor, { at: toPath })
-    Transforms.select(editor, { path: toPath, offset: 0 })
+    throw new Error('should never reach')
   } else {
-    const parentPath = Path.parent(path)
-    const parent = Node.get(editor, parentPath)
-    // inside a list
-    if (isElementType<ListItem>(parent, 'listItem')) {
-      Transforms.setNodes(editor, {
-        type: 'list',
-        ...params,
-      }, {
-        at: Path.parent(parentPath),
-      })
+    // TODO: this is dirty
+    editor.addMark('start', params.start)
+    if (editor.nearest([Node.get(editor, path), path], ListNode)) {
+      editor.addMark('ordered', params.ordered)
+      ListItemNode.toolbarItems[0].action(editor, path, {} as never)
     } else {
-      Transforms.wrapNodes(editor, {
-        type: 'listItem',
-        checked: undefined,
-        spread: params.spread,
-        children: [],
-      }, {
-        at: path,
-      })
-      Transforms.wrapNodes(editor, {
-        type: 'list',
-        children: [],
-        ...params,
-      }, {
-        at: path,
-      })
+      toolbarItems[params.ordered ? 0 : 1].action(editor, path, {} as never)
     }
   }
 }

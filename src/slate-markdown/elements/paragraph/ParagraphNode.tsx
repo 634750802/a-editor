@@ -12,7 +12,7 @@ const ParagraphNode = defineNode<Paragraph>({
   isVoid: false,
   wrappingParagraph: false, // only for trigger; do not add block event handlers. add them in list item.
   contentType: MdastContentType.flow,
-  contentModelType: MdastContentType.flow,
+  contentModelType: MdastContentType.phrasing,
   toggle: {},
   events: {},
   render (editor: Editor, { element, attributes, children }: TypedRenderElementProps<Paragraph>): JSX.Element {

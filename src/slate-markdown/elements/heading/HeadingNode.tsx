@@ -1,11 +1,46 @@
 import { defineNode, MdastContentType, ToolbarItemConfig } from '/src/slate-markdown/core/elements'
 import { Heading } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import { createElement } from 'react'
-import { Node, Path, Transforms } from 'slate'
+import { Node, NodeEntry, Path } from 'slate'
 import { isElementType } from '/src/slate-markdown/slate-utils'
 import LineWrapper from '/src/components/line-wrapper/LineWrapper'
-import { isElementActive } from '/src/slate-markdown/elements/text/TextNode'
 import classNames from 'classnames'
+import ParagraphNode from '/src/slate-markdown/elements/paragraph/ParagraphNode'
+
+
+const toolbarItems: ToolbarItemConfig<Path>[] = ([1, 2, 3, 4, 5, 6] as Heading['depth'][]).map(depth => {
+  // const isHeadingActive: ToolbarItemConfig<Path>['isActive'] = (editor, path) => isElementActive<Heading>(editor, path, 'heading', heading => heading.depth === depth)
+  const isHeadingActive: ToolbarItemConfig<Path>['isActive'] = (editor, path) => {
+    const entry: NodeEntry = [Node.get(editor, path), path]
+    const nearestEntry = editor.nearest(entry, HeadingNode)
+    return !!(nearestEntry && nearestEntry[0].depth === depth)
+  }
+  const isHeadingDisabled: ToolbarItemConfig<Path>['isDisabled'] = (editor, path) => {
+    const entry: NodeEntry = [Node.get(editor, path), path]
+    const headingEntry = editor.nearest(entry, HeadingNode)
+    if (headingEntry) {
+      return !editor.canToggle(headingEntry, ParagraphNode, false)
+    } else {
+      return !editor.canToggle(entry, HeadingNode, true)
+    }
+  }
+  return {
+    key: `heading-level-${depth}`,
+    // eslint-disable-next-line react/jsx-one-expression-per-line
+    icon: <>H{depth}</>,
+    isActive: isHeadingActive,
+    isDisabled: isHeadingDisabled,
+    action: (editor, path, event) => {
+      const entry: NodeEntry = [Node.get(editor, path), path]
+      const headingEntry = editor.nearest(entry, HeadingNode)
+      if (headingEntry) {
+        editor.toggle(headingEntry, ParagraphNode, undefined)
+      } else {
+        editor.toggle<Heading>(entry, HeadingNode, { depth })
+      }
+    },
+  }
+})
 
 const HeadingNode = defineNode<Heading>({
   type: 'heading',
@@ -25,12 +60,12 @@ const HeadingNode = defineNode<Heading>({
   toggle: {
     prefix: /^#{1,6}$/,
     estimatePrefixLength: 6,
+    // deprecated
     toggle: (editor, path, params) => {
       if (params) {
-        Transforms.setNodes(editor, { type: 'heading', ...params }, { at: path })
+        editor.toggle([Node.get(editor, path), path], HeadingNode, params)
       } else {
-        Transforms.unsetNodes(editor, 'depth', { at: path })
-        Transforms.setNodes(editor, { type: 'paragraph' }, { at: path })
+        editor.toggle([Node.get(editor, path), path], ParagraphNode, undefined)
       }
     },
     onTrigger: (prefix) => {
@@ -43,29 +78,11 @@ const HeadingNode = defineNode<Heading>({
       if (!isElementType<Heading>(heading, 'heading')) {
         return false
       }
-      HeadingNode.toggle.toggle(editor, Path.parent(path), false)
+      editor.toggle([heading, Path.parent(path)], ParagraphNode, undefined)
       return true
-    }
+    },
   },
-  toolbarItems: [1, 2, 3, 4, 5, 6].map(depth => {
-    const isHeadingActive: ToolbarItemConfig<Path>['isActive'] = (editor, path) => isElementActive<Heading>(editor, path, 'heading', heading => heading.depth === depth)
-    return {
-      key: `heading-level-${depth}`,
-      // eslint-disable-next-line react/jsx-one-expression-per-line
-      icon: <>H{depth}</>,
-      isActive: isHeadingActive,
-      isDisabled: (editor, range) => !isElementType(Node.get(editor, range), ['paragraph', 'heading']),
-      action: (editor, path, event) => {
-        if (isHeadingActive(editor, path)) {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          HeadingNode.toggle.toggle!(editor, path, false)
-        } else {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          HeadingNode.toggle.toggle!(editor, path, { depth } as never)
-        }
-      },
-    }
-  }),
+  toolbarItems: toolbarItems,
 })
 
 export default HeadingNode

@@ -1,13 +1,46 @@
-import { defineNode, MdastContentType } from '/src/slate-markdown/core/elements'
+import { defineNode, MdastContentType, ToolbarItemConfig } from '/src/slate-markdown/core/elements'
 import { Blockquote } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
-import { Editor, Node, Path, Transforms } from 'slate'
-import { hasAncestor, isElementType } from '/src/slate-markdown/slate-utils'
+import { Editor, Node, NodeEntry, Path, Transforms } from 'slate'
+import { isElementType } from '/src/slate-markdown/slate-utils'
 import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faQuoteLeft } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
+import ParagraphNode from '/src/slate-markdown/elements/paragraph/ParagraphNode'
 
 library.add(faQuoteLeft)
+
+const toolbarItems: ToolbarItemConfig<Path>[] = [{
+  key: 'blockquote',
+  icon: <FontAwesomeIcon icon={faQuoteLeft} />,
+  isActive: (editor: Editor, path: Path): boolean => {
+    const entry: NodeEntry = [Node.get(editor, path), path]
+    return !!editor.nearest(entry, BlockquoteNode)
+  },
+  isDisabled: (editor, path) => {
+    const entry: NodeEntry = [Node.get(editor, path), path]
+    const blockquoteEntry = editor.nearest(entry, BlockquoteNode)
+    if (blockquoteEntry) {
+      return !editor.canUnwrap(blockquoteEntry, [BlockquoteNode])
+    } else {
+      return !editor.canToggle(entry, BlockquoteNode, false)
+    }
+  },
+  tips: (
+    <>
+      引用
+    </>
+  ),
+  action: (editor, path, e) => {
+    const entry: NodeEntry = [Node.get(editor, path), path]
+    const blockquoteEntry = editor.nearest(entry, BlockquoteNode)
+    if (blockquoteEntry) {
+      return editor.unwrap(blockquoteEntry, [BlockquoteNode])
+    } else {
+      return editor.toggle(entry, BlockquoteNode, undefined)
+    }
+  },
+}]
 
 const BlockquoteNode = defineNode<Blockquote>({
   type: 'blockquote',
@@ -47,26 +80,7 @@ const BlockquoteNode = defineNode<Blockquote>({
       return true
     },
   },
-  toolbarItems: [{
-    key: 'blockquote',
-    icon: <FontAwesomeIcon icon={faQuoteLeft} />,
-    isActive: isBlockquoteActive,
-    isDisabled: (editor, range) => !isElementType(Node.get(editor, range), ['heading', 'paragraph']),
-    tips: <>
-      引用
-          </>,
-    action: (editor, range, e) => {
-      if (isBlockquoteActive(editor, range)) {
-        BlockquoteNode.toggle.toggle(editor, range, false)
-      } else {
-        BlockquoteNode.toggle.toggle(editor, range, true)
-      }
-    },
-  }],
+  toolbarItems,
 })
-
-export function isBlockquoteActive (editor: Editor, path: Path): boolean {
-  return hasAncestor(editor, { at: path, match: node => isElementType(node, 'blockquote') })
-}
 
 export default BlockquoteNode

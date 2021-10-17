@@ -1,5 +1,5 @@
-import { BlockEventHandler, CustomBlockElementEvents, ICustomBlockElementConfig, ICustomElementConfig, ICustomInlineElementConfig, ICustomTextConfig, isContentTypeConforms, MdastContentType, RemarkBlockElement, RemarkInlineElement, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
-import { Editor, Element, Node, NodeEntry, Path, Point, Range, Text, Transforms } from 'slate'
+import { BlockEventHandler, CustomBlockElementEvents, ICustomBlockElementConfig, ICustomElementConfig, ICustomInlineElementConfig, ICustomTextConfig, isContentTypeConforms, MdastContentType, RemarkBlockElement, RemarkElement, RemarkElementProps, RemarkInlineElement, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
+import { Ancestor, Editor, Element, Node, NodeEntry, Path, Point, Range, Text, Transforms } from 'slate'
 import type { EditableProps } from 'slate-react/dist/components/editable'
 import { createElement, KeyboardEvent } from 'react'
 import isHotkey from 'is-hotkey'
@@ -8,6 +8,7 @@ import LinkNode from '/src/slate-markdown/elements/link/LinkNode'
 import DecorationStack from '/src/slate-markdown/core/decoration-stack'
 import { ReactEditor } from 'slate-react'
 import { isElementType } from '/src/slate-markdown/slate-utils'
+import { ToggleStrategy } from '/src/components/ti-editor/TiEditor'
 
 export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkBlockElement = RemarkBlockElement, IE extends RemarkInlineElement = RemarkInlineElement> {
   readonly blockConfigs: ICustomBlockElementConfig<BE>[] = []
@@ -19,7 +20,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
 
   readonly customElementMap: Map<string, ICustomElementConfig<IE | BE>> = new Map()
   readonly contentTypeMap: Map<string, MdastContentType> = new Map()
-  readonly contentModelTypeMap: Map<string, MdastContentType> = new Map()
+  readonly contentModelTypeMap: Map<string, MdastContentType | null> = new Map()
 
   define (config: ICustomInlineElementConfig<IE>): this
   define<T> (config: ICustomBlockElementConfig<BE>): this
@@ -35,6 +36,8 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
         this.blockConfigs.push(config)
       }
       this.customElementMap.set(config.type, config as never)
+      this.contentModelTypeMap.set(config.type, config.contentModelType)
+      this.contentTypeMap.set(config.type, config.contentType)
       if (config.isVoid) {
         this.voidSet.add(config.type)
       }
@@ -76,6 +79,211 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
       } else {
         return false
       }
+    }
+
+    editor.getContentType = node => {
+      if (Element.isElement(node)) {
+        return this.contentTypeMap.get(node.type) || null
+      } else if (Text.isText(node)) {
+        return this.textConfig.contentType || null
+      } else {
+        return null
+      }
+    }
+
+    editor.getContentModelType = node => {
+      if (Editor.isEditor(node)) {
+        return MdastContentType.flow
+      } else if (Element.isElement(node)) {
+        return this.contentModelTypeMap.get(node.type) || null
+      } else if (Text.isText(node)) {
+        return this.textConfig.contentModelType
+      } else {
+        return null
+      }
+    }
+
+    editor.getContentTypePair = node => {
+      if (Element.isElement(node)) {
+        return [this.contentTypeMap.get(node.type) || null, this.contentModelTypeMap.get(node.type) || null]
+      } else if (Text.isText(node)) {
+        return [this.textConfig.contentType || null, this.textConfig.contentModelType || null]
+      } else {
+        return [null, null]
+      }
+    }
+
+    // this is important
+    editor.toggle = (entry, config, params): boolean => {
+      const canToggle = editor.canToggle(entry, config, true)
+      if (!canToggle) {
+        return false
+      }
+      const [[node, path], toggleStrategy] = canToggle
+      const realParams = typeof params === 'object' ? params : {}
+      switch (toggleStrategy) {
+        case ToggleStrategy.replace:
+          Transforms.unsetNodes(editor, Object.keys(Node.extractProps(node)))
+          Transforms.setNodes(editor, { type: config.type, ...realParams, children: [] }, { at: path })
+          return true
+        case ToggleStrategy.wrap:
+          Transforms.wrapNodes(editor, { type: config.type, ...realParams } as never, { at: path })
+          return true
+        case ToggleStrategy.custom:
+          throw new Error('TODO: ToggleStrategy.custom')
+        default:
+          throw new Error('unknown ToggleStrategy: ' + toggleStrategy)
+      }
+    }
+
+    editor.canToggle = (entry, config, ancestors) => {
+      const [node] = entry
+      const [contentType, contentModelType] = editor.getContentTypePair(node)
+      // TODO this is wrong
+      if (config.contentType !== contentType) {
+        return false
+      }
+      if (config.contentModelType === contentModelType) {
+        return [entry, ToggleStrategy.replace]
+      }
+      if (config.contentModelType === contentType) {
+        return [entry, ToggleStrategy.wrap]
+      }
+
+      if (!ancestors) {
+        return false
+      }
+      const entries = Node.ancestors(editor, entry[1], { reverse: true })
+      for (const entry of entries) {
+        const res = editor.canToggle(entry, config, false)
+        if (res) {
+          return res
+        }
+      }
+      return false
+    }
+
+    editor.unwrap = (entry: NodeEntry, configs: ICustomElementConfig<RemarkElement>[]) => {
+      if (!editor.canUnwrap(entry, configs)) {
+        return false
+      }
+      const [node, rootPath] = entry
+      const levels: Path[][] = [[[]]]
+      let queue: NodeEntry[] = [[node, []]]
+      let depth = 0
+      while (depth < configs.length - 1) {
+        const newQueue: NodeEntry[] = []
+        for (const [node, path] of queue) {
+          for (const [i, child] of (node as Ancestor).children.entries()) {
+            newQueue.push([child, path.concat(i)])
+          }
+        }
+
+        depth += 1
+        queue = newQueue
+        levels.push(newQueue.map(([, path]) => path))
+      }
+
+      // unwrap from bottom to top to prevent using path refs.
+      for (const level of levels.reverse()) {
+        for (const path of level.reverse()) {
+          Transforms.unwrapNodes(editor, { at: rootPath.concat(path), split: true })
+        }
+      }
+      return true
+    }
+
+    editor.canUnwrap = ([node, path]: NodeEntry, configs: ICustomElementConfig<RemarkElement>[]) => {
+      if (configs.length === 0) {
+        return true
+      }
+      const parentContentModelType = editor.getContentModelType(Node.parent(editor, path))
+      const contentModelType = configs[configs.length - 1].contentModelType
+      if (!parentContentModelType || !contentModelType) {
+        return false
+      }
+      if (!isContentTypeConforms(contentModelType, parentContentModelType)) {
+        return false
+      }
+      // bfs checks sub nodes strictly matches the case
+      // do not check if contentTypes of configs are compatible, for it is unwrapping.
+      let queue: NodeEntry[] = [[node, []]]
+      let depth = 0
+      while (depth < configs.length) {
+        const newQueue: NodeEntry[] = []
+        for (const [node, path] of queue) {
+          if (!isElementType(node, configs[depth].type)) {
+            return false
+          }
+          for (const [i, child] of node.children.entries()) {
+            newQueue.push([child, path.concat(i)])
+          }
+        }
+        depth += 1
+        queue = newQueue
+      }
+      return true
+    }
+
+    editor.wrap = (entry: NodeEntry, configs: ICustomElementConfig<RemarkElement>[], params: RemarkElementProps<any>[]) => {
+      if (!editor.canWrap(entry, configs, params)) {
+        return false
+      }
+      const [, path] = entry
+      let i = configs.length - 1
+      while (i >= 0) {
+        const config = configs[i]
+        const param = params[i]
+        Transforms.wrapNodes(editor, Object.assign({ type: config.type, children: [] }, param) as never, { at: path })
+        i--
+      }
+      return true
+    }
+
+    editor.canWrap = (entry: NodeEntry, configs: ICustomElementConfig<RemarkElement>[], params: RemarkElementProps<any>[]) => {
+      console.assert(configs.length === params.length, 'editor.canWrap: configs.length should be equals to params.length')
+      const [node, path] = entry
+      const parent = Node.parent(editor, path)
+      let i = 0
+      let parentContentModelType: MdastContentType | null = editor.getContentModelType(parent)
+      while (i < configs.length) {
+        const config = configs[i]
+        if (parentContentModelType === null || !isContentTypeConforms(config.contentType, parentContentModelType)) {
+          return false
+        }
+        parentContentModelType = config.contentModelType
+        i += 1
+      }
+      if (parentContentModelType === null) {
+        return false
+      }
+      const nodeContentType = editor.getContentType(node)
+      if (!nodeContentType) {
+        return false
+      }
+      return isContentTypeConforms(nodeContentType, parentContentModelType)
+    }
+
+    editor.nearest = <E extends RemarkElement> (entry: NodeEntry, config: ICustomElementConfig<E>) => {
+      const [node, path] = entry
+      if (isElementType<E>(node, config.type)) {
+        return entry as NodeEntry<E>
+      }
+      for (const ancestorEntry of Node.ancestors(editor, path, { reverse: true })) {
+        if (isElementType<E>(ancestorEntry[0], config.type)) {
+          return ancestorEntry as NodeEntry<E>
+        }
+      }
+      return undefined
+    }
+
+    editor.getAndRemoveMark = (attr: string) => {
+      if (editor.marks) {
+        const res = (editor.marks as never)[attr]
+        editor.removeMark(attr)
+        return res
+      }
+      return undefined
     }
 
     // TODO: uses canContainsContent === null
