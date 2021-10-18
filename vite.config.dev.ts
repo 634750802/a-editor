@@ -13,7 +13,8 @@ export default defineConfig({
   resolve: {
     alias: {
       'node:url': 'url',
-      'universal-deep-strict-equal': 'src/shim/universal-deep-strict-equal.js'
+      'universal-deep-strict-equal': 'src/shim/universal-deep-strict-equal.js',
+      'lodash': 'lodash-es'
     },
   },
 })

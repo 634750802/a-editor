@@ -1,5 +1,5 @@
 import React from 'react'
-import TiEditor from '/src/components/ti-editor/TiEditor'
+import TiEditor from './index'
 import { instructionsMd } from '/src/instructions'
 import './app.less'
 import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
