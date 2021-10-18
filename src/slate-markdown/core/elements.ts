@@ -1,12 +1,16 @@
 import { Blockquote, Code, Heading, Image, InlineMath, Link, List, ListItem, Paragraph, Table, TableCell, TableRow, Text, ThematicBreak } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
-import { Editor, Element as SlateElement, Location, NodeEntry, Path, Range, Text as SlateText } from 'slate'
+import { BaseElement, Editor, Element as SlateElement, Location, NodeEntry, Path, Range, Text as SlateText } from 'slate'
 import { RenderElementProps, RenderLeafProps } from 'slate-react'
 import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
 import { ToolbarItemProps } from '/src/components/hovering-toolbar/getHoveringToolItems'
 import { SyntheticEvent } from 'react'
 import { SYMBOL_PRISM_TOKEN } from '/src/slate-markdown/elements/code/CodeNode'
 
-export type RemarkBlockElement = List | ListItem | Paragraph | Code | Heading | Blockquote | ThematicBreak | Table | TableRow | TableCell
+export interface CustomBlockElements {
+  [key: string]: { type: string } & BaseElement
+}
+
+export type RemarkBlockElement = List | ListItem | Paragraph | Code | Heading | Blockquote | ThematicBreak | Table | TableRow | TableCell | CustomBlockElements[keyof CustomBlockElements]
 export type RemarkInlineElement = InlineMath | Image | Link
 export type RemarkElement = RemarkBlockElement | RemarkInlineElement
 export type RemarkText = Text & { [SYMBOL_PRISM_TOKEN]?: string }

@@ -9,13 +9,17 @@ import DecorationStack from '/src/slate-markdown/core/decoration-stack'
 import { ReactEditor } from 'slate-react'
 import { isElementType } from '/src/slate-markdown/slate-utils'
 import { ToggleStrategy } from '/src/components/ti-editor/TiEditor'
-import { Processor, unified } from 'unified'
+import { Plugin, Processor, unified } from 'unified'
 import { remarkToSlate, slateToRemark } from 'remark-slate-transformer'
 import remarkStringify from 'remark-stringify'
 import remarkParse from 'remark-parse'
 import rehypeParse from 'rehype-parse'
 import rehypeRemark from 'rehype-remark'
 import { Image } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
+import remarkGfm from 'remark-gfm'
+import rfdc from 'rfdc'
+
+const clone = rfdc({ proto: false, circles: false })
 
 type ProcessorHandler = (processor: Processor) => void
 
@@ -31,35 +35,42 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
   readonly contentTypeMap: Map<string, MdastContentType> = new Map()
   readonly contentModelTypeMap: Map<string, MdastContentType | null> = new Map()
 
+  private serializerPlugins: Plugin[] = []
+  private deserializerPlugins: Plugin[] = []
+
   private serializeProcessor: Processor = unified()
   private deserializeProcessor: Processor = unified()
   private deserializeHTMLProcessor: Processor = unified()
 
 
   freezeProcessors () {
-    this.serializeProcessor.use(slateToRemark).use(remarkStringify, {
+    this.serializeProcessor.use(this.serializerPlugins).use(slateToRemark).use(remarkGfm).use(remarkStringify, {
       emphasis: '*',
       strong: '*',
       listItemIndent: 'one',
       fence: '`',
-      bullet: '-'
+      bullet: '-',
     }).freeze()
-    this.deserializeProcessor.use(remarkParse).use(remarkToSlate).freeze()
-    this.deserializeHTMLProcessor.use(rehypeParse).use(rehypeRemark).use(remarkToSlate).freeze()
+    this.deserializeProcessor.use(remarkParse).use(remarkGfm).use(remarkToSlate).use(this.deserializerPlugins).freeze()
+    this.deserializeHTMLProcessor.use(rehypeParse).use(rehypeRemark).use(remarkGfm).use(remarkToSlate).use(this.deserializerPlugins).freeze()
   }
 
-  configProcessor (handler: ProcessorHandler) {
-    this.configSerializeProcessor(handler)
-    this.configDeserializeProcessor(handler)
-    handler(this.deserializeHTMLProcessor)
+  configProcessor (...plugins: Plugin[]) {
+    this.configSerializeProcessor(...plugins)
+    this.configDeserializeProcessor(...plugins)
   }
 
-  configSerializeProcessor (handler: ProcessorHandler) {
-    handler(this.serializeProcessor)
+  configSerializeProcessor (...plugins: Plugin []) {
+    this.serializerPlugins.push(...plugins)
   }
 
-  configDeserializeProcessor (handler: ProcessorHandler) {
-    handler(this.deserializeProcessor)
+  configDeserializeProcessor (...plugins: Plugin[]) {
+    this.deserializerPlugins.push(...plugins)
+  }
+
+  use (plugin: (factory: this) => void): this {
+    plugin(this)
+    return this
   }
 
   define (config: ICustomInlineElementConfig<IE>): this
@@ -83,6 +94,33 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
       }
     }
     return this
+  }
+
+  private editorWrapHandlers: ((editor: Editor) => void)[] = []
+
+  onWrapEditor (handler: (editor: Editor) => void) {
+    this.editorWrapHandlers.push(handler)
+  }
+
+  private editorMountedHandlers: ((editor: Editor) => void)[] = []
+
+  onEditorMounted (handler: (editor: Editor) => void) {
+    this.editorMountedHandlers.push(handler)
+  }
+
+  triggerEditorMounted (editor: Editor) {
+    this.editorMountedHandlers.forEach(handler => handler(editor))
+  }
+
+  generateMarkdown (fragment: Descendant[]): string {
+    return this.serializeProcessor.stringify(this.serializeProcessor.runSync({
+      type: 'root',
+      children: clone(fragment), // processors may change the ast.
+    } as never)) as string
+  }
+
+  parseMarkdown (value: string): Descendant[] {
+    return this.deserializeProcessor.processSync(value).result as Descendant[]
   }
 
   wrapEditor<E extends Editor> (editor: E, setValue: Dispatch<SetStateAction<Descendant[]>>): E {
@@ -109,15 +147,12 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
 
     Object.defineProperty(editor, 'markdown', {
       enumerable: false,
-      configurable: false,
+      configurable: true,
       get: () => {
-        return this.serializeProcessor.stringify(this.serializeProcessor.runSync({
-          type: 'root',
-          children: editor.children,
-        } as never))
+        return this.generateMarkdown(editor.children)
       },
       set: (value) => {
-        setValue(this.deserializeProcessor.processSync(value).result as Descendant[])
+        setValue(this.parseMarkdown(value))
         Editor.setNormalizing(editor, true)
       },
     })
@@ -427,11 +462,10 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
     editor.setFragmentData = (dt) => {
       setFragmentData(dt)
       // copy the markdown content
-      dt.setData('text/plain', this.serializeProcessor.stringify(this.serializeProcessor.runSync({
-        type: 'root',
-        children: editor.getFragment()
-      } as never)) as string)
+      dt.setData('text/plain', this.generateMarkdown(editor.getFragment()))
     }
+
+    this.editorWrapHandlers.forEach(handler => handler(editor))
 
     return editor
   }

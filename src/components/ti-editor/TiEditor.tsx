@@ -1,7 +1,7 @@
 /* eslint-disable react/forbid-component-props */
-import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
+import React, { forwardRef, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react'
-import { BaseEditor, createEditor, Descendant, Editor, Element, Node, NodeEntry, Text } from 'slate'
+import { BaseEditor, createEditor, Descendant, Editor, Element, Node, NodeEntry, Text, Transforms } from 'slate'
 import { withHistory } from 'slate-history'
 import PropTypes from 'prop-types'
 import './editor.less'
@@ -111,9 +111,6 @@ const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false,
     const editorFactory = new EditorFactory()
     register(editorFactory)
     config && config(editorFactory)
-    editorFactory.configProcessor(processor => {
-      processor.use(remarkGfm)
-    })
     editorFactory.freezeProcessors()
     return editorFactory
   }, [])
@@ -134,7 +131,9 @@ const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false,
   }, [editor, ref])
 
   useEffect(() => {
-    editor.markdown = initialMarkdown
+    if (initialMarkdown) {
+      editor.markdown = initialMarkdown
+    }
   }, [editor])
 
   const editableProps = useMemo(() => {
@@ -163,13 +162,19 @@ const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false,
     }
   }, [form])
 
-  console.log(disabled)
+  const onChange = useCallback((newValue: Descendant[]) => {
+    setValue(newValue)
+  }, [setValue])
+
+  useLayoutEffect(() => {
+    editorFactory.triggerEditorMounted(editor)
+  }, [editor])
 
   return (
     // Add the editable component inside the context.
     <Slate
       editor={editor}
-      onChange={setValue}
+      onChange={onChange}
       value={value}
     >
       <HoveringToolbar />
