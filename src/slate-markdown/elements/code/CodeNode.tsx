@@ -1,4 +1,4 @@
-import { defineNode, isContentTypeConforms, MdastContentType, ToolbarItemConfig } from '/src/slate-markdown/core/elements'
+import { defineNode, isContentTypeConforms, MdastContentType, ToolbarItemConfig, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
 import { Code } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import React, { ChangeEvent } from 'react'
 import LineWrapper from '/src/components/line-wrapper/LineWrapper'
@@ -21,7 +21,6 @@ import classNames from 'classnames'
 import Tippy from '@tippyjs/react'
 import './style.less'
 import { isElementType } from '/src/slate-markdown/slate-utils'
-import { TypedRenderElementProps } from '/dist/slate-markdown/core/elements'
 import { useReadOnly } from 'slate-react'
 
 const options = [
