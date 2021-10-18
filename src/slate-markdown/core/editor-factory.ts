@@ -601,11 +601,10 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
       }
     }
 
-    const handleFiles = (dt: DataTransfer) => {
-
+    const handleFiles = (dt: DataTransfer, range: Range | null) => {
       const images = [...dt.files].filter(file => /image\/*/.test(file.type))
       if (images.length > 0) {
-        onInsertImage(images, editor.selection)
+        onInsertImage(images, range)
       }
     }
 
@@ -629,11 +628,11 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
         }
       }
 
-      handleFiles(dt)
+      handleFiles(dt, editor.selection)
     }
 
     const onDrop = (event: DragEvent) => {
-      handleFiles(event.dataTransfer)
+      handleFiles(event.dataTransfer, ReactEditor.findEventRange(editor, event))
     }
 
     return {
