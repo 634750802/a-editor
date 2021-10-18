@@ -1,7 +1,7 @@
 import { BlockEventHandler, CustomBlockElementEvents, ICustomBlockElementConfig, ICustomElementConfig, ICustomInlineElementConfig, ICustomTextConfig, isContentTypeConforms, MdastContentType, RemarkBlockElement, RemarkElement, RemarkElementProps, RemarkInlineElement, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
 import { Ancestor, Descendant, Editor, Element, Node, NodeEntry, Path, Point, Range, Text, Transforms } from 'slate'
 import type { EditableProps } from 'slate-react/dist/components/editable'
-import { createElement, Dispatch, KeyboardEvent, SetStateAction } from 'react'
+import { ClipboardEvent, createElement, Dispatch, KeyboardEvent, SetStateAction } from 'react'
 import isHotkey from 'is-hotkey'
 import TextNode, { TextNodeDecorator } from '/src/slate-markdown/elements/text/TextNode'
 import LinkNode from '/src/slate-markdown/elements/link/LinkNode'
@@ -13,7 +13,8 @@ import { Processor, unified } from 'unified'
 import { remarkToSlate, slateToRemark } from 'remark-slate-transformer'
 import remarkStringify from 'remark-stringify'
 import remarkParse from 'remark-parse'
-import { HistoryEditor } from 'slate-history'
+import rehypeParse from 'rehype-parse'
+import rehypeRemark from 'rehype-remark'
 
 type ProcessorHandler = (processor: Processor) => void
 
@@ -43,7 +44,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
       bullet: '-'
     }).freeze()
     this.deserializeProcessor.use(remarkParse).use(remarkToSlate).freeze()
-    this.deserializeHTMLProcessor.freeze()
+    this.deserializeHTMLProcessor.use(rehypeParse).use(rehypeRemark).use(remarkToSlate).freeze()
   }
 
   configProcessor (handler: ProcessorHandler) {
@@ -84,7 +85,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
   }
 
   wrapEditor<E extends Editor> (editor: E, setValue: Dispatch<SetStateAction<Descendant[]>>): E {
-    const { isVoid, isInline, normalizeNode, insertBreak, insertFragment } = editor
+    const { isVoid, isInline, normalizeNode, insertBreak, insertFragment, setFragmentData } = editor
 
     editor.factory = this as never
 
@@ -422,6 +423,15 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
       insertFragment(fragment)
     }
 
+    editor.setFragmentData = (dt) => {
+      setFragmentData(dt)
+      // copy the markdown content
+      dt.setData('text/plain', this.serializeProcessor.stringify(this.serializeProcessor.runSync({
+        type: 'root',
+        children: editor.getFragment()
+      } as never)) as string)
+    }
+
     return editor
   }
 
@@ -572,6 +582,27 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
       return decorationStack.process(entry)
     }
 
+    const onPaste = (event: ClipboardEvent) => {
+      const dt = event.clipboardData
+      if (!dt) {
+        return
+      }
+      // from outside of the document
+      if (dt.types.indexOf('application/x-slate-fragment') < 0) {
+        if (dt.types.indexOf('text/html') >= 0) {
+          const htmlData = dt.getData('text/html')
+          const nodes = this.deserializeHTMLProcessor.processSync(htmlData).result as Descendant[]
+          editor.insertFragment(nodes)
+          event.preventDefault()
+        } else if (dt.types.indexOf('text/plain') >= 0) {
+          const textData = dt.getData('text/plain')
+          const nodes = this.deserializeProcessor.processSync(textData).result as Descendant[]
+          editor.insertFragment(nodes)
+          event.preventDefault()
+        }
+      }
+    }
+
     return {
       renderElement: (props) => {
         const config = this.customElementMap.get(props.element.type)
@@ -604,7 +635,6 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
               handleInsertParagraph(event)
               break
             case 'insertFromPaste':
-              console.log(event)
               break
           }
         })
@@ -656,6 +686,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
           }
         }
       },
+      onPaste,
     }
   }
 }
