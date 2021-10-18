@@ -21,7 +21,8 @@ import classNames from 'classnames'
 import Tippy from '@tippyjs/react'
 import './style.less'
 import { isElementType } from '/src/slate-markdown/slate-utils'
-import ParagraphNode from '/src/slate-markdown/elements/paragraph/ParagraphNode'
+import { TypedRenderElementProps } from '/dist/slate-markdown/core/elements'
+import { useReadOnly } from 'slate-react'
 
 const options = [
   'markdown',
@@ -69,10 +70,23 @@ const toolbarItems: ToolbarItemConfig<Path>[] = [{
     } else {
       const text = Node.string(node)
       Transforms.removeNodes(editor, { at: path })
-      Transforms.insertNodes(editor, { type: 'code', lang: 'markdown', meta: undefined, children: [{ text }]}, { at: path, select: true })
+      Transforms.insertNodes(editor, { type: 'code', lang: 'markdown', meta: undefined, children: [{ text }] }, { at: path, select: true })
     }
   },
 }]
+
+const renderCode = ({ attributes, element, children }: TypedRenderElementProps<Code>, active: boolean) => {
+  return (
+    <pre
+      {...attributes}
+      className={classNames({ active }, element.lang ? `language-${element.lang}` : undefined)}
+    >
+      <code className="prism-code">
+        {children}
+      </code>
+    </pre>
+  )
+}
 
 const CodeNode = defineNode<Code>({
   type: 'code',
@@ -81,7 +95,14 @@ const CodeNode = defineNode<Code>({
   wrappingParagraph: false,
   contentType: MdastContentType.flow,
   contentModelType: MdastContentType.value,
-  render: (editor, { element, children, attributes }) => {
+  render: (editor, props) => {
+    const { element } = props
+    const readonly = useReadOnly()
+
+    if (readonly) {
+      return renderCode(props, false)
+    }
+
     return (
       <LineWrapper element={element}>
         {({ active, pathRef }) => (
@@ -110,14 +131,7 @@ const CodeNode = defineNode<Code>({
             interactive
             placement='top-start'
           >
-            <pre
-              {...attributes}
-              className={classNames({ active }, element.lang ? `language-${element.lang}` : undefined)}
-            >
-              <code className="prism-code">
-                {children}
-              </code>
-            </pre>
+            {renderCode(props, active)}
           </Tippy>
 
         )}

@@ -30,6 +30,7 @@ function App (): JSX.Element {
     <div>
       <TiEditor
         config={config}
+        disabled
         initialMarkdown={instructionsMd}
         uploadFile={uploadFile}
       />

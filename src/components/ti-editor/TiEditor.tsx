@@ -163,6 +163,8 @@ const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false,
     }
   }, [form])
 
+  console.log(disabled)
+
   return (
     // Add the editable component inside the context.
     <Slate
@@ -180,6 +182,7 @@ const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false,
           <Editable
             as="article"
             className="ti-community-editor markdown-body"
+            readOnly={disabled}
             {...editableProps}
           />
         </div>

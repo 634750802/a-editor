@@ -4,7 +4,7 @@ import Tippy from '@tippyjs/react/headless'
 import PopContent from '/src/components/line-wrapper/PopContent'
 import './style.less'
 import { useCallback, useContext, useLayoutEffect, useRef, useState } from 'react'
-import { ReactEditor, useSlateStatic } from 'slate-react'
+import { ReactEditor, useReadOnly, useSlateStatic } from 'slate-react'
 import { Editor, Node, Path, PathRef, Text } from 'slate'
 import useBlockToolItems from '/src/components/line-wrapper/useBlockToolItems'
 import useForceUpdate from '/src/hooks/forceUpdate'
@@ -72,6 +72,12 @@ export default function LineWrapper ({ element, children }: TopLevelBlockProps):
     const node = element.children[0]
     return element.children.length === 1 && Text.isText(node) && node.text === ''
   })()
+
+  const readonly = useReadOnly()
+
+  if (readonly) {
+    return typeof children === 'function' ? children({ active, pathRef: pathRef.current }) : children
+  }
 
   return (
     <Tippy
