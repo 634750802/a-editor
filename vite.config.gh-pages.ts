@@ -6,4 +6,9 @@ import plainText from 'vite-plugin-plain-text'
 export default defineConfig({
   plugins: [react({}), plainText(/\.md$/)],
   base: 'https://634750802.github.io/a-editor/',
+  resolve: {
+    alias: {
+      'node:url': 'url'
+    },
+  },
 })

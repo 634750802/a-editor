@@ -14,5 +14,10 @@ export default defineConfig({
     rollupOptions: {
       external: ['react']
     }
-  }
+  },
+  resolve: {
+    alias: {
+      'node:url': 'url'
+    },
+  },
 })
