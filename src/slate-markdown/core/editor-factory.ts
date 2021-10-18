@@ -1,7 +1,7 @@
 import { BlockEventHandler, CustomBlockElementEvents, ICustomBlockElementConfig, ICustomElementConfig, ICustomInlineElementConfig, ICustomTextConfig, isContentTypeConforms, MdastContentType, RemarkBlockElement, RemarkElement, RemarkElementProps, RemarkInlineElement, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
 import { Ancestor, Descendant, Editor, Element, Node, NodeEntry, Path, Point, Range, Text, Transforms } from 'slate'
 import type { EditableProps } from 'slate-react/dist/components/editable'
-import { ClipboardEvent, createElement, Dispatch, KeyboardEvent, SetStateAction } from 'react'
+import { ClipboardEvent, createElement, Dispatch, DragEvent, KeyboardEvent, SetStateAction } from 'react'
 import isHotkey from 'is-hotkey'
 import TextNode, { TextNodeDecorator } from '/src/slate-markdown/elements/text/TextNode'
 import LinkNode from '/src/slate-markdown/elements/link/LinkNode'
@@ -15,6 +15,7 @@ import remarkStringify from 'remark-stringify'
 import remarkParse from 'remark-parse'
 import rehypeParse from 'rehype-parse'
 import rehypeRemark from 'rehype-remark'
+import { Image } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 
 type ProcessorHandler = (processor: Processor) => void
 
@@ -582,6 +583,32 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
       return decorationStack.process(entry)
     }
 
+    const onInsertImage = (images: File[], range: Range | null) => {
+      const ref = range ? Editor.rangeRef(editor, range) : null
+      if (editor.uploadFile) {
+        Promise.all(images.map(editor.uploadFile))
+          .then((urls) => urls.map((url, i) => ({
+            type: 'image',
+            url,
+            title: undefined,
+            alt: images[i].name,
+            children: [{ text: '' }],
+          } as Image)))
+          .then(fragment => {
+            Transforms.insertNodes(editor, fragment, { at: ref?.current ?? Editor.last(editor, [])[1] })
+          })
+          .catch(console.error)
+      }
+    }
+
+    const handleFiles = (dt: DataTransfer) => {
+
+      const images = [...dt.files].filter(file => /image\/*/.test(file.type))
+      if (images.length > 0) {
+        onInsertImage(images, editor.selection)
+      }
+    }
+
     const onPaste = (event: ClipboardEvent) => {
       const dt = event.clipboardData
       if (!dt) {
@@ -601,6 +628,12 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
           event.preventDefault()
         }
       }
+
+      handleFiles(dt)
+    }
+
+    const onDrop = (event: DragEvent) => {
+      handleFiles(event.dataTransfer)
     }
 
     return {
@@ -687,6 +720,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
         }
       },
       onPaste,
+      onDrop,
     }
   }
 }

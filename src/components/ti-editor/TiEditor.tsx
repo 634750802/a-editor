@@ -26,6 +26,7 @@ declare module 'slate' {
 
 export interface TiCommunityEditorProps {
   config?: (factory: EditorFactory) => void
+  uploadFile?: (file: File) => Promise<string>
   disabled?: boolean
   initialMarkdown?: string
 }
@@ -44,6 +45,7 @@ export interface TiEditor {
 }
 
 export interface TiEditor {
+  uploadFile?: (file: File) => Promise<string>
   updatePopper: (range?: DOMRange) => void
   hidePopper: () => void
   togglePopper: (range?: DOMRange) => void
@@ -102,7 +104,7 @@ export interface TiEditor {
 }
 
 
-const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false, initialMarkdown = '', config }: TiCommunityEditorProps, ref): JSX.Element => {
+const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false, initialMarkdown = '', config, uploadFile }: TiCommunityEditorProps, ref): JSX.Element => {
   const [value, setValue] = useState<Descendant[]>([])
 
   const editorFactory = useMemo(() => {
@@ -149,6 +151,9 @@ const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false,
   const [form, setForm] = useState<JSX.Element>()
 
   editor.setActionForm = setForm
+  if (uploadFile) {
+    editor.uploadFile = uploadFile
+  }
 
   const formPortal = useMemo(() => {
     if (form) {
