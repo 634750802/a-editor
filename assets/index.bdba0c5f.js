@@ -125,4 +125,4 @@ deb
 
 `+Object.values(Wn).map(t=>t.plainText).join(`
 
-`);function Kn(t){t.configProcessor(e=>{})}async function Qn(t){return new Promise((e,n)=>{const s=new FileReader;s.onloadend=function(){setTimeout(()=>{e(s.result)},500)},s.onerror=function(){n(s.error)},s.readAsDataURL(t)})}function Gn(){return c("div",{children:c(fe,{config:Kn,disabled:!0,initialMarkdown:Vn,uploadFile:Qn})})}Et.render(c(Ct.StrictMode,{children:c(Gn,{})}),document.getElementById("root"));
+`);function Kn(t){t.configProcessor(e=>{})}async function Qn(t){return new Promise((e,n)=>{const s=new FileReader;s.onloadend=function(){setTimeout(()=>{e(s.result)},500)},s.onerror=function(){n(s.error)},s.readAsDataURL(t)})}function Gn(){return c("div",{children:c(fe,{config:Kn,initialMarkdown:Vn,uploadFile:Qn})})}Et.render(c(Ct.StrictMode,{children:c(Gn,{})}),document.getElementById("root"));
