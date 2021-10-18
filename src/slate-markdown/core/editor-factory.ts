@@ -1,7 +1,7 @@
 import { BlockEventHandler, CustomBlockElementEvents, ICustomBlockElementConfig, ICustomElementConfig, ICustomInlineElementConfig, ICustomTextConfig, isContentTypeConforms, MdastContentType, RemarkBlockElement, RemarkElement, RemarkElementProps, RemarkInlineElement, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
-import { Ancestor, Editor, Element, Node, NodeEntry, Path, Point, Range, Text, Transforms } from 'slate'
+import { Ancestor, Descendant, Editor, Element, Node, NodeEntry, Path, Point, Range, Text, Transforms } from 'slate'
 import type { EditableProps } from 'slate-react/dist/components/editable'
-import { createElement, KeyboardEvent } from 'react'
+import { createElement, Dispatch, KeyboardEvent, SetStateAction } from 'react'
 import isHotkey from 'is-hotkey'
 import TextNode, { TextNodeDecorator } from '/src/slate-markdown/elements/text/TextNode'
 import LinkNode from '/src/slate-markdown/elements/link/LinkNode'
@@ -9,6 +9,13 @@ import DecorationStack from '/src/slate-markdown/core/decoration-stack'
 import { ReactEditor } from 'slate-react'
 import { isElementType } from '/src/slate-markdown/slate-utils'
 import { ToggleStrategy } from '/src/components/ti-editor/TiEditor'
+import { Processor, unified } from 'unified'
+import { remarkToSlate, slateToRemark } from 'remark-slate-transformer'
+import remarkStringify from 'remark-stringify'
+import remarkParse from 'remark-parse'
+import { HistoryEditor } from 'slate-history'
+
+type ProcessorHandler = (processor: Processor) => void
 
 export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkBlockElement = RemarkBlockElement, IE extends RemarkInlineElement = RemarkInlineElement> {
   readonly blockConfigs: ICustomBlockElementConfig<BE>[] = []
@@ -21,6 +28,37 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
   readonly customElementMap: Map<string, ICustomElementConfig<IE | BE>> = new Map()
   readonly contentTypeMap: Map<string, MdastContentType> = new Map()
   readonly contentModelTypeMap: Map<string, MdastContentType | null> = new Map()
+
+  private serializeProcessor: Processor = unified()
+  private deserializeProcessor: Processor = unified()
+  private deserializeHTMLProcessor: Processor = unified()
+
+
+  freezeProcessors () {
+    this.serializeProcessor.use(slateToRemark).use(remarkStringify, {
+      emphasis: '*',
+      strong: '*',
+      listItemIndent: 'one',
+      fence: '`',
+      bullet: '-'
+    }).freeze()
+    this.deserializeProcessor.use(remarkParse).use(remarkToSlate).freeze()
+    this.deserializeHTMLProcessor.freeze()
+  }
+
+  configProcessor (handler: ProcessorHandler) {
+    this.configSerializeProcessor(handler)
+    this.configDeserializeProcessor(handler)
+    handler(this.deserializeHTMLProcessor)
+  }
+
+  configSerializeProcessor (handler: ProcessorHandler) {
+    handler(this.serializeProcessor)
+  }
+
+  configDeserializeProcessor (handler: ProcessorHandler) {
+    handler(this.deserializeProcessor)
+  }
 
   define (config: ICustomInlineElementConfig<IE>): this
   define<T> (config: ICustomBlockElementConfig<BE>): this
@@ -45,10 +83,42 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
     return this
   }
 
-  wrapEditor<E extends Editor> (editor: E): E {
-    const { isVoid, isInline, normalizeNode, insertBreak } = editor
+  wrapEditor<E extends Editor> (editor: E, setValue: Dispatch<SetStateAction<Descendant[]>>): E {
+    const { isVoid, isInline, normalizeNode, insertBreak, insertFragment } = editor
 
     editor.factory = this as never
+
+    function debugPrintTree (node: Node): void {
+      if (Editor.isEditor(node)) {
+        console.group('#root')
+        node.children.forEach(debugPrintTree)
+        console.groupEnd()
+      } else if (Element.isElement(node)) {
+        console.group(node.type)
+        node.children.forEach(debugPrintTree)
+        console.groupEnd()
+      } else {
+        console.debug('text')
+      }
+    }
+
+    (window as any).debugPrintTree = () => debugPrintTree(editor);
+    (window as any).debugEditor = editor
+
+    Object.defineProperty(editor, 'markdown', {
+      enumerable: false,
+      configurable: false,
+      get: () => {
+        return this.serializeProcessor.stringify(this.serializeProcessor.runSync({
+          type: 'root',
+          children: editor.children,
+        } as never))
+      },
+      set: (value) => {
+        setValue(this.deserializeProcessor.processSync(value).result as Descendant[])
+        Editor.setNormalizing(editor, true)
+      },
+    })
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     editor.updatePopper = editor.hidePopper = editor.togglePopper = () => {
@@ -294,7 +364,6 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
         shouldNormalizeDefaults = false
       }
       Editor.withoutNormalizing(editor, () => {
-        debugPrintTree(editor)
         const [node, path] = entry
         if (Element.isElement(node)) {
           const normalize = this.customElementMap.get(node.type)?.normalize
@@ -334,6 +403,23 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
       }
 
       insertBreak()
+    }
+
+    editor.insertFragment = (fragment) => {
+      if (editor.selection) {
+        const el = Node.parent(editor, editor.selection.anchor.path)
+        const cmt = editor.getContentModelType(el)
+        if (cmt === MdastContentType.value) {
+          const data = this.serializeProcessor.stringify(this.serializeProcessor.runSync({
+            type: 'root',
+            children: fragment
+          } as never)) as string
+          Transforms.insertText(editor, data)
+          return
+        }
+      }
+
+      insertFragment(fragment)
     }
 
     return editor
@@ -581,7 +667,6 @@ function isFirstTextPoint (editor: Editor, point: Point): boolean {
 }
 
 function batch (editor: Editor, fn: (preventNormalizing: () => void) => void) {
-  debugPrintTree(editor)
   let prevent = true
   Editor.withoutNormalizing(editor, () => {
     fn(() => {
@@ -591,18 +676,4 @@ function batch (editor: Editor, fn: (preventNormalizing: () => void) => void) {
   if (!prevent) {
     Editor.normalize(editor)
   }
-}
-
-function debugPrintTree (node: Node): void {
-  // if (Editor.isEditor(node)) {
-  //   console.group('#root')
-  //   node.children.forEach(debugPrintTree)
-  //   console.groupEnd()
-  // } else if (Element.isElement(node)) {
-  //   console.group(node.type)
-  //   node.children.forEach(debugPrintTree)
-  //   console.groupEnd()
-  // } else {
-  //   console.debug('text')
-  // }
 }

@@ -1,10 +1,9 @@
 /* eslint-disable react/forbid-component-props */
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react'
-import { BaseEditor, createEditor, Editor, Element, Node, NodeEntry, Text } from 'slate'
+import { BaseEditor, createEditor, Descendant, Editor, Element, Node, NodeEntry, Text } from 'slate'
 import { withHistory } from 'slate-history'
 import PropTypes from 'prop-types'
-import { TiCommunityEditorInstance, useInstance } from '/src/components/ti-editor/hooks'
 import './editor.less'
 import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
 import register from '/src/slate-markdown/elements/register'
@@ -14,6 +13,7 @@ import { ICustomElementConfig, MdastContentType, RemarkBlockElement, RemarkEleme
 import { createPortal } from 'react-dom'
 import 'github-markdown-css/github-markdown.css'
 import UIContext, { UIContextProps } from '/src/components/ti-editor/ui-context'
+import remarkGfm from 'remark-gfm'
 
 // see https://docs.slatejs.org/walkthroughs/01-installing-slate
 declare module 'slate' {
@@ -25,6 +25,7 @@ declare module 'slate' {
 }
 
 export interface TiCommunityEditorProps {
+  config?: (factory: EditorFactory) => void
   disabled?: boolean
   initialMarkdown?: string
 }
@@ -34,6 +35,12 @@ export const enum ToggleStrategy {
   wrap = 2,
   unwrap = 3,
   custom = 4
+}
+
+export interface TiEditor {
+  get markdown (): string
+
+  set markdown (value: string)
 }
 
 export interface TiEditor {
@@ -95,23 +102,42 @@ export interface TiEditor {
 }
 
 
-const TiEditor = forwardRef<TiCommunityEditorInstance, TiCommunityEditorProps>(({ disabled = false, initialMarkdown = '' }, ref): JSX.Element => {
+const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false, initialMarkdown = '', config }: TiCommunityEditorProps, ref): JSX.Element => {
+  const [value, setValue] = useState<Descendant[]>([])
 
   const editorFactory = useMemo(() => {
     const editorFactory = new EditorFactory()
     register(editorFactory)
+    config && config(editorFactory)
+    editorFactory.configProcessor(processor => {
+      processor.use(remarkGfm)
+    })
+    editorFactory.freezeProcessors()
     return editorFactory
   }, [])
 
   const editor = useMemo(() => {
     const editor = withReact(withHistory(createEditor()))
-    return editorFactory.wrapEditor(editor)
-  }, [])
+    return editorFactory.wrapEditor(editor, setValue)
+  }, [editorFactory])
+
+  useEffect(() => {
+    if (ref) {
+      if (typeof ref === 'function') {
+        ref(editor)
+      } else {
+        ref.current = editor
+      }
+    }
+  }, [editor, ref])
+
+  useEffect(() => {
+    editor.markdown = initialMarkdown
+  }, [editor])
 
   const editableProps = useMemo(() => {
     return editorFactory.createDefaultEditableProps(editor)
-  }, [])
-  const [instance, value, setValue] = useInstance(editor)
+  }, [editorFactory, editor])
 
   const containerRef = useRef<HTMLDivElement>(null)
   const uiContextProps = useMemo<UIContextProps>(() => ({
@@ -119,17 +145,6 @@ const TiEditor = forwardRef<TiCommunityEditorInstance, TiCommunityEditorProps>((
       return containerRef.current?.getBoundingClientRect() ?? new DOMRect()
     },
   }), [containerRef])
-
-  useEffect(() => {
-    if (ref) {
-      if (typeof ref === 'function') {
-        ref(instance)
-      } else {
-        ref.current = instance
-      }
-    }
-    instance.markdown = initialMarkdown
-  }, [editor])
 
   const [form, setForm] = useState<JSX.Element>()
 

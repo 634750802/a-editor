@@ -82,12 +82,32 @@ const ListItemNode = defineNode<ListItem>({
   wrappingParagraph: true, // only for block event handlers; do not add trigger. add them in list item.
   contentType: MdastContentType.list,
   contentModelType: MdastContentType.flow,
-  normalize: (editor, node, path) => {
-    const lastIndex = node.children.length - 1
-    if (node.children.length > 1 && isElementType(node.children[lastIndex], 'paragraph')) {
-      const newPath = Path.next(path)
-      Transforms.moveNodes(editor, { at: path.concat(lastIndex), to: newPath })
-      Transforms.wrapNodes(editor, { type: 'listItem', checked: node.checked, spread: node.spread, children: [] }, { at: newPath })
+  normalize: (editor, node, path, preventDefaults) => {
+    if (node.children.length > 0) {
+      if (isElementType(node.children[0], 'list')) {
+        Transforms.moveNodes(editor, { at: path.concat(0), to: Path.parent(path) })
+        preventDefaults()
+        return
+      } else {
+        const lastIndex = node.children.length - 1
+        if (node.children.length > 1 && isElementType(node.children[lastIndex], 'paragraph')) {
+          const newPath = Path.next(path)
+          Transforms.moveNodes(editor, { at: path.concat(lastIndex), to: newPath })
+          Transforms.wrapNodes(editor, { type: 'listItem', checked: node.checked, spread: node.spread, children: [] }, { at: newPath })
+          preventDefaults()
+          return
+        }
+      }
+    } else {
+      Transforms.removeNodes(editor, { at: path })
+      preventDefaults()
+      return
+    }
+    const parent = Node.parent(editor, path)
+    const parentContentModelType = editor.getContentModelType(parent)
+    if (parentContentModelType !== MdastContentType.list) {
+      Transforms.wrapNodes(editor, { type: 'list', ordered: false, start: undefined, spread: undefined, children: [] }, { at: path })
+      preventDefaults()
     }
   },
   render (editor: Editor, { element, attributes, children }): JSX.Element {
