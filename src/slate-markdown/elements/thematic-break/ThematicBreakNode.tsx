@@ -15,8 +15,8 @@ export default defineNode<ThematicBreak>({
   render (editor: Editor, { element, children, attributes }: TypedRenderElementProps<ThematicBreak>): JSX.Element {
     return (
       <LineWrapper element={element}>
-        <VoidElement>
-          <hr {...attributes} />
+        <VoidElement attributes={attributes}>
+          <hr />
 
           {children}
         </VoidElement>

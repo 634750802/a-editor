@@ -16,12 +16,11 @@ const ImageNode = defineNode<Image>({
   contentModelType: null,
   render: (editor: Editor, { element, attributes, children }: TypedRenderElementProps<Image>): JSX.Element => {
     return (
-      <VoidElement>
+      <VoidElement attributes={attributes}>
         <img
           alt={element.alt}
           src={element.url}
           title={element.title}
-          {...attributes}
         />
 
         {children}
