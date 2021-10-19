@@ -66,7 +66,6 @@ const ListItemNode = defineNode<ListItem>({
       return editor.runAction('indent-list', Path.parent(path))
     },
   },
-  toolbarItems: [],
 })
 
 export default ListItemNode

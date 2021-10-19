@@ -85,7 +85,6 @@ const ListNode = defineNode<List>({
     },
   },
   events: {},
-  toolbarItems: [],
 })
 
 export default ListNode

@@ -11,7 +11,6 @@ const TableRowNode = defineNode<TableRow>({
   events: {},
   toggle: {},
 
-  toolbarItems: [],
   render: (editor, { element, attributes, children }) => {
     return (
       <tr {...attributes}>

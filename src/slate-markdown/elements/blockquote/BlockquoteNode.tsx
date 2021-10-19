@@ -43,7 +43,6 @@ const BlockquoteNode = defineNode<Blockquote>({
       return editor.runAction('outdent-blockquote', Path.parent(path))
     },
   },
-  toolbarItems: [],
 })
 
 export default BlockquoteNode

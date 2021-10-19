@@ -48,7 +48,6 @@ const LinkNode = defineNode({
   match: {
     regexp: createUrlRegExp(),
   },
-  toolbarItems: [],
 } as Omit<ICustomInlineElementConfig<Link, { text: string }>, 'register'>)
 
 export default LinkNode

@@ -45,6 +45,5 @@ export default defineNode<ThematicBreak>({
     },
   },
   events: {},
-  toolbarItems: [],
 })
 

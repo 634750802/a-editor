@@ -12,7 +12,6 @@ const TableCellNode = defineNode<TableCell>({
   events: {},
   toggle: {},
 
-  toolbarItems: [],
   render: (editor, { element, attributes, children }) => {
     return (
       <TableContext.Consumer>

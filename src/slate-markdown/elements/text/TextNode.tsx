@@ -98,8 +98,7 @@ const TextNode = defineNode<RemarkText, TextApi>({
         }
       }
     }
-  },
-  toolbarItems: [],
+  }
 })
 
 export function isDecoratorActive (editor: Editor, selection: Range, decorator: TextNodeDecorator): boolean {

@@ -39,7 +39,6 @@ const HeadingNode = defineNode<Heading>({
       return editor.runAction('toggle-paragraph', path)
     },
   },
-  toolbarItems: [],
 })
 
 export default HeadingNode

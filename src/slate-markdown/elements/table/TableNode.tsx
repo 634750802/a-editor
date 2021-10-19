@@ -18,7 +18,6 @@ const TableNode = defineNode<Table>({
   events: {},
   toggle: {},
 
-  toolbarItems: [],
   render: (editor, { element, attributes, children }) => {
     const [heading, ...body] = children
     // eslint-disable-next-line react/jsx-no-constructed-context-values

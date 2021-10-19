@@ -41,5 +41,4 @@ export default defineNode<CustomBlockElements['section']>({
   },
   events: {},
   toggle: {},
-  toolbarItems: [],
 })

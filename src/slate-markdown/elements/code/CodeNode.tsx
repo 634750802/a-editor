@@ -118,7 +118,6 @@ const CodeNode = defineNode<Code>({
     },
   },
   events: {},
-  toolbarItems: [],
   // see slate.js official highlighting example
   decorate: (editor, [node, path], el) => {
     if (Text.isText(node) && el.lang) {

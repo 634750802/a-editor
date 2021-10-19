@@ -35,7 +35,6 @@ const ImageNode = defineNode<Image>({
       { text: ' ' },
     ], { at: location })
   },
-  toolbarItems: [],
 } as Omit<ICustomInlineElementConfig<Image, Record<string, unknown>>, 'register'>)
 
 export default ImageNode

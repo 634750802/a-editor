@@ -32,7 +32,6 @@ const ParagraphNode = defineNode<Paragraph>({
       </LineWrapper>
     )
   },
-  toolbarItems: [],
 })
 
 export default ParagraphNode
