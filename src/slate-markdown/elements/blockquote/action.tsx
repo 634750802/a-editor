@@ -1,9 +1,9 @@
-import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
+import { EditorFactory } from '@/slate-markdown/core/editor-factory'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faQuoteLeft } from '@fortawesome/free-solid-svg-icons'
 import { Node, NodeEntry } from 'slate'
-import { ActionType } from '/src/slate-markdown/core/actions'
-import BlockquoteNode from '/src/slate-markdown/elements/blockquote/BlockquoteNode'
+import { ActionType } from '@/slate-markdown/core/actions'
+import BlockquoteNode from '@/slate-markdown/elements/blockquote/BlockquoteNode'
 
 export function register (factory: EditorFactory): void {
 

@@ -1,10 +1,10 @@
-import { defineNode, ICustomInlineElementConfig, MdastContentType, RemarkElementProps, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
+import { defineNode, ICustomInlineElementConfig, MdastContentType, RemarkElementProps, TypedRenderElementProps } from '@/slate-markdown/core/elements'
 import { Image } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import { Editor, Transforms } from 'slate'
 import React from 'react'
 import { faImage } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import VoidElement from '/src/components/void-element/void-element'
+import VoidElement from '@/components/void-element/void-element'
 
 library.add(faImage)
 

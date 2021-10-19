@@ -5,16 +5,16 @@ import { BaseEditor, createEditor, Descendant, Editor, Element, Node, NodeEntry,
 import { HistoryEditor, withHistory } from 'slate-history'
 import PropTypes from 'prop-types'
 import './editor.less'
-import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
-import register from '/src/slate-markdown/elements/register'
-import HoveringToolbar from '/src/components/hovering-toolbar/HoveringToolbar'
+import { EditorFactory } from '@/slate-markdown/core/editor-factory'
+import register from '@/slate-markdown/elements/register'
+import HoveringToolbar from '@/components/hovering-toolbar/HoveringToolbar'
 import { DOMRange } from 'slate-react/dist/utils/dom'
-import { ICustomElementConfig, MdastContentType, RemarkBlockElement, RemarkElement, RemarkElementProps, RemarkInlineElement, RemarkText } from '/src/slate-markdown/core/elements'
+import { ICustomElementConfig, MdastContentType, RemarkBlockElement, RemarkElement, RemarkElementProps, RemarkInlineElement, RemarkText } from '@/slate-markdown/core/elements'
 import { createPortal } from 'react-dom'
 import 'github-markdown-css/github-markdown.css'
-import UIContext, { UIContextProps } from '/src/components/ti-editor/ui-context'
+import UIContext, { UIContextProps } from '@/components/ti-editor/ui-context'
 import remarkGfm from 'remark-gfm'
-import { coreActionsPlugin } from '/src/slate-markdown/core/actions'
+import { coreActionsPlugin } from '@/slate-markdown/core/actions'
 
 // see https://docs.slatejs.org/walkthroughs/01-installing-slate
 declare module 'slate' {

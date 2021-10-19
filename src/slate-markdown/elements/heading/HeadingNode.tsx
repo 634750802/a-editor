@@ -1,7 +1,7 @@
-import { defineNode, MdastContentType } from '/src/slate-markdown/core/elements'
+import { defineNode, MdastContentType } from '@/slate-markdown/core/elements'
 import { Heading } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import { createElement } from 'react'
-import LineWrapper from '/src/components/line-wrapper/LineWrapper'
+import LineWrapper from '@/components/line-wrapper/LineWrapper'
 import classNames from 'classnames'
 
 

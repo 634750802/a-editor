@@ -1,8 +1,8 @@
-import { defineNode, MdastContentType, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
+import { defineNode, MdastContentType, TypedRenderElementProps } from '@/slate-markdown/core/elements'
 import { ThematicBreak } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import { Editor, Path, Transforms } from 'slate'
-import VoidElement from '/src/components/void-element/void-element'
-import LineWrapper from '/src/components/line-wrapper/LineWrapper'
+import VoidElement from '@/components/void-element/void-element'
+import LineWrapper from '@/components/line-wrapper/LineWrapper'
 import { ReactEditor } from 'slate-react'
 
 export default defineNode<ThematicBreak>({

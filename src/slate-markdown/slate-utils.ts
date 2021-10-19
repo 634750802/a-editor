@@ -1,6 +1,6 @@
 import { Editor, Element, Location, Node, Path, Text } from 'slate'
 import { NodeMatch } from 'slate/dist/interfaces/editor'
-import { ICustomBlockElementConfig, ICustomConfig, RemarkBlockElement } from '/src/slate-markdown/core/elements'
+import { ICustomBlockElementConfig, ICustomConfig, RemarkBlockElement } from '@/slate-markdown/core/elements'
 
 type HasAncestorParams<T extends Node> = {
   at: Path

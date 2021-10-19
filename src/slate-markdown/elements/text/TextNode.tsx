@@ -1,10 +1,10 @@
 /* eslint-disable react/jsx-one-expression-per-line */
-import { defineNode, isContentTypeConforms, MdastContentType, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
+import { defineNode, isContentTypeConforms, MdastContentType, RemarkText, TypedRenderLeafProps } from '@/slate-markdown/core/elements'
 import { Editor, Element, Location, Node, Path, Range, Text, Transforms } from 'slate'
 import React from 'react'
 import { ReactEditor } from 'slate-react'
-import { isElementType } from '/src/slate-markdown/slate-utils'
-import { SYMBOL_PRISM_TOKEN } from '/src/slate-markdown/elements/code/CodeNode'
+import { isElementType } from '@/slate-markdown/slate-utils'
+import { SYMBOL_PRISM_TOKEN } from '@/slate-markdown/elements/code/CodeNode'
 import classNames from 'classnames'
 import { NodeMatch } from 'slate/dist/interfaces/editor'
 

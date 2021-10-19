@@ -3,10 +3,10 @@ import { useSlateStatic } from 'slate-react'
 import { VirtualElement } from '@popperjs/core'
 import { usePopper } from 'react-popper'
 import './style.less'
-import getHoveringToolItems, { ToolbarItemProps } from '/src/components/hovering-toolbar/getHoveringToolItems'
-import ToolbarItem from '/src/components/toolbar-item/ToolbarItem'
+import getHoveringToolItems, { ToolbarItemProps } from '@/components/hovering-toolbar/getHoveringToolItems'
+import ToolbarItem from '@/components/toolbar-item/ToolbarItem'
 import { DOMRange } from 'slate-react/dist/utils/dom'
-import useForceUpdate from '/src/hooks/forceUpdate'
+import useForceUpdate from '@/hooks/forceUpdate'
 
 function HoveringToolbar (): JSX.Element {
   const editor = useSlateStatic()

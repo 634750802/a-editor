@@ -1,4 +1,4 @@
-import { defineNode, ICustomInlineElementConfig, MdastContentType, RemarkElementProps, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
+import { defineNode, ICustomInlineElementConfig, MdastContentType, RemarkElementProps, TypedRenderElementProps } from '@/slate-markdown/core/elements'
 import { Link } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import { Editor, Location, Node, Point, Transforms } from 'slate'
 import React from 'react'

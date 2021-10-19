@@ -1,8 +1,8 @@
 /* eslint-disable react/jsx-max-depth */
-import { defineNode, MdastContentType } from '/src/slate-markdown/core/elements'
+import { defineNode, MdastContentType } from '@/slate-markdown/core/elements'
 import { Table } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
-import LineWrapper from '/src/components/line-wrapper/LineWrapper'
-import { TableContext } from '/src/slate-markdown/elements/table/context'
+import LineWrapper from '@/components/line-wrapper/LineWrapper'
+import { TableContext } from '@/slate-markdown/elements/table/context'
 import { faTable } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
 

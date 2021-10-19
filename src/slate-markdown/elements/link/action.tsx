@@ -1,14 +1,14 @@
-import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
+import { EditorFactory } from '@/slate-markdown/core/editor-factory'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faLink } from '@fortawesome/free-solid-svg-icons'
 import React from 'react'
-import { ActionType } from '/src/slate-markdown/core/actions'
-import { isElementActive, isRangeCustomTextPropsEnabled } from '/src/slate-markdown/elements/text/TextNode'
+import { ActionType } from '@/slate-markdown/core/actions'
+import { isElementActive, isRangeCustomTextPropsEnabled } from '@/slate-markdown/elements/text/TextNode'
 import { Editor, Element, Path, Transforms } from 'slate'
-import { requireFields } from '/src/components/form'
-import createSchema from '/src/slate-markdown/elements/link/create-schema.json'
+import { requireFields } from '@/components/form'
+import createSchema from '@/slate-markdown/elements/link/create-schema.json'
 import { JSONSchema7 } from 'json-schema'
-import LinkNode from '/src/slate-markdown/elements/link/LinkNode'
+import LinkNode from '@/slate-markdown/elements/link/LinkNode'
 
 export function register (factory: EditorFactory) {
   factory.defineAction({

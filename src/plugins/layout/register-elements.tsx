@@ -1,8 +1,8 @@
-import { CustomBlockElements, defineNode, MdastContentType } from '/src/slate-markdown/core/elements'
+import { CustomBlockElements, defineNode, MdastContentType } from '@/slate-markdown/core/elements'
 import { Descendant, Editor, Transforms } from 'slate'
 import { FormEvent } from 'react'
 
-declare module '/src/slate-markdown/core/elements' {
+declare module '@/slate-markdown/core/elements' {
   export interface CustomBlockElements {
     section: {
       type: 'section'

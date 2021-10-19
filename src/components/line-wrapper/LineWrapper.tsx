@@ -1,14 +1,14 @@
 /* eslint-disable react/jsx-no-bind */
-import { RemarkBlockElement } from '/src/slate-markdown/core/elements'
+import { RemarkBlockElement } from '@/slate-markdown/core/elements'
 import Tippy from '@tippyjs/react/headless'
-import PopContent from '/src/components/line-wrapper/PopContent'
+import PopContent from '@/components/line-wrapper/PopContent'
 import './style.less'
 import { useCallback, useContext, useLayoutEffect, useRef, useState } from 'react'
 import { ReactEditor, useReadOnly, useSlateStatic } from 'slate-react'
 import { Editor, Node, Path, PathRef, Text } from 'slate'
-import useBlockToolItems from '/src/components/line-wrapper/useBlockToolItems'
-import useForceUpdate from '/src/hooks/forceUpdate'
-import UIContext from '/src/components/ti-editor/ui-context'
+import useBlockToolItems from '@/components/line-wrapper/useBlockToolItems'
+import useForceUpdate from '@/hooks/forceUpdate'
+import UIContext from '@/components/ti-editor/ui-context'
 
 const EOF = String.fromCharCode(0xfe, 0xff)
 

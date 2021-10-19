@@ -1,8 +1,8 @@
 import { Blockquote, Code, Heading, Image, InlineMath, Link, List, ListItem, Paragraph, Table, TableCell, TableRow, Text, ThematicBreak } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import { BaseElement, Editor, Element as SlateElement, Location, NodeEntry, Path, Range, Text as SlateText } from 'slate'
 import { RenderElementProps, RenderLeafProps } from 'slate-react'
-import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
-import { SYMBOL_PRISM_TOKEN } from '/src/slate-markdown/elements/code/CodeNode'
+import { EditorFactory } from '@/slate-markdown/core/editor-factory'
+import { SYMBOL_PRISM_TOKEN } from '@/slate-markdown/elements/code/CodeNode'
 
 export interface CustomBlockElements {
   [key: string]: { type: string } & BaseElement

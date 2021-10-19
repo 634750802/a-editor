@@ -4,8 +4,8 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { faBold, faCode, faItalic, faStrikethrough } from '@fortawesome/free-solid-svg-icons'
 import { ReactEditor } from 'slate-react'
 import { DOMRange } from 'slate-react/dist/utils/dom'
-import { MdastContentType } from '/src/slate-markdown/core/elements'
-import { ActionState, ActionStateRenderer } from '/src/slate-markdown/core/actions'
+import { MdastContentType } from '@/slate-markdown/core/elements'
+import { ActionState, ActionStateRenderer } from '@/slate-markdown/core/actions'
 
 library.add(faBold, faItalic, faStrikethrough, faCode)
 

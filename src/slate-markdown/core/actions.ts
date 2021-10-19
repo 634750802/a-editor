@@ -1,9 +1,9 @@
 import { SyntheticEvent } from 'react'
 import { Editor, Location, Node, Path, Range, Text } from 'slate'
-import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
-import { MdastContentType } from '/src/slate-markdown/core/elements'
-import { createSyntheticEvent } from '/src/utils/react'
-import { TextNodeDecorator } from '/src/slate-markdown/elements/text/TextNode'
+import { EditorFactory } from '@/slate-markdown/core/editor-factory'
+import { MdastContentType } from '@/slate-markdown/core/elements'
+import { createSyntheticEvent } from '@/utils/react'
+import { TextNodeDecorator } from '@/slate-markdown/elements/text/TextNode'
 
 declare module '../../components/ti-editor/TiEditor' {
   interface TiEditor {

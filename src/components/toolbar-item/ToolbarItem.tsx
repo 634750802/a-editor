@@ -1,5 +1,5 @@
 import React, { MouseEvent, useCallback } from 'react'
-import { ToolbarItemProps } from '/src/components/hovering-toolbar/getHoveringToolItems'
+import { ToolbarItemProps } from '@/components/hovering-toolbar/getHoveringToolItems'
 import classNames from 'classnames'
 import Tippy from '@tippyjs/react'
 import { useSlateStatic } from 'slate-react'

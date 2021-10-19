@@ -1,6 +1,6 @@
 import { Editor, Element, NodeEntry, Path, Range } from 'slate'
-import { ICustomBlockElementConfig, RemarkBlockElement, RemarkInlineElement, RemarkText } from '/src/slate-markdown/core/elements'
-import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
+import { ICustomBlockElementConfig, RemarkBlockElement, RemarkInlineElement, RemarkText } from '@/slate-markdown/core/elements'
+import { EditorFactory } from '@/slate-markdown/core/editor-factory'
 
 type RequiredProp<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>
 

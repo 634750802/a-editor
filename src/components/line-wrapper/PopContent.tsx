@@ -1,10 +1,10 @@
-import { RemarkBlockElement } from '/src/slate-markdown/core/elements'
+import { RemarkBlockElement } from '@/slate-markdown/core/elements'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBars, faPlus } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { ToolbarItemProps } from '/src/components/line-wrapper/useBlockToolItems'
+import { ToolbarItemProps } from '@/components/line-wrapper/useBlockToolItems'
 import Tippy from '@tippyjs/react'
-import ToolbarItem from '/src/components/toolbar-item/ToolbarItem'
+import ToolbarItem from '@/components/toolbar-item/ToolbarItem'
 import React from 'react'
 
 library.add(faBars, faPlus)

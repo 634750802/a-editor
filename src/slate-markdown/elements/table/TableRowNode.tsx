@@ -1,4 +1,4 @@
-import { defineNode, MdastContentType } from '/src/slate-markdown/core/elements'
+import { defineNode, MdastContentType } from '@/slate-markdown/core/elements'
 import { Table, TableRow } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 
 const TableRowNode = defineNode<TableRow>({

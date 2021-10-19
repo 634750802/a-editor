@@ -1,4 +1,4 @@
-import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
+import { EditorFactory } from '@/slate-markdown/core/editor-factory'
 
 const elements = import.meta.globEager('./**/*.tsx')
 export default function (editorFactory: EditorFactory): void {

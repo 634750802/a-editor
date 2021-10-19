@@ -2,7 +2,7 @@ import React, { SyntheticEvent } from 'react'
 import { Editor, PathRef } from 'slate'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faBold, faCode, faItalic, faStrikethrough } from '@fortawesome/free-solid-svg-icons'
-import { ActionState, ActionStateRenderer } from '/src/slate-markdown/core/actions'
+import { ActionState, ActionStateRenderer } from '@/slate-markdown/core/actions'
 
 library.add(faBold, faItalic, faStrikethrough, faCode)
 

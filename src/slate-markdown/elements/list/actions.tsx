@@ -1,13 +1,13 @@
-import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
-import { ActionType } from '/src/slate-markdown/core/actions'
+import { EditorFactory } from '@/slate-markdown/core/editor-factory'
+import { ActionType } from '@/slate-markdown/core/actions'
 import { Editor, Node, NodeEntry, Path, Transforms } from 'slate'
 import { List, ListItem } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
-import ListNode from '/src/slate-markdown/elements/list/ListNode'
-import ListItemNode from '/src/slate-markdown/elements/list/ListItemNode'
+import ListNode from '@/slate-markdown/elements/list/ListNode'
+import ListItemNode from '@/slate-markdown/elements/list/ListItemNode'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faIndent, faListOl, faListUl, faOutdent } from '@fortawesome/free-solid-svg-icons'
 import React from 'react'
-import { RemarkElementProps } from '/src/slate-markdown/core/elements'
+import { RemarkElementProps } from '@/slate-markdown/core/elements'
 
 type ListIndentionActionProps = {
   listEntry: NodeEntry<List> | undefined

@@ -1,9 +1,9 @@
 import React from 'react'
 import TiEditor from './index'
-import { instructionsMd } from '/src/instructions'
+import { instructionsMd } from '@/instructions'
 import './app.less'
-import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
-import layoutPlugin from '/src/plugins/layout'
+import { EditorFactory } from '@/slate-markdown/core/editor-factory'
+import layoutPlugin from '@/plugins/layout'
 import { HistoryEditor } from 'slate-history'
 
 function config (factory: EditorFactory) {

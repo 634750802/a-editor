@@ -1,8 +1,8 @@
-import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
-import { ActionType } from '/src/slate-markdown/core/actions'
+import { EditorFactory } from '@/slate-markdown/core/editor-factory'
+import { ActionType } from '@/slate-markdown/core/actions'
 import { Node, NodeEntry } from 'slate'
-import HeadingNode from '/src/slate-markdown/elements/heading/HeadingNode'
-import ParagraphNode from '/src/slate-markdown/elements/paragraph/ParagraphNode'
+import HeadingNode from '@/slate-markdown/elements/heading/HeadingNode'
+import ParagraphNode from '@/slate-markdown/elements/paragraph/ParagraphNode'
 import { Heading } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 
 export function register (editorFactory: EditorFactory): void {

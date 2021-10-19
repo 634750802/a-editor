@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import plainText from 'vite-plugin-plain-text'
+import { resolve } from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -11,10 +12,11 @@ export default defineConfig({
     }
   },
   resolve: {
-    alias: {
-      'node:url': 'url',
-      'universal-deep-strict-equal': 'src/shim/universal-deep-strict-equal.js',
-      'lodash': 'lodash-es'
-    },
+    alias: [
+      { find: '@', replacement: resolve(__dirname, 'src') },
+      { find: 'node:url', replacement: 'url' },
+      { find: 'universal-deep-strict-equal', replacement: 'src/shim/universal-deep-strict-equal.js' },
+      { find: 'lodash', replacement: 'lodash-es' },
+    ],
   },
 })

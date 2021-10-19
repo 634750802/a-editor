@@ -1,8 +1,8 @@
-import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
+import { EditorFactory } from '@/slate-markdown/core/editor-factory'
 import { faBold, faCode, faItalic, faStrikethrough } from '@fortawesome/free-solid-svg-icons'
 import React from 'react'
-import TextNode, { isDecoratorActive, isRangeCustomTextPropsEnabled, TextNodeDecorator } from '/src/slate-markdown/elements/text/TextNode'
-import { ActionType } from '/src/slate-markdown/core/actions'
+import TextNode, { isDecoratorActive, isRangeCustomTextPropsEnabled, TextNodeDecorator } from '@/slate-markdown/elements/text/TextNode'
+import { ActionType } from '@/slate-markdown/core/actions'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 export function register (factory: EditorFactory) {

@@ -1,12 +1,12 @@
-import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
+import { EditorFactory } from '@/slate-markdown/core/editor-factory'
 import el from './register-elements'
-import remarkSectionPlugin from '/src/plugins/layout/remark-utils'
-import { CustomBlockElements } from '/src/slate-markdown/core/elements'
+import remarkSectionPlugin from '@/plugins/layout/remark-utils'
+import { CustomBlockElements } from '@/slate-markdown/core/elements'
 import { Descendant, Editor, Node, Path, PathRef, Range, Transforms } from 'slate'
-import { isElementType } from '/src/slate-markdown/slate-utils'
+import { isElementType } from '@/slate-markdown/slate-utils'
 import { HistoryEditor } from 'slate-history'
 
-declare module '/src/components/ti-editor/TiEditor' {
+declare module '@/components/ti-editor/TiEditor' {
   interface TiEditor {
     getSectionRange (index: number): Range | undefined
 
@@ -20,7 +20,7 @@ declare module '/src/components/ti-editor/TiEditor' {
   }
 }
 
-declare module '/src/slate-markdown/core/editor-factory' {
+declare module '@/slate-markdown/core/editor-factory' {
   interface EditorFactory {
     configSections (sections: CustomBlockElements['section'][]): void
   }

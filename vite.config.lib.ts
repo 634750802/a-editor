@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import visualizer from 'rollup-plugin-visualizer'
 import typescript from '@rollup/plugin-typescript'
 import tsConfig from './tsconfig.json'
+import { resolve } from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -20,9 +21,10 @@ export default defineConfig({
     },
   },
   resolve: {
-    alias: {
-      'node:url': 'url',
-      'lodash': 'lodash-es',
-    },
+    alias: [
+      { find: '@', replacement: resolve(__dirname, 'src') },
+      { find: 'node:url', replacement: 'url' },
+      { find: 'lodash', replacement: 'lodash-es' },
+    ],
   },
 })

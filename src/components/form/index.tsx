@@ -1,7 +1,7 @@
 import React, { RefObject, useCallback, useMemo, useRef } from 'react'
 import { JSONSchema7 } from 'json-schema'
 import Tippy from '@tippyjs/react'
-import ActionForm from '/src/components/form/ActionForm'
+import ActionForm from '@/components/form/ActionForm'
 import { Instance } from 'tippy.js'
 import { Editor } from 'slate'
 import { ReactEditor } from 'slate-react'
