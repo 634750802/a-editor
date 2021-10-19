@@ -10,8 +10,26 @@ function config (factory: EditorFactory) {
   factory.configSections([
     {
       type: 'section', children: [{
-        type: 'paragraph', depth: 1, children: [
-          { text: 'section', inlineCode: true },
+        type: 'heading', depth: 1, children: [
+          { text: 'section 1', inlineCode: true },
+          { text: ' 无法修改或删除，使用方法查看 ' },
+          { text: 'plugins/layout', inlineCode: true },
+        ],
+      }],
+    },
+    {
+      type: 'section', children: [{
+        type: 'heading', depth: 1, children: [
+          { text: 'section 2', inlineCode: true },
+          { text: ' 无法修改或删除，使用方法查看 ' },
+          { text: 'plugins/layout', inlineCode: true },
+        ],
+      }],
+    },
+    {
+      type: 'section', children: [{
+        type: 'heading', depth: 1, children: [
+          { text: 'section 3', inlineCode: true },
           { text: ' 无法修改或删除，使用方法查看 ' },
           { text: 'plugins/layout', inlineCode: true },
         ],
@@ -19,9 +37,9 @@ function config (factory: EditorFactory) {
     },
   ])
   factory.onEditorMounted(editor => {
-    setTimeout(() => {
-      editor.setSectionMarkdown(0, instructionsMd)
-    })
+    // setTimeout(() => {
+    //   editor.setSectionMarkdown(0, instructionsMd)
+    // })
   })
 }
 

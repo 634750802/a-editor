@@ -46,6 +46,7 @@ export interface TiEditor {
 }
 
 export interface TiEditor {
+  onAlert: (title: string, message: string) => void
   uploadFile?: (file: File) => Promise<string>
   updatePopper: (range?: DOMRange) => void
   hidePopper: () => void
@@ -119,6 +120,9 @@ const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false,
 
   const editor = useMemo(() => {
     const editor = withReact(withHistory(createEditor()))
+    editor.onAlert = (title, message) => {
+      console.warn(title, message)
+    }
     return editorFactory.wrapEditor(editor, setValue)
   }, [editorFactory])
 

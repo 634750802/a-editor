@@ -37,7 +37,7 @@ export default function layoutPlugin (factory: EditorFactory): void {
   }
 
   factory.onWrapEditor(editor => {
-    const { normalizeNode, deleteFragment, deleteBackward, deleteForward, insertFragment } = editor
+    const { normalizeNode, deleteFragment, deleteBackward, deleteForward, insertFragment, runAction } = editor
 
     const pathRefs: PathRef[] = []
 
@@ -45,9 +45,37 @@ export default function layoutPlugin (factory: EditorFactory): void {
       insertFragment(fragment.filter(node => !isElementType(node, 'section')))
     }
 
+    editor.runAction = (key, location, event) => {
+      if (location) {
+        const range = Editor.range(editor, location)
+        let exists = false
+        for (const pathRef of pathRefs) {
+          if (pathRef.current && Range.includes(range, pathRef.current)) {
+            exists = true
+            break
+          }
+        }
+        if (exists) {
+          editor.onAlert('无法操作固定内容', '')
+          return false
+        }
+      }
+      return false
+    }
+
     editor.deleteFragment = (dir) => {
-      if (Editor.nodes(editor, { match: node => isElementType(node, 'section'), mode: 'highest' })) {
-        return
+      if (editor.selection) {
+        let exists = false
+        for (const pathRef of pathRefs) {
+          if (pathRef.current && Range.includes(editor.selection, pathRef.current)) {
+            exists = true
+            break
+          }
+        }
+        if (exists) {
+          editor.onAlert('无法删除固定内容', '')
+          return
+        }
       }
       deleteFragment(dir)
     }
@@ -57,7 +85,7 @@ export default function layoutPlugin (factory: EditorFactory): void {
         const point = Editor.before(editor, editor.selection, { unit })
         if (point) {
           if (isElementType(Editor.node(editor, point, { depth: 1 })[0], 'section')) {
-            console.warn('match section')
+            editor.onAlert('无法删除固定内容', '')
             return
           }
         }
@@ -70,7 +98,7 @@ export default function layoutPlugin (factory: EditorFactory): void {
         const point = Editor.after(editor, editor.selection, { unit })
         if (point) {
           if (isElementType(Editor.node(editor, point, { depth: 1 })[0], 'section')) {
-            console.warn('match section')
+            editor.onAlert('无法删除固定内容', '')
             return
           }
         }
