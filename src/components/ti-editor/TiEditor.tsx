@@ -2,7 +2,7 @@
 import React, { forwardRef, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react'
 import { BaseEditor, createEditor, Descendant, Editor, Element, Node, NodeEntry, Text, Transforms } from 'slate'
-import { withHistory } from 'slate-history'
+import { HistoryEditor, withHistory } from 'slate-history'
 import PropTypes from 'prop-types'
 import './editor.less'
 import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
@@ -19,7 +19,7 @@ import { coreActionsPlugin } from '/src/slate-markdown/core/actions'
 // see https://docs.slatejs.org/walkthroughs/01-installing-slate
 declare module 'slate' {
   interface CustomTypes {
-    Editor: BaseEditor & ReactEditor & TiEditor
+    Editor: BaseEditor & ReactEditor & HistoryEditor & TiEditor
     Element: RemarkBlockElement | RemarkInlineElement
     Text: RemarkText
   }

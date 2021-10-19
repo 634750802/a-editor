@@ -4,6 +4,7 @@ import remarkSectionPlugin from '/src/plugins/layout/remark-utils'
 import { CustomBlockElements } from '/src/slate-markdown/core/elements'
 import { Descendant, Editor, Node, Path, PathRef, Range, Transforms } from 'slate'
 import { isElementType } from '/src/slate-markdown/slate-utils'
+import { HistoryEditor } from 'slate-history'
 
 declare module '/src/components/ti-editor/TiEditor' {
   interface TiEditor {
@@ -117,33 +118,35 @@ export default function layoutPlugin (factory: EditorFactory): void {
 
     const forceLayout = () => {
       let changed = false
-      Editor.withoutNormalizing(editor, () => {
-        if (configuredSections.length) {
-          if (pathRefs.length === 0) {
-            for (let i = configuredSections.length - 1; i >= 0; --i) {
-              pathRefs[i] = insertSection(configuredSections[i])
-            }
-            return
-          } else {
-            for (let i = configuredSections.length - 1; i >= 0; --i) {
-              const pathRef = pathRefs[i]
-              if (pathRef.current) {
-                if (!isElementType(Node.get(editor, pathRef.current), 'section')) {
+      HistoryEditor.withoutSaving(editor, () => {
+        Editor.withoutNormalizing(editor, () => {
+          if (configuredSections.length) {
+            if (pathRefs.length === 0) {
+              for (let i = configuredSections.length - 1; i >= 0; --i) {
+                pathRefs[i] = insertSection(configuredSections[i])
+              }
+              return
+            } else {
+              for (let i = configuredSections.length - 1; i >= 0; --i) {
+                const pathRef = pathRefs[i]
+                if (pathRef.current) {
+                  if (!isElementType(Node.get(editor, pathRef.current), 'section')) {
+                    pathRef.unref()
+                    pathRefs[i] = insertSection(configuredSections[i])
+                    changed = true
+                  }
+                } else {
                   pathRef.unref()
                   pathRefs[i] = insertSection(configuredSections[i])
                   changed = true
                 }
-              } else {
-                pathRef.unref()
-                pathRefs[i] = insertSection(configuredSections[i])
-                changed = true
+              }
+              if (changed) {
+                return
               }
             }
-            if (changed) {
-              return
-            }
           }
-        }
+        })
       })
       return changed
     }
