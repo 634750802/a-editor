@@ -743,14 +743,14 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
         editor.hidePopper()
       },
       onClick: () => {
-        const selection = window.getSelection()
-        if (selection && selection.isCollapsed && selection.rangeCount > 0) {
-          const range = selection.getRangeAt(0)
-          const slateRange = ReactEditor.toSlateRange(editor, range, { exactMatch: true })
-          if (slateRange && editor.selection && Range.equals(slateRange, editor.selection)) {
-            editor.togglePopper(range)
-          }
-        }
+        // const selection = window.getSelection()
+        // if (selection && selection.isCollapsed && selection.rangeCount > 0) {
+        //   const range = selection.getRangeAt(0)
+        //   const slateRange = ReactEditor.toSlateRange(editor, range, { exactMatch: true })
+        //   if (slateRange && editor.selection && Range.equals(slateRange, editor.selection)) {
+        //     editor.togglePopper(range)
+        //   }
+        // }
       },
       onPaste,
       onDrop,
