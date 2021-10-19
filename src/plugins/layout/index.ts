@@ -60,7 +60,7 @@ export default function layoutPlugin (factory: EditorFactory): void {
           return false
         }
       }
-      return false
+      return runAction(key, location, event)
     }
 
     editor.deleteFragment = (dir) => {
