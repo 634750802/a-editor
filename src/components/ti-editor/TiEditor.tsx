@@ -14,6 +14,7 @@ import { createPortal } from 'react-dom'
 import 'github-markdown-css/github-markdown.css'
 import UIContext, { UIContextProps } from '/src/components/ti-editor/ui-context'
 import remarkGfm from 'remark-gfm'
+import { coreActionsPlugin } from '/src/slate-markdown/core/actions'
 
 // see https://docs.slatejs.org/walkthroughs/01-installing-slate
 declare module 'slate' {
@@ -109,6 +110,7 @@ const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false,
 
   const editorFactory = useMemo(() => {
     const editorFactory = new EditorFactory()
+    editorFactory.use(coreActionsPlugin)
     register(editorFactory)
     config && config(editorFactory)
     editorFactory.freezeProcessors()

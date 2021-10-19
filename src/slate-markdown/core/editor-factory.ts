@@ -230,7 +230,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
       const realParams = typeof params === 'object' ? params : {}
       switch (toggleStrategy) {
         case ToggleStrategy.replace:
-          Transforms.unsetNodes(editor, Object.keys(Node.extractProps(node)))
+          Transforms.unsetNodes(editor, Object.keys(Node.extractProps(node)), { at: path })
           Transforms.setNodes(editor, { type: config.type, ...realParams, children: [] }, { at: path })
           return true
         case ToggleStrategy.wrap:

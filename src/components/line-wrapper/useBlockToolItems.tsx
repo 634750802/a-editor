@@ -2,6 +2,7 @@ import React, { SyntheticEvent } from 'react'
 import { Editor, PathRef } from 'slate'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faBold, faCode, faItalic, faStrikethrough } from '@fortawesome/free-solid-svg-icons'
+import { ActionState, ActionStateRenderer } from '/src/slate-markdown/core/actions'
 
 library.add(faBold, faItalic, faStrikethrough, faCode)
 
@@ -14,24 +15,35 @@ export type ToolbarItemProps = {
   tips?: JSX.Element
 }
 
+function render<P extends Record<string, unknown>> (state: ActionState<P>, renderer: JSX.Element | ActionStateRenderer<P> | null) {
+  if (!renderer) {
+    return undefined
+  }
+  if (typeof renderer === 'function') {
+    return renderer(state)
+  } else {
+    return renderer
+  }
+}
+
 export default function useBlockToolItems (editor: Editor, pathRef: PathRef | undefined): ToolbarItemProps[][] {
   const path = pathRef?.current
-  return editor.factory.blockConfigs
-    .map(config => config.toolbarItems.map((
-      { key, isDisabled, isActive, action, icon, tips }) => ({
-      key,
-      disabled: path ? isDisabled(editor, path) : false,
-      active: path ? isActive(editor, path) : false,
-      icon,
-      action: path
-        ? event => {
-          action(editor, path, event)
-          event.preventDefault()
-          event.stopPropagation()
-        }
-        : () => {
+
+  if (!path) {
+    return []
+  }
+
+  return editor.factory.lineActions.map(group => {
+    return editor.getActions(path, group)
+      .map(({ action: { key, icon, tips }, state }) => ({
+        key,
+        disabled: state.disabled,
+        active: state.active,
+        icon: render(state, icon),
+        tips: render(state, tips),
+        action: event => {
+          editor.runAction(key, path, event)
         },
-      tips,
-    } as ToolbarItemProps)))
-    .filter(items => items.length > 0)
+      } as ToolbarItemProps))
+  })
 }

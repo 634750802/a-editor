@@ -1,9 +1,7 @@
 /* eslint-disable react/jsx-one-expression-per-line */
-import { defineNode, ICustomBlockElementConfig, isContentTypeConforms, MdastContentType, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
+import { defineNode, isContentTypeConforms, MdastContentType, RemarkText, TypedRenderLeafProps } from '/src/slate-markdown/core/elements'
 import { Editor, Element, Location, Node, Path, Range, Text, Transforms } from 'slate'
 import React from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBold, faCode, faItalic, faStrikethrough, IconDefinition } from '@fortawesome/free-solid-svg-icons'
 import { ReactEditor } from 'slate-react'
 import { isElementType } from '/src/slate-markdown/slate-utils'
 import { SYMBOL_PRISM_TOKEN } from '/src/slate-markdown/elements/code/CodeNode'
@@ -101,44 +99,8 @@ const TextNode = defineNode<RemarkText, TextApi>({
       }
     }
   },
-  toolbarItems: ([
-    {
-      key: TextNodeDecorator.strong,
-      icon: faBold,
-      tips: <>加粗</>,
-    },
-    {
-      key: TextNodeDecorator.emphasis,
-      icon: faItalic,
-      tips: <>斜体</>,
-    },
-    {
-      key: TextNodeDecorator.inlineCode,
-      icon: faCode,
-      tips: <>行内代码</>,
-    },
-    {
-      key: TextNodeDecorator.delete,
-      icon: faStrikethrough,
-      tips: <>删除</>,
-    },
-  ] as ToolbarItemConfig[]).map(({ key, icon, tips }) => ({
-    key: key,
-    icon: <FontAwesomeIcon icon={icon} />,
-    isActive: (editor, range) => isDecoratorActive(editor, range, key),
-    isDisabled: (editor, range) => !isRangeCustomTextPropsEnabled(editor, range),
-    action: (editor, range, event) => {
-      TextNode.toggleDecorator(editor, range, key)
-    },
-    tips,
-  })),
+  toolbarItems: [],
 })
-
-type ToolbarItemConfig = {
-  key: TextNodeDecorator
-  icon: IconDefinition
-  tips?: JSX.Element
-}
 
 export function isDecoratorActive (editor: Editor, selection: Range, decorator: TextNodeDecorator): boolean {
   if (!ReactEditor.hasRange(editor, selection)) {

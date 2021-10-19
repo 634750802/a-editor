@@ -1,8 +1,8 @@
-import { defineNode, isContentTypeConforms, MdastContentType, ToolbarItemConfig, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
+import { defineNode, MdastContentType, TypedRenderElementProps } from '/src/slate-markdown/core/elements'
 import { Code } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import React, { ChangeEvent } from 'react'
 import LineWrapper from '/src/components/line-wrapper/LineWrapper'
-import { Editor, Node, Path, Range, Text, Transforms } from 'slate'
+import { Range, Text, Transforms } from 'slate'
 import Prism, { Token } from 'prismjs'
 import 'prismjs/components/prism-markdown.js'
 import 'prismjs/components/prism-javascript.js'
@@ -15,12 +15,9 @@ import 'prismjs/components/prism-jsx.js'
 import 'prismjs/components/prism-tsx.js'
 import 'prismjs/components/prism-json.js'
 import 'prismjs/components/prism-log.js'
-import { faCode } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import classNames from 'classnames'
 import Tippy from '@tippyjs/react'
 import './style.less'
-import { isElementType } from '/src/slate-markdown/slate-utils'
 import { useReadOnly } from 'slate-react'
 
 const options = [
@@ -38,41 +35,6 @@ const options = [
 ]
 
 export const SYMBOL_PRISM_TOKEN = Symbol('prism_token')
-
-const toolbarItems: ToolbarItemConfig<Path>[] = [{
-  key: 'code-block',
-  icon: <FontAwesomeIcon icon={faCode} />,
-  isActive: (editor: Editor, path: Path) => isElementType(Node.get(editor, path), 'code'),
-  isDisabled: (editor, path) => {
-    const node = Node.get(editor, path)
-    if (isElementType(node, 'code')) {
-      return false
-    }
-    const parent = Node.parent(editor, path)
-    const parentContentModelType = editor.getContentModelType(parent)
-    if (!parentContentModelType) {
-      return true
-    }
-    return !isContentTypeConforms(CodeNode.contentType, parentContentModelType)
-  },
-  tips: (
-    <>
-      代码块
-    </>
-  ),
-  action: (editor, path, e) => {
-    // TODO: remove dirty handles
-    const node = Node.get(editor, path)
-    if (isElementType(node, 'code')) {
-      Transforms.unsetNodes(editor, Object.keys(Node.extractProps(node)), { at: path })
-      Transforms.setNodes(editor, { type: 'paragraph' }, { at: path })
-    } else {
-      const text = Node.string(node)
-      Transforms.removeNodes(editor, { at: path })
-      Transforms.insertNodes(editor, { type: 'code', lang: 'markdown', meta: undefined, children: [{ text }] }, { at: path, select: true })
-    }
-  },
-}]
 
 const renderCode = ({ attributes, element, children }: TypedRenderElementProps<Code>, active: boolean) => {
   return (
@@ -141,15 +103,7 @@ const CodeNode = defineNode<Code>({
     // TODO: do we needs to support meta?
     prefix: /^`{3}(?: (\w+))?$/,
     toggle: (editor, path, params) => {
-      if (params) {
-        const text = Node.string(Node.get(editor, path))
-        Transforms.removeNodes(editor, { at: path })
-        Transforms.insertNodes(editor, { type: 'code', ...params, children: [{ text }] }, { at: path })
-        Transforms.select(editor, path.concat(0))
-      } else {
-        Transforms.unsetNodes(editor, ['meta', 'lang'], { at: path })
-        Transforms.setNodes(editor, { type: 'paragraph' }, { at: path })
-      }
+      return editor.runAction('toggle-codeblock', path)
     },
     onTrigger: (prefix, editor, path) => {
       if (path.length > 1) {
@@ -164,7 +118,7 @@ const CodeNode = defineNode<Code>({
     },
   },
   events: {},
-  toolbarItems,
+  toolbarItems: [],
   // see slate.js official highlighting example
   decorate: (editor, [node, path], el) => {
     if (Text.isText(node) && el.lang) {

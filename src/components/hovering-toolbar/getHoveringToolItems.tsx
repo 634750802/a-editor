@@ -1,11 +1,11 @@
 import React, { SyntheticEvent } from 'react'
 import { Editor, Element } from 'slate'
-import TextNode from '/src/slate-markdown/elements/text/TextNode'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faBold, faCode, faItalic, faStrikethrough } from '@fortawesome/free-solid-svg-icons'
 import { ReactEditor } from 'slate-react'
 import { DOMRange } from 'slate-react/dist/utils/dom'
 import { MdastContentType } from '/src/slate-markdown/core/elements'
+import { ActionState, ActionStateRenderer } from '/src/slate-markdown/core/actions'
 
 library.add(faBold, faItalic, faStrikethrough, faCode)
 
@@ -16,6 +16,17 @@ export type ToolbarItemProps = {
   disabled: boolean
   action?: (event: SyntheticEvent) => void
   tips?: JSX.Element
+}
+
+function render<P extends Record<string, unknown>> (state: ActionState<P>, renderer: JSX.Element | ActionStateRenderer<P> | null) {
+  if (!renderer) {
+    return undefined
+  }
+  if (typeof renderer === 'function') {
+    return renderer(state)
+  } else {
+    return renderer
+  }
 }
 
 export default function getHoveringToolItems (editor: Editor, domRange: DOMRange | undefined): ToolbarItemProps[] {
@@ -43,17 +54,17 @@ export default function getHoveringToolItems (editor: Editor, domRange: DOMRange
     }
   }
 
-  const toolbarItems: ToolbarItemProps [] = TextNode.toolbarItems
-    .concat(editor.factory.inlineConfigs.flatMap(config => config.toolbarItems))
-    .map((
-      { key, isDisabled, isActive, action, icon, tips }) => ({
+
+  return editor.getActions(range ?? undefined, editor.factory.selectionActions)
+    .map(({ action: { key, icon, tips }, state }) => ({
       key,
-      disabled: range ? isDisabled(editor, range) : false,
-      active: range ? isActive(editor, range) : false,
-      icon,
-      action: range ? event => action(editor, range, event) : () => {
+      disabled: state.disabled,
+      active: state.active,
+      icon: render(state, icon),
+      tips: render(state, tips),
+      action: event => {
+        editor.runAction(key, range ?? undefined, event)
       },
-      tips,
-    }))
-  return toolbarItems
+    } as ToolbarItemProps))
+    .filter(item => !item.disabled)
 }

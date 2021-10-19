@@ -2,8 +2,6 @@ import { Blockquote, Code, Heading, Image, InlineMath, Link, List, ListItem, Par
 import { BaseElement, Editor, Element as SlateElement, Location, NodeEntry, Path, Range, Text as SlateText } from 'slate'
 import { RenderElementProps, RenderLeafProps } from 'slate-react'
 import { EditorFactory } from '/src/slate-markdown/core/editor-factory'
-import { ToolbarItemProps } from '/src/components/hovering-toolbar/getHoveringToolItems'
-import { SyntheticEvent } from 'react'
 import { SYMBOL_PRISM_TOKEN } from '/src/slate-markdown/elements/code/CodeNode'
 
 export interface CustomBlockElements {
@@ -91,8 +89,6 @@ export interface ICustomBlockElementConfig<E extends RemarkBlockElement> extends
   // heading is not while blockquote and listItem are.
   // deprecated: uses contentModelType: 'phrasing'
   wrappingParagraph: boolean
-  toolbarItems: ToolbarItemConfig<Path>[]
-
   decorate?: (editor: Editor, entry: NodeEntry, el: E) => Range[]
 }
 
@@ -106,22 +102,12 @@ export interface ICustomInlineElementConfig<E extends RemarkInlineElement, P = R
   insert: (editor: Editor, location: Location, params: RemarkElementProps<E & P>) => void
 
   match?: CustomInlineMatch
-
-  toolbarItems: ToolbarItemConfig[]
 }
 
 export interface ICustomTextConfig<T extends RemarkText> extends ICustomConfig<T> {
   isLeaf: true
 
   render (editor: Editor, props: TypedRenderLeafProps<T>): JSX.Element
-
-  toolbarItems: ToolbarItemConfig[]
-}
-
-export interface ToolbarItemConfig<R = Range> extends Omit<ToolbarItemProps, 'active' | 'disabled' | 'action'> {
-  action: (editor: Editor, range: R, event: SyntheticEvent) => void
-  isActive: (editor: Editor, range: R) => boolean
-  isDisabled: (editor: Editor, range: R) => boolean
 }
 
 type AnyConfig =
