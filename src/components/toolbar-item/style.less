@@ -1,9 +1,10 @@
-.toolbar-item {
+.a-editor-toolbar-item {
   display: block;
   height: 24px;
   font-size: 12px;
   min-width: 24px;
-  color: white;
+  color: rgba(0, 0, 0, 0.9);
+  background: transparent;
   text-align: center;
   line-height: 24px;
   cursor: pointer;
@@ -12,12 +13,13 @@
   transition: all .2s ease;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: #e8e8e8;
   }
 
   &.active {
-    background: white;
-    color: rgba(0, 0, 0, 0.8);
+    color: black;
+    background: #d8d8d8;
+
   }
 
   &.disabled {
@@ -32,4 +34,14 @@
     font-size: 12px;
     letter-spacing: 0.1em;
   }
+}
+
+.tippy-box {
+  background: #f8f8f8;
+  color: rgba(0, 0, 0, 0.9);
+  box-shadow: rgba(0,0,0,0.1) 2px 4px 8px 0;
+}
+
+.tippy-arrow {
+  color:  #f8f8f8;
 }

@@ -24,7 +24,7 @@ function ToolbarItem ({ icon, active, disabled, action, tips }: ToolbarItemProps
 
   const el = (
     <span
-      className={classNames('toolbar-item', { active, disabled })}
+      className={classNames('a-editor-toolbar-item', { active, disabled })}
       onMouseDown={handleAction}
     >
       {icon}
