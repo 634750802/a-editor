@@ -532,7 +532,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
 
           if (Element.isElement(parentNode)) {
             const config = this.customElementMap.get(parentNode.type) as ICustomBlockElementConfig<BE> | undefined
-            if (!config) {
+            if (!config || config.isInline) {
               return
             }
             const handler = get(config.events)
