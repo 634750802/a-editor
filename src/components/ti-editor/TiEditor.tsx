@@ -102,6 +102,15 @@ export interface TiEditor {
 
 }
 
+function toJsxElements (children: JSX.Element | JSX.Element[] | undefined): JSX.Element[] {
+  if (!children) {
+    return []
+  }
+  if (children instanceof Array) {
+    return children
+  }
+  return [children]
+}
 
 const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false, initialMarkdown = '', config, uploadFile, value, onChange: propOnChange, children }: TiCommunityEditorProps, ref): JSX.Element => {
   const editorFactory = useMemo(() => {
@@ -119,7 +128,7 @@ const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false,
     editor.onAlert = (title, message) => {
       console.warn(title, message)
     }
-    return editorFactory.wrapEditor(editor)
+    return editorFactory.wrapEditor(editor, toJsxElements(children))
   }, [editorFactory])
 
   useEffect(() => {
