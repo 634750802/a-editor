@@ -5,7 +5,6 @@ import { CustomBlockElements } from '@/slate-markdown/core/elements'
 import { Descendant, Editor, Node, Path, PathRef, Range, Span, Transforms } from 'slate'
 import { isElementType } from '@/slate-markdown/slate-utils'
 import { HistoryEditor } from 'slate-history'
-import { DIRTY_PATHS } from 'slate/dist/utils/weak-maps'
 
 declare module '@/components/ti-editor/TiEditor' {
   interface TiEditor {
@@ -22,6 +21,10 @@ declare module '@/components/ti-editor/TiEditor' {
     getSectionMarkdown (index: number): string
 
     onSectionLayout (section: number): void
+
+    isForcingLayout: boolean
+
+    forceLayout (): void
   }
 }
 
@@ -116,6 +119,7 @@ export default function layoutPlugin (factory: EditorFactory): void {
     }
 
     const insertSection = (section: CustomBlockElements['section']): PathRef => {
+      editor.isForcingLayout = true
       let pathIndex = 0
       if (editor.selection) {
         pathIndex = editor.selection.focus.path[0]
@@ -124,7 +128,11 @@ export default function layoutPlugin (factory: EditorFactory): void {
       return Editor.pathRef(editor, [pathIndex])
     }
 
-    const forceLayout = () => {
+    editor.isForcingLayout = false
+    editor.forceLayout = function forceLayout () {
+      if (!Editor.isNormalizing(editor)) {
+        return false
+      }
       let changed = false
       const layoutSet = new Set<number>()
       HistoryEditor.withoutSaving(editor, () => {
@@ -160,14 +168,17 @@ export default function layoutPlugin (factory: EditorFactory): void {
           }
         })
       })
-      layoutSet.forEach(editor.onSectionLayout)
+      if (changed) {
+        Editor.normalize(editor, { force: true })
+        layoutSet.forEach(editor.onSectionLayout)
+
+      }
       return changed
     }
 
     editor.normalizeNode = (entry) => {
-      if (!forceLayout()) {
-        normalizeNode(entry)
-      }
+      normalizeNode(entry)
+      editor.forceLayout()
     }
 
     Object.defineProperty(editor, 'markdown', {
@@ -214,11 +225,7 @@ export default function layoutPlugin (factory: EditorFactory): void {
       if (!span) {
         return undefined
       }
-      if (!editor.children.length) {
-        return undefined
-      }
       const [start, end] = span
-      console.log(span)
       const anchor = Editor.start(editor, start)
       const focus = Editor.end(editor, end)
       return { anchor, focus }
@@ -254,6 +261,7 @@ export default function layoutPlugin (factory: EditorFactory): void {
     editor.onChange = () => {
       onChange()
       Object.values(onChangeMap).forEach(cb => cb())
+      editor.isForcingLayout = false
     }
 
     editor.onSectionLayout = (section) => {
@@ -262,7 +270,7 @@ export default function layoutPlugin (factory: EditorFactory): void {
   })
 
   factory.onEditorMounted((editor) => {
-    Editor.normalize(editor, { force: true })
+    editor.forceLayout()
   })
 
   let i = 0

@@ -1,6 +1,6 @@
 {
   "name": "@634750802/a-editor",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "scripts": {
     "dev": "vite -c vite.config.dev.ts",
     "build:gh-pages": "tsc && vite build -c vite.config.gh-pages.ts",

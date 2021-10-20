@@ -38,6 +38,9 @@ export default function VirtualSectionInput ({ section, value, onChange: propOnC
     }
 
     const resetOnChange = editor.factory.registerOnChange(() => {
+      if (editor.isForcingLayout) {
+        return
+      }
       const range = editor.getSectionRange(section)
 
       if (!range) {

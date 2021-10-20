@@ -153,7 +153,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
       },
       set: (value) => {
         setValue(this.parseMarkdown(value))
-        Editor.setNormalizing(editor, true)
+        Editor.normalize(editor, { force: true })
       },
     })
 
