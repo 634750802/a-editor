@@ -384,15 +384,6 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
       return undefined
     }
 
-    editor.getAndRemoveMark = (attr: string) => {
-      if (editor.marks) {
-        const res = (editor.marks as never)[attr]
-        editor.removeMark(attr)
-        return res
-      }
-      return undefined
-    }
-
     editor.isVoid = element => this.voidSet.has(element.type) || isVoid(element)
     editor.isInline = element => this.inlineSet.has(element.type) || isInline(element)
     editor.normalizeNode = (entry) => {

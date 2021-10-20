@@ -50,7 +50,6 @@ export interface TiEditor {
   setActionForm: (form: JSX.Element | undefined) => void
 
   nearest: <E extends RemarkElement>(entry: NodeEntry, config: ICustomElementConfig<E>) => NodeEntry<E> | undefined
-  getAndRemoveMark: (mark: string) => unknown
 }
 
 export interface TiEditor {
