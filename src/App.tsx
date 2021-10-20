@@ -64,7 +64,7 @@ async function uploadFile (file: File): Promise<string> {
   })
 }
 
-const log = (e, f) => console.log(f())
+const log = (e: unknown, f: () => string) => console.log(f())
 
 function App (): JSX.Element {
   const [value, setValue] = useState<Descendant[]>([])
