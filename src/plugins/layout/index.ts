@@ -286,3 +286,5 @@ export default function layoutPlugin (factory: EditorFactory): void {
   }
 
 }
+
+export { default as VirtualSectionInput } from './virtual-section-input'
