@@ -158,7 +158,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
     })
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    editor.updatePopper = editor.hidePopper = editor.togglePopper = () => {
+    editor.updateSelectionToolbar = editor.hideSelectionToolbar = editor.toggleSelectionToolbar = () => {
     }
 
     editor.isContent = (node, type): node is Element | Text => {
@@ -733,14 +733,14 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
         const selection = window.getSelection()
         if (selection) {
           if (selection.isCollapsed) {
-            editor.hidePopper()
+            editor.hideSelectionToolbar()
           } else if (selection.rangeCount > 0) {
-            editor.updatePopper(selection.getRangeAt(0))
+            editor.updateSelectionToolbar(selection.getRangeAt(0))
           }
         }
       },
       onBlur: (event) => {
-        editor.hidePopper()
+        editor.hideSelectionToolbar()
       },
       onClick: () => {
         // const selection = window.getSelection()
@@ -748,13 +748,17 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
         //   const range = selection.getRangeAt(0)
         //   const slateRange = ReactEditor.toSlateRange(editor, range, { exactMatch: true })
         //   if (slateRange && editor.selection && Range.equals(slateRange, editor.selection)) {
-        //     editor.togglePopper(range)
+        //     editor.toggleSelectionToolbar(range)
         //   }
         // }
       },
       onPaste,
       onDrop,
     }
+  }
+
+  createDefaultChildren (editor: Editor): JSX.Element[] {
+    return []
   }
 }
 

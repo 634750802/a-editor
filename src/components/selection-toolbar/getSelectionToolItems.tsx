@@ -29,7 +29,7 @@ function render<P extends Record<string, unknown>> (state: ActionState<P>, rende
   }
 }
 
-export default function getHoveringToolItems (editor: Editor, domRange: DOMRange | undefined): ToolbarItemProps[] {
+export default function getSelectionToolItems (editor: Editor, domRange: DOMRange | undefined): ToolbarItemProps[] {
   if (!domRange) {
     return []
   }

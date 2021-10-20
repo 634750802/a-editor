@@ -1,20 +1,18 @@
 /* eslint-disable react/forbid-component-props */
 import React, { forwardRef, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react'
-import { BaseEditor, createEditor, Descendant, Editor, Element, Node, NodeEntry, Text, Transforms } from 'slate'
+import { BaseEditor, createEditor, Descendant, Editor, Element, Node, NodeEntry, Text } from 'slate'
 import { HistoryEditor, withHistory } from 'slate-history'
 import PropTypes from 'prop-types'
 import './editor.less'
 import { EditorFactory } from '@/slate-markdown/core/editor-factory'
 import register from '@/slate-markdown/elements/register'
-import HoveringToolbar from '@/components/hovering-toolbar/HoveringToolbar'
-import { DOMRange } from 'slate-react/dist/utils/dom'
 import { ICustomElementConfig, MdastContentType, RemarkBlockElement, RemarkElement, RemarkElementProps, RemarkInlineElement, RemarkText } from '@/slate-markdown/core/elements'
 import { createPortal } from 'react-dom'
 import 'github-markdown-css/github-markdown.css'
 import UIContext, { UIContextProps } from '@/components/ti-editor/ui-context'
-import remarkGfm from 'remark-gfm'
 import { coreActionsPlugin } from '@/slate-markdown/core/actions'
+import { coreSelectionToolbarPlugin } from '@/slate-markdown/core/selection-toolbar'
 
 // see https://docs.slatejs.org/walkthroughs/01-installing-slate
 declare module 'slate' {
@@ -48,9 +46,6 @@ export interface TiEditor {
 export interface TiEditor {
   onAlert: (title: string, message: string) => void
   uploadFile?: (file: File) => Promise<string>
-  updatePopper: (range?: DOMRange) => void
-  hidePopper: () => void
-  togglePopper: (range?: DOMRange) => void
   factory: EditorFactory
   setActionForm: (form: JSX.Element | undefined) => void
 
@@ -112,6 +107,7 @@ const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false,
   const editorFactory = useMemo(() => {
     const editorFactory = new EditorFactory()
     editorFactory.use(coreActionsPlugin)
+    editorFactory.use(coreSelectionToolbarPlugin)
     register(editorFactory)
     config && config(editorFactory)
     editorFactory.freezeProcessors()
@@ -176,6 +172,8 @@ const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false,
     editorFactory.triggerEditorMounted(editor)
   }, [editor])
 
+  const defaultChildren = useMemo(() => editorFactory.createDefaultChildren(editor), [editorFactory, editor])
+
   return (
     // Add the editable component inside the context.
     <Slate
@@ -183,7 +181,7 @@ const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false,
       onChange={onChange}
       value={value}
     >
-      <HoveringToolbar />
+      {defaultChildren}
 
       <UIContext.Provider value={uiContextProps}>
         <div

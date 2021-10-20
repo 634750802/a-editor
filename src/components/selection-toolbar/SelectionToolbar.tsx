@@ -3,12 +3,12 @@ import { useSlateStatic } from 'slate-react'
 import { VirtualElement } from '@popperjs/core'
 import { usePopper } from 'react-popper'
 import './style.less'
-import getHoveringToolItems, { ToolbarItemProps } from '@/components/hovering-toolbar/getHoveringToolItems'
+import getSelectionToolItems, { ToolbarItemProps } from '@/components/selection-toolbar/getSelectionToolItems'
 import ToolbarItem from '@/components/toolbar-item/ToolbarItem'
 import { DOMRange } from 'slate-react/dist/utils/dom'
 import useForceUpdate from '@/hooks/forceUpdate'
 
-function HoveringToolbar (): JSX.Element {
+function SelectionToolbar (): JSX.Element {
   const editor = useSlateStatic()
 
   const ref = useRef<HTMLDivElement>(null)
@@ -17,7 +17,7 @@ function HoveringToolbar (): JSX.Element {
   const forceUpdate = useForceUpdate()
   const [items, setItems] = useState<ToolbarItemProps[]>([])
 
-  editor.hidePopper = () => setHidden(true)
+  editor.hideSelectionToolbar = () => setHidden(true)
 
   const ve = useMemo(() => {
     return {
@@ -39,17 +39,17 @@ function HoveringToolbar (): JSX.Element {
     ],
   })
 
-  editor.updatePopper = (range) => {
+  editor.updateSelectionToolbar = (range) => {
     if (range) {
       const isFirstRange = !rangeRef.current
       rangeRef.current = range
       if (isFirstRange) {
         setTimeout(() => {
-          editor.updatePopper()
+          editor.updateSelectionToolbar()
         }, 0)
       }
     }
-    const nowItems = getHoveringToolItems(editor, rangeRef.current)
+    const nowItems = getSelectionToolItems(editor, rangeRef.current)
     setItems(nowItems)
 
     if (nowItems.length > 0) {
@@ -61,11 +61,11 @@ function HoveringToolbar (): JSX.Element {
     forceUpdate()
   }
 
-  editor.togglePopper = (range) => {
+  editor.toggleSelectionToolbar = (range) => {
     if (hidden) {
-      editor.updatePopper(range)
+      editor.updateSelectionToolbar(range)
     } else {
-      editor.hidePopper()
+      editor.hideSelectionToolbar()
     }
   }
 
@@ -91,4 +91,4 @@ function HoveringToolbar (): JSX.Element {
   )
 }
 
-export default HoveringToolbar
+export default SelectionToolbar
