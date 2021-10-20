@@ -50,6 +50,8 @@ export type CustomBlockElementEvents = {
   onTab?: BlockEventHandler
   onStartDelete?: BlockEventHandler
   onStartEnter?: BlockEventHandler
+  onInsertParagraph?: BlockEventHandler
+  onDeleteText?: BlockEventHandler
 }
 
 export type CustomBlockElementToggle<T> = {

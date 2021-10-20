@@ -522,19 +522,29 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
       }
     }
 
-    const withStartEventBlockHandler = (get: ((toggle: CustomBlockElementEvents) => BlockEventHandler | undefined)) => (event: InputEvent) => {
+    const withStartEventBlockHandler = (getStart: ((toggle: CustomBlockElementEvents) => BlockEventHandler | undefined), get: ((toggle: CustomBlockElementEvents) => BlockEventHandler | undefined)) => (event: InputEvent) => {
       const { selection } = editor
       if (selection) {
         if (Range.isCollapsed(selection)) {
           const point = selection.anchor
-          // is first text node?
-          if (isFirstTextPoint(editor, point)) {
-            const parentPath = Path.parent(point.path)
-            const parentNode = Node.get(editor, parentPath)
-            if (Element.isElement(parentNode)) {
-              const config = this.customElementMap.get(parentNode.type) as ICustomBlockElementConfig<BE> | undefined
+          const parentPath = Path.parent(point.path)
+          const parentNode = Node.get(editor, parentPath)
+
+          if (Element.isElement(parentNode)) {
+            const config = this.customElementMap.get(parentNode.type) as ICustomBlockElementConfig<BE> | undefined
+            if (!config) {
+              return
+            }
+            const handler = get(config.events)
+            if (handler && handler(editor, point.path)) {
+              event.preventDefault()
+              return
+            }
+            // TODO: wrappingParagraph elements
+            // is first text node?
+            if (isFirstTextPoint(editor, point)) {
               if (config) {
-                const handler = get(config.events)
+                const handler = getStart(config.events)
                 if (handler && handler(editor, point.path)) {
                   event.preventDefault()
                   return
@@ -545,7 +555,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
                 if (!Path.hasPrevious(parentPath) && Element.isElement(grandParentNode)) {
                   const config = this.customElementMap.get(grandParentNode.type) as ICustomBlockElementConfig<BE> | undefined
                   if (config?.wrappingParagraph) {
-                    const handler = get(config.events)
+                    const handler = getStart(config.events)
                     if (handler && handler(editor, point.path)) {
                       event.preventDefault()
                       return
@@ -559,8 +569,8 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
       }
     }
 
-    const handleDeleteText = withStartEventBlockHandler(toggle => toggle.onStartDelete)
-    const handleInsertParagraph = withStartEventBlockHandler(toggle => toggle.onStartEnter)
+    const handleDeleteText = withStartEventBlockHandler(events => events.onStartDelete, events => events.onDeleteText)
+    const handleInsertParagraph = withStartEventBlockHandler(events => events.onStartEnter, events => events.onInsertParagraph)
 
     const withCommonEventBlockHandler = (get: ((toggle: CustomBlockElementEvents) => BlockEventHandler | undefined)) => (event: KeyboardEvent) => {
       const { selection } = editor

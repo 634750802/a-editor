@@ -9,7 +9,15 @@ const TableCellNode = defineNode<TableCell>({
   contentType: MdastContentType.tableRow,
   contentModelType: MdastContentType.phrasing,
   wrappingParagraph: false,
-  events: {},
+  events: {
+    onStartDelete: (editor, path) => {
+      return true
+    },
+    onInsertParagraph: (editor, path) => {
+      editor.insertText('\n')
+      return true
+    }
+  },
   toggle: {},
 
   render: (editor, { element, attributes, children }) => {
