@@ -1,10 +1,12 @@
-import React from 'react'
+import React, { useCallback, useState } from 'react'
 import TiEditor from './index'
 import { instructionsMd } from '@/instructions'
 import './app.less'
 import { EditorFactory } from '@/slate-markdown/core/editor-factory'
 import layoutPlugin from '@/plugins/layout'
 import { HistoryEditor } from 'slate-history'
+import { Descendant } from 'slate'
+import VirtualSectionInput from '@/plugins/layout/virtual-section-input'
 
 function config (factory: EditorFactory) {
   factory.use(layoutPlugin)
@@ -21,9 +23,18 @@ function config (factory: EditorFactory) {
         {
           type: 'blockquote', children: [{
             type: 'paragraph', children: [
-              {text: '用于固定的内容结构'}
+              { text: '用于固定的内容结构' },
             ],
           }],
+        },
+      ],
+    },
+    {
+      type: 'section', children: [
+        {
+          type: 'heading', depth: 1, children: [
+            { text: 'section 2', inlineCode: true },
+          ],
         },
       ],
     },
@@ -31,7 +42,8 @@ function config (factory: EditorFactory) {
   factory.onEditorMounted(editor => {
     setTimeout(() => {
       HistoryEditor.withoutSaving(editor, () => {
-        editor.setSectionMarkdown(0, instructionsMd)
+        editor.setSectionMarkdown(0, 'write something here')
+        editor.setSectionMarkdown(1, instructionsMd)
       })
     })
   })
@@ -42,23 +54,43 @@ async function uploadFile (file: File): Promise<string> {
     const reader = new FileReader();
     reader.onloadend = function() {
       setTimeout(() => {
-        resolve(reader.result as string);
+        resolve(reader.result as string)
       }, 500)
     }
     reader.onerror = function () {
       reject(reader.error)
     }
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(file)
   })
 }
 
+const log = (e, f) => console.log(f())
+
 function App (): JSX.Element {
+  const [value, setValue] = useState<Descendant[]>([])
+
+  const onChange = useCallback((newValue: Descendant[]) => {
+    setValue(newValue)
+  }, [value])
+
   return (
     <div>
       <TiEditor
         config={config}
+        onChange={onChange}
         uploadFile={uploadFile}
-      />
+        value={value}
+      >
+        <VirtualSectionInput
+          onChange={log}
+          section={0}
+        />
+
+        <VirtualSectionInput
+          onChange={log}
+          section={1}
+        />
+      </TiEditor>
     </div>
   )
 }

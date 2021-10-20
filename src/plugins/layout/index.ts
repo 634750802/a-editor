@@ -2,13 +2,16 @@ import { EditorFactory } from '@/slate-markdown/core/editor-factory'
 import el from './register-elements'
 import remarkSectionPlugin from '@/plugins/layout/remark-utils'
 import { CustomBlockElements } from '@/slate-markdown/core/elements'
-import { Descendant, Editor, Node, Path, PathRef, Range, Transforms } from 'slate'
+import { Descendant, Editor, Node, Path, PathRef, Range, Span, Transforms } from 'slate'
 import { isElementType } from '@/slate-markdown/slate-utils'
 import { HistoryEditor } from 'slate-history'
+import { DIRTY_PATHS } from 'slate/dist/utils/weak-maps'
 
 declare module '@/components/ti-editor/TiEditor' {
   interface TiEditor {
     getSectionRange (index: number): Range | undefined
+
+    getSectionSpan (index: number): Span | undefined
 
     setSection (index: number, fragment: Descendant[]): void
 
@@ -17,12 +20,17 @@ declare module '@/components/ti-editor/TiEditor' {
     setSectionMarkdown (index: number, fragment: string): void
 
     getSectionMarkdown (index: number): string
+
+    onSectionLayout (section: number): void
   }
 }
 
 declare module '@/slate-markdown/core/editor-factory' {
   interface EditorFactory {
     configSections (sections: CustomBlockElements['section'][]): void
+
+    registerOnChange: (handler: () => void) => () => void
+    registerOnSectionLayout: (handler: (section: number) => void) => () => void
   }
 }
 
@@ -38,7 +46,7 @@ export default function layoutPlugin (factory: EditorFactory): void {
   }
 
   factory.onWrapEditor(editor => {
-    const { normalizeNode, deleteFragment, deleteBackward, deleteForward, insertFragment, runAction } = editor
+    const { normalizeNode, deleteFragment, deleteBackward, deleteForward, insertFragment, runAction, onChange } = editor
 
     const pathRefs: PathRef[] = []
 
@@ -118,12 +126,14 @@ export default function layoutPlugin (factory: EditorFactory): void {
 
     const forceLayout = () => {
       let changed = false
+      const layoutSet = new Set<number>()
       HistoryEditor.withoutSaving(editor, () => {
         Editor.withoutNormalizing(editor, () => {
           if (configuredSections.length) {
             if (pathRefs.length === 0) {
               for (let i = configuredSections.length - 1; i >= 0; --i) {
                 pathRefs[i] = insertSection(configuredSections[i])
+                layoutSet.add(i)
               }
               return
             } else {
@@ -134,11 +144,13 @@ export default function layoutPlugin (factory: EditorFactory): void {
                     pathRef.unref()
                     pathRefs[i] = insertSection(configuredSections[i])
                     changed = true
+                    layoutSet.add(i)
                   }
                 } else {
                   pathRef.unref()
                   pathRefs[i] = insertSection(configuredSections[i])
                   changed = true
+                  layoutSet.add(i)
                 }
               }
               if (changed) {
@@ -148,6 +160,7 @@ export default function layoutPlugin (factory: EditorFactory): void {
           }
         })
       })
+      layoutSet.forEach(editor.onSectionLayout)
       return changed
     }
 
@@ -166,7 +179,8 @@ export default function layoutPlugin (factory: EditorFactory): void {
       },
     })
 
-    editor.getSectionRange = i => {
+
+    editor.getSectionSpan = i => {
       if (i >= pathRefs.length) {
         return undefined
       }
@@ -184,19 +198,39 @@ export default function layoutPlugin (factory: EditorFactory): void {
         return undefined
       }
       start = Path.next(start)
-      end = Path.previous(end)
+      if (Path.hasPrevious(end)) {
+        end = Path.previous(end)
+      } else {
+        end = start
+      }
       if (Path.isBefore(end, start)) {
         end = start
       }
-      return { anchor: Editor.start(editor, start), focus: Editor.end(editor, end) }
+      return [start, end]
+    }
+
+    editor.getSectionRange = i => {
+      const span = editor.getSectionSpan(i)
+      if (!span) {
+        return undefined
+      }
+      if (!editor.children.length) {
+        return undefined
+      }
+      const [start, end] = span
+      console.log(span)
+      const anchor = Editor.start(editor, start)
+      const focus = Editor.end(editor, end)
+      return { anchor, focus }
     }
 
     editor.getSection = i => {
-      const range = editor.getSectionRange(i)
-      if (!range) {
+      const span = editor.getSectionSpan(i)
+      if (!span) {
         return []
       }
-      return Editor.fragment(editor, range)
+      const [...nodes] = Editor.nodes(editor, { at: span, mode: 'highest', match: node => !Editor.isEditor(node) })
+      return nodes.map(([node]) => node as Descendant)
     }
 
     editor.getSectionMarkdown = (i) => {
@@ -208,6 +242,7 @@ export default function layoutPlugin (factory: EditorFactory): void {
       if (!range) {
         return
       }
+
       Transforms.select(editor, range)
       editor.insertFragment(fragments)
     }
@@ -215,10 +250,39 @@ export default function layoutPlugin (factory: EditorFactory): void {
     editor.setSectionMarkdown = (i, markdown) => {
       editor.setSection(i, factory.parseMarkdown(markdown))
     }
+
+    editor.onChange = () => {
+      onChange()
+      Object.values(onChangeMap).forEach(cb => cb())
+    }
+
+    editor.onSectionLayout = (section) => {
+      Object.values(onSectionLayoutMap).forEach(cb => cb(section))
+    }
   })
 
   factory.onEditorMounted((editor) => {
     Editor.normalize(editor, { force: true })
   })
+
+  let i = 0
+  const onChangeMap: Record<number, () => void> = {}
+  const onSectionLayoutMap: Record<number, (section: number) => void> = {}
+
+  factory.registerOnChange = handler => {
+    const id = ++i
+    onChangeMap[id] = handler
+    return () => {
+      delete onChangeMap[i]
+    }
+  }
+
+  factory.registerOnSectionLayout = handler => {
+    const id = ++i
+    onSectionLayoutMap[id] = handler
+    return () => {
+      delete onSectionLayoutMap[i]
+    }
+  }
 
 }

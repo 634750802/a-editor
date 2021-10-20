@@ -28,6 +28,9 @@ export interface TiCommunityEditorProps {
   uploadFile?: (file: File) => Promise<string>
   disabled?: boolean
   initialMarkdown?: string
+  value: Descendant[]
+  onChange: (value: Descendant[]) => void
+  children?: JSX.Element | JSX.Element[]
 }
 
 export const enum ToggleStrategy {
@@ -100,7 +103,7 @@ export interface TiEditor {
 }
 
 
-const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false, initialMarkdown = '', config, uploadFile }: TiCommunityEditorProps, ref): JSX.Element => {
+const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false, initialMarkdown = '', config, uploadFile, value: propValue, onChange: propOnChange, children }: TiCommunityEditorProps, ref): JSX.Element => {
   const [value, setValue] = useState<Descendant[]>([])
 
   const editorFactory = useMemo(() => {
@@ -163,9 +166,16 @@ const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false,
     }
   }, [form])
 
+  useEffect(() => {
+    if (value !== propValue) {
+      setValue(propValue)
+    }
+  }, [value, propValue])
+
   const onChange = useCallback((newValue: Descendant[]) => {
     setValue(newValue)
-  }, [setValue])
+    propOnChange(newValue)
+  }, [setValue, propOnChange])
 
   useLayoutEffect(() => {
     editorFactory.triggerEditorMounted(editor)
@@ -194,6 +204,8 @@ const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false,
             {...editableProps}
           />
         </div>
+
+        {children}
       </UIContext.Provider>
 
       {formPortal}
