@@ -1,12 +1,12 @@
 import React, { useCallback, useState } from 'react'
 import TiEditor from './index'
-import { instructionsMd } from '@/instructions'
 import './app.less'
 import { EditorFactory } from '@/slate-markdown/core/editor-factory'
 import layoutPlugin from '@/plugins/layout'
 import { HistoryEditor } from 'slate-history'
 import { Descendant } from 'slate'
 import VirtualSectionInput from '@/plugins/layout/virtual-section-input'
+import { instructionsMd } from '@/instructions'
 
 function config (factory: EditorFactory) {
   factory.use(layoutPlugin)
@@ -64,14 +64,15 @@ async function uploadFile (file: File): Promise<string> {
   })
 }
 
-const log = (e: unknown, f: () => string) => console.log(f())
-
 function App (): JSX.Element {
   const [value, setValue] = useState<Descendant[]>([])
 
   const onChange = useCallback((newValue: Descendant[]) => {
     setValue(newValue)
   }, [value])
+
+  const [first, setFirst] = useState<Descendant[]>([])
+  const [second, setSecond] = useState<Descendant[]>([])
 
   return (
     <div>
@@ -82,13 +83,15 @@ function App (): JSX.Element {
         value={value}
       >
         <VirtualSectionInput
-          onChange={log}
+          onChange={setFirst}
           section={0}
+          value={first}
         />
 
         <VirtualSectionInput
-          onChange={log}
+          onChange={setSecond}
           section={1}
+          value={second}
         />
       </TiEditor>
     </div>

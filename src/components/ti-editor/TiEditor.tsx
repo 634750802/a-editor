@@ -103,9 +103,7 @@ export interface TiEditor {
 }
 
 
-const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false, initialMarkdown = '', config, uploadFile, value: propValue, onChange: propOnChange, children }: TiCommunityEditorProps, ref): JSX.Element => {
-  const [value, setValue] = useState<Descendant[]>([])
-
+const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false, initialMarkdown = '', config, uploadFile, value, onChange: propOnChange, children }: TiCommunityEditorProps, ref): JSX.Element => {
   const editorFactory = useMemo(() => {
     const editorFactory = new EditorFactory()
     editorFactory.use(coreActionsPlugin)
@@ -121,7 +119,7 @@ const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false,
     editor.onAlert = (title, message) => {
       console.warn(title, message)
     }
-    return editorFactory.wrapEditor(editor, setValue)
+    return editorFactory.wrapEditor(editor)
   }, [editorFactory])
 
   useEffect(() => {
@@ -166,18 +164,11 @@ const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false,
     }
   }, [form])
 
-  useEffect(() => {
-    if (value !== propValue) {
-      setValue(propValue)
-    }
-  }, [value, propValue])
-
   const onChange = useCallback((newValue: Descendant[]) => {
-    setValue(newValue)
     propOnChange(newValue)
-  }, [setValue, propOnChange])
+  }, [propOnChange])
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     editorFactory.triggerEditorMounted(editor)
   }, [editor])
 

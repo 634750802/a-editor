@@ -2,11 +2,11 @@ import { useSlateStatic } from 'slate-react'
 import { useEffect, useRef } from 'react'
 import { Descendant, Editor, Operation, Range } from 'slate'
 
+
 interface VirtualSectionInputProps {
   section: number
-  value?: Descendant[]
-  onChange: (value: Descendant[], toMarkdown: () => string) => void
-  initialMarkdownValue?: string
+  value: Descendant[]
+  onChange: (value: Descendant[]) => void
 }
 
 function isOperationInRange (editor: Editor, operations: Operation[], range: Range): boolean {
@@ -21,26 +21,14 @@ function isOperationInRange (editor: Editor, operations: Operation[], range: Ran
 }
 
 
-export default function VirtualSectionInput ({ section, value, onChange: propOnChange }: VirtualSectionInputProps): null {
+export default function VirtualSectionInput ({ section, value = [], onChange }: VirtualSectionInputProps): null {
   const editor = useSlateStatic()
-  const valueRef = useRef<Descendant[] | undefined>(value)
-  const onChangeRef = useRef<VirtualSectionInputProps['onChange']>(propOnChange)
-
-  valueRef.current = value
-  onChangeRef.current = propOnChange
+  const onChangeRef = useRef(onChange)
+  const valueRef = useRef<Descendant[]>([])
+  onChangeRef.current = onChange
 
   useEffect(() => {
-    const range = editor.getSectionRange(section)
-    if (range) {
-      if (valueRef.current) {
-        editor.setSection(section, valueRef.current)
-      }
-    }
-
     const resetOnChange = editor.factory.registerOnChange(() => {
-      if (editor.isForcingLayout) {
-        return
-      }
       const range = editor.getSectionRange(section)
 
       if (!range) {
@@ -49,7 +37,8 @@ export default function VirtualSectionInput ({ section, value, onChange: propOnC
 
       if (isOperationInRange(editor, editor.operations, range)) {
         const fragment = editor.getSection(section)
-        onChangeRef.current(fragment, () => editor.factory.generateMarkdown(fragment))
+        valueRef.current = fragment
+        onChange(fragment)
       }
     })
 
@@ -57,9 +46,9 @@ export default function VirtualSectionInput ({ section, value, onChange: propOnC
       if (section !== i) {
         return
       }
-      const range = editor.getSectionRange(section)
-      if (range && valueRef.current) {
-        editor.setSection(section, valueRef.current)
+      if (value !== valueRef.current) {
+        valueRef.current = value
+        editor.setSection(section, value)
       }
     })
 
@@ -70,7 +59,7 @@ export default function VirtualSectionInput ({ section, value, onChange: propOnC
   }, [editor])
 
   useEffect(() => {
-    if (value) {
+    if (value !== valueRef.current) {
       editor.setSection(section, value)
     }
   }, [value])

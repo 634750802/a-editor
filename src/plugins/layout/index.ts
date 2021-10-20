@@ -21,10 +21,6 @@ declare module '@/components/ti-editor/TiEditor' {
     getSectionMarkdown (index: number): string
 
     onSectionLayout (section: number): void
-
-    isForcingLayout: boolean
-
-    forceLayout (): void
   }
 }
 
@@ -48,10 +44,13 @@ export default function layoutPlugin (factory: EditorFactory): void {
     configuredSections = sections
   }
 
+  const PATH_REFS = new WeakMap<Editor, PathRef[]>()
+
   factory.onWrapEditor(editor => {
     const { normalizeNode, deleteFragment, deleteBackward, deleteForward, insertFragment, runAction, onChange } = editor
 
     const pathRefs: PathRef[] = []
+    PATH_REFS.set(editor, pathRefs)
 
     editor.insertFragment = fragment => {
       insertFragment(fragment.filter(node => !isElementType(node, 'section')))
@@ -118,67 +117,8 @@ export default function layoutPlugin (factory: EditorFactory): void {
       deleteForward(unit)
     }
 
-    const insertSection = (section: CustomBlockElements['section']): PathRef => {
-      editor.isForcingLayout = true
-      let pathIndex = 0
-      if (editor.selection) {
-        pathIndex = editor.selection.focus.path[0]
-      }
-      Transforms.insertNodes(editor, [section, { type: 'paragraph', children: [{ text: '' }] }], { at: [pathIndex] })
-      return Editor.pathRef(editor, [pathIndex])
-    }
-
-    editor.isForcingLayout = false
-    editor.forceLayout = function forceLayout () {
-      if (!Editor.isNormalizing(editor)) {
-        return false
-      }
-      let changed = false
-      const layoutSet = new Set<number>()
-      HistoryEditor.withoutSaving(editor, () => {
-        Editor.withoutNormalizing(editor, () => {
-          if (configuredSections.length) {
-            if (pathRefs.length === 0) {
-              for (let i = configuredSections.length - 1; i >= 0; --i) {
-                pathRefs[i] = insertSection(configuredSections[i])
-                layoutSet.add(i)
-              }
-              return
-            } else {
-              for (let i = configuredSections.length - 1; i >= 0; --i) {
-                const pathRef = pathRefs[i]
-                if (pathRef.current) {
-                  if (!isElementType(Node.get(editor, pathRef.current), 'section')) {
-                    pathRef.unref()
-                    pathRefs[i] = insertSection(configuredSections[i])
-                    changed = true
-                    layoutSet.add(i)
-                  }
-                } else {
-                  pathRef.unref()
-                  pathRefs[i] = insertSection(configuredSections[i])
-                  changed = true
-                  layoutSet.add(i)
-                }
-              }
-              if (changed) {
-                return
-              }
-            }
-          }
-        })
-      })
-      if (changed) {
-        Editor.normalize(editor, { force: true })
-        layoutSet.forEach(editor.onSectionLayout)
-
-      }
-      return changed
-    }
-
     editor.normalizeNode = (entry) => {
       normalizeNode(entry)
-      editor.forceLayout()
     }
 
     Object.defineProperty(editor, 'markdown', {
@@ -216,6 +156,9 @@ export default function layoutPlugin (factory: EditorFactory): void {
       }
       if (Path.isBefore(end, start)) {
         end = start
+      }
+      if (!Editor.hasPath(editor, start) || !Editor.hasPath(editor, end)) {
+        return undefined
       }
       return [start, end]
     }
@@ -261,7 +204,6 @@ export default function layoutPlugin (factory: EditorFactory): void {
     editor.onChange = () => {
       onChange()
       Object.values(onChangeMap).forEach(cb => cb())
-      editor.isForcingLayout = false
     }
 
     editor.onSectionLayout = (section) => {
@@ -269,8 +211,32 @@ export default function layoutPlugin (factory: EditorFactory): void {
     }
   })
 
-  factory.onEditorMounted((editor) => {
-    editor.forceLayout()
+  factory.onEditorMounted(editor => {
+    const pathRefs = PATH_REFS.get(editor)
+    if (!pathRefs) {
+      throw new Error()
+    }
+    const insertSection = (section: CustomBlockElements['section'], i: number): PathRef => {
+      Transforms.insertNodes(editor, [section, { type: 'paragraph', children: [{ text: '' }] }], { at: [i * 2] })
+      return Editor.pathRef(editor, [i * 2])
+    }
+
+    HistoryEditor.withoutSaving(editor, () => {
+      Editor.withoutNormalizing(editor, () => {
+        if (configuredSections.length) {
+          if (pathRefs.length === 0) {
+            for (let i = 0; i < configuredSections.length; ++i) {
+              pathRefs[i] = insertSection(configuredSections[i], i)
+            }
+            return
+          }
+        }
+      })
+    })
+    for (let i = 0; i < configuredSections.length; ++i) {
+      editor.onSectionLayout(i)
+    }
+
   })
 
   let i = 0

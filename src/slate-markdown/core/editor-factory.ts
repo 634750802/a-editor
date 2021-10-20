@@ -123,7 +123,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
     return this.deserializeProcessor.processSync(value).result as Descendant[]
   }
 
-  wrapEditor<E extends Editor> (editor: E, setValue: Dispatch<SetStateAction<Descendant[]>>): E {
+  wrapEditor<E extends Editor> (editor: E): E {
     const { isVoid, isInline, normalizeNode, insertBreak, insertFragment, setFragmentData } = editor
 
     editor.factory = this as never
@@ -144,18 +144,6 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
 
     (window as any).debugPrintTree = () => debugPrintTree(editor);
     (window as any).debugEditor = editor
-
-    Object.defineProperty(editor, 'markdown', {
-      enumerable: false,
-      configurable: true,
-      get: () => {
-        return this.generateMarkdown(editor.children)
-      },
-      set: (value) => {
-        setValue(this.parseMarkdown(value))
-        Editor.normalize(editor, { force: true })
-      },
-    })
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     editor.updateSelectionToolbar = editor.hideSelectionToolbar = editor.toggleSelectionToolbar = () => {
