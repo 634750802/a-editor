@@ -2,10 +2,9 @@ import { EditorFactory } from '@/slate-markdown/core/editor-factory'
 import el from './register-elements'
 import remarkSectionPlugin from '@/plugins/layout/remark-utils'
 import { CustomBlockElements } from '@/slate-markdown/core/elements'
-import { Descendant, Editor, Path, PathRef, Range, Span, Transforms } from 'slate'
+import { Descendant, Editor, Node, Path, PathRef, Range, Span, Transforms } from 'slate'
 import { isElementType } from '@/slate-markdown/slate-utils'
 import { HistoryEditor } from 'slate-history'
-import VirtualSectionInput, { VirtualSectionInputProps } from '@/plugins/layout/virtual-section-input'
 
 declare module '@/components/ti-editor/TiEditor' {
   interface TiEditor {
@@ -27,29 +26,11 @@ declare module '@/components/ti-editor/TiEditor' {
 
 declare module '@/slate-markdown/core/editor-factory' {
   interface EditorFactory {
-    /**
-     * @deprecated deprecated
-     */
     configSections (sections: CustomBlockElements['section'][]): void
 
     registerOnChange: (handler: () => void) => () => void
     registerOnSectionLayout: (handler: (section: number) => void) => () => void
   }
-}
-
-function parseChildren (editor: Editor, children: JSX.Element[]) {
-  const sections: string[] = []
-  const vsiList = children.filter(el => el.type === VirtualSectionInput)
-  vsiList.forEach(el => {
-    const { section, headingText } = el.props as VirtualSectionInputProps
-    sections[section] = headingText
-  })
-  for (let i = 0; i < vsiList.length; i++) {
-    if (!sections[i]) {
-      throw new Error('section[' + i + '] is required')
-    }
-  }
-  editor.factory.configSections(sections.map(s => ({ type: 'section', children: editor.factory.parseMarkdown(s) })))
 }
 
 export default function layoutPlugin (factory: EditorFactory): void {
@@ -65,10 +46,8 @@ export default function layoutPlugin (factory: EditorFactory): void {
 
   const PATH_REFS = new WeakMap<Editor, PathRef[]>()
 
-  factory.onWrapEditor((editor, children) => {
+  factory.onWrapEditor(editor => {
     const { normalizeNode, deleteFragment, deleteBackward, deleteForward, insertFragment, runAction, onChange } = editor
-
-    parseChildren(editor, children)
 
     const pathRefs: PathRef[] = []
     PATH_REFS.set(editor, pathRefs)

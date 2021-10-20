@@ -10,6 +10,35 @@ import { instructionsMd } from '@/instructions'
 
 function config (factory: EditorFactory) {
   factory.use(layoutPlugin)
+  factory.configSections([
+    {
+      type: 'section', children: [
+        {
+          type: 'heading', depth: 1, children: [
+            { text: 'section 1', inlineCode: true },
+            { text: ' 无法修改或删除，使用方法查看 ' },
+            { text: 'plugins/layout', inlineCode: true },
+          ],
+        },
+        {
+          type: 'blockquote', children: [{
+            type: 'paragraph', children: [
+              { text: '用于固定的内容结构' },
+            ],
+          }],
+        },
+      ],
+    },
+    {
+      type: 'section', children: [
+        {
+          type: 'heading', depth: 1, children: [
+            { text: 'section 2', inlineCode: true },
+          ],
+        },
+      ],
+    },
+  ])
   factory.onEditorMounted(editor => {
     setTimeout(() => {
       HistoryEditor.withoutSaving(editor, () => {
@@ -54,14 +83,12 @@ function App (): JSX.Element {
         value={value}
       >
         <VirtualSectionInput
-          headingText='`section 1`'
           onChange={setFirst}
           section={0}
           value={first}
         />
 
         <VirtualSectionInput
-          headingText='`section 2`'
           onChange={setSecond}
           section={1}
           value={second}

@@ -96,9 +96,9 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
     return this
   }
 
-  private editorWrapHandlers: ((editor: Editor, children: JSX.Element[]) => void)[] = []
+  private editorWrapHandlers: ((editor: Editor) => void)[] = []
 
-  onWrapEditor (handler: (editor: Editor, children: JSX.Element[]) => void) {
+  onWrapEditor (handler: (editor: Editor) => void) {
     this.editorWrapHandlers.push(handler)
   }
 
@@ -123,7 +123,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
     return this.deserializeProcessor.processSync(value).result as Descendant[]
   }
 
-  wrapEditor<E extends Editor> (editor: E, children: JSX.Element[]): E {
+  wrapEditor<E extends Editor> (editor: E): E {
     const { isVoid, isInline, normalizeNode, insertBreak, insertFragment, setFragmentData } = editor
 
     editor.factory = this as never
@@ -444,7 +444,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
       dt.setData('text/plain', this.generateMarkdown(editor.getFragment()))
     }
 
-    this.editorWrapHandlers.forEach(handler => handler(editor, children))
+    this.editorWrapHandlers.forEach(handler => handler(editor))
 
     return editor
   }

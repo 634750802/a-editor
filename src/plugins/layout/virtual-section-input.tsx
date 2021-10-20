@@ -3,11 +3,10 @@ import { useEffect, useRef } from 'react'
 import { Descendant, Editor, Operation, Range } from 'slate'
 
 
-export interface VirtualSectionInputProps {
+interface VirtualSectionInputProps {
   section: number
   value: Descendant[]
   onChange: (value: Descendant[]) => void
-  headingText: string
 }
 
 function isOperationInRange (editor: Editor, operations: Operation[], range: Range): boolean {
@@ -39,7 +38,7 @@ export default function VirtualSectionInput ({ section, value = [], onChange }: 
       if (isOperationInRange(editor, editor.operations, range)) {
         const fragment = editor.getSection(section)
         valueRef.current = fragment
-        onChangeRef.current(fragment)
+        onChange(fragment)
       }
     })
 
