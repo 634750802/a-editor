@@ -19,6 +19,7 @@ export default defineConfig({
     rollupOptions: {
       external: ['react', 'react-dom'],
     },
+    sourcemap: true
   },
   resolve: {
     alias: [
