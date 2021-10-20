@@ -38,7 +38,7 @@ export default function VirtualSectionInput ({ section, value = [], onChange }: 
       if (isOperationInRange(editor, editor.operations, range)) {
         const fragment = editor.getSection(section)
         valueRef.current = fragment
-        onChange(fragment)
+        onChangeRef.current(fragment)
       }
     })
 
