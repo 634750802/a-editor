@@ -5,6 +5,8 @@ import React from 'react'
 import { faImage } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import VoidElement from '@/components/void-element/void-element'
+import { useSelected } from 'slate-react'
+import classNames from 'classnames'
 
 library.add(faImage)
 
@@ -15,10 +17,13 @@ const ImageNode = defineNode<Image>({
   contentType: MdastContentType.staticPhrasing,
   contentModelType: null,
   render: (editor: Editor, { element, attributes, children }: TypedRenderElementProps<Image>): JSX.Element => {
+    const selected = useSelected()
+
     return (
       <VoidElement attributes={attributes}>
         <img
           alt={element.alt}
+          className={classNames({ selected })}
           src={element.url}
           title={element.title}
         />

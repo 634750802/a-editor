@@ -9,5 +9,16 @@
   ::selection {
     background: rgba(51,112,255,.34);
   }
+
+  pre, img, table {
+    transition: all .2s ease;
+  }
+  pre.selected, img.selected, table.selected {
+    box-shadow: rgba(51,112,255,.34) 0 0 1px 2px;
+  }
+
+  table {
+    width: max-content;
+  }
 }
 

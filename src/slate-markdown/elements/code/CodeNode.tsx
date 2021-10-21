@@ -1,8 +1,8 @@
 import { defineNode, MdastContentType, TypedRenderElementProps } from '@/slate-markdown/core/elements'
 import { Code } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
-import React, { ChangeEvent } from 'react'
+import React from 'react'
 import LineWrapper from '@/components/line-wrapper/LineWrapper'
-import { Range, Text, Transforms } from 'slate'
+import { Range, Text } from 'slate'
 import Prism, { Token } from 'prismjs'
 import 'prismjs/components/prism-markdown.js'
 import 'prismjs/components/prism-javascript.js'
@@ -18,7 +18,8 @@ import 'prismjs/components/prism-log.js'
 import classNames from 'classnames'
 import Tippy from '@tippyjs/react'
 import './style.less'
-import { useReadOnly } from 'slate-react'
+import { useFocused, useReadOnly, useSelected } from 'slate-react'
+import LangSelect from '@/slate-markdown/elements/code/LangSelect'
 
 const options = [
   'markdown',
@@ -36,11 +37,11 @@ const options = [
 
 export const SYMBOL_PRISM_TOKEN = Symbol('prism_token')
 
-const renderCode = ({ attributes, element, children }: TypedRenderElementProps<Code>, active: boolean) => {
+const renderCode = ({ attributes, element, children }: TypedRenderElementProps<Code>, active: boolean, selected = false) => {
   return (
     <pre
       {...attributes}
-      className={classNames({ active }, element.lang ? `language-${element.lang}` : undefined)}
+      className={classNames({ active, selected }, element.lang ? `language-${element.lang}` : undefined)}
     >
       <code className="prism-code">
         {children}
@@ -59,6 +60,7 @@ const CodeNode = defineNode<Code>({
   render: (editor, props) => {
     const { element } = props
     const readonly = useReadOnly()
+    const selected = useSelected()
 
     if (readonly) {
       return renderCode(props, false)
@@ -70,29 +72,17 @@ const CodeNode = defineNode<Code>({
           <Tippy
             appendTo={document.body}
             content={(
-              <select
-                className="lang-selector"
-                contentEditable={false}
-                /* eslint-disable-next-line react/jsx-no-bind */
-                onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                  if (pathRef?.current) {
-                    Transforms.setNodes(editor, { lang: e.currentTarget.value }, { at: pathRef.current })
-                  }
-                }}
-                tabIndex={undefined}
-                value={element.lang || undefined}
-              >
-                {options.map(op => (
-                  <option key={op}>
-                    {op}
-                  </option>
-                ))}
-              </select>
+              <LangSelect
+                editor={editor}
+                lang={element.lang}
+                options={options}
+                pathRef={pathRef}
+              />
             )}
             interactive
-            placement='top-start'
+            placement="top-start"
           >
-            {renderCode(props, active)}
+            {renderCode(props, active, selected)}
           </Tippy>
 
         )}

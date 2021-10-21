@@ -5,6 +5,8 @@ import LineWrapper from '@/components/line-wrapper/LineWrapper'
 import { TableContext } from '@/slate-markdown/elements/table/context'
 import { faTable } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
+import classNames from 'classnames'
+import { useSelected } from 'slate-react'
 
 library.add(faTable)
 
@@ -19,6 +21,8 @@ const TableNode = defineNode<Table>({
   toggle: {},
 
   render: (editor, { element, attributes, children }) => {
+    const selected = useSelected()
+    const className = classNames({ selected })
     const [heading, ...body] = children
     // eslint-disable-next-line react/jsx-no-constructed-context-values
     const headerContextProps = { isHeader: true, align: element.align }
@@ -26,7 +30,10 @@ const TableNode = defineNode<Table>({
     const bodyContextProps = { isHeader: false, align: element.align }
     return (
       <LineWrapper element={element}>
-        <table {...attributes}>
+        <table
+          className={className}
+          {...attributes}
+        >
           <TableContext.Provider value={headerContextProps}>
             <thead>
               {heading}
