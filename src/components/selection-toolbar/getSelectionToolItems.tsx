@@ -6,6 +6,7 @@ import { ReactEditor } from 'slate-react'
 import { DOMRange } from 'slate-react/dist/utils/dom'
 import { MdastContentType } from '@/slate-markdown/core/elements'
 import { ActionState, ActionStateRenderer } from '@/slate-markdown/core/actions'
+import { isRangeEditable } from '@/slate-markdown/elements/text/TextNode'
 
 library.add(faBold, faItalic, faStrikethrough, faCode)
 
@@ -36,6 +37,9 @@ export default function getSelectionToolItems (editor: Editor, domRange: DOMRang
   const range = ReactEditor.toSlateRange(editor, domRange, { exactMatch: true }) ?? editor.selection
 
   if (range) {
+    if (!isRangeEditable(editor, range)) {
+      return []
+    }
     const [matched] = Editor.nodes(editor, {
       at: range,
       match: node => {
@@ -53,7 +57,6 @@ export default function getSelectionToolItems (editor: Editor, domRange: DOMRang
       return []
     }
   }
-
 
   return editor.getActions(range ?? undefined, editor.factory.selectionActions)
     .map(({ action: { key, icon, tips }, state }) => ({

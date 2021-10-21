@@ -114,6 +114,11 @@ export function isDecoratorActive (editor: Editor, selection: Range, decorator: 
   return !!marks[decorator]
 }
 
+export const isRangeEditable = (editor: Editor, range: Range) => {
+  const [node] = Editor.nodes(editor, { at: range, match: node => !editor.isEditable(node) } )
+  return !node
+}
+
 export const isRangeCustomTextPropsEnabled = (editor: Editor, range: Range) => {
   const match = isPhrasing(editor)
   const [nodes] = Editor.nodes(editor, { at: range, match })

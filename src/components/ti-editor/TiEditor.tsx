@@ -56,6 +56,8 @@ export interface TiEditor {
 }
 
 export interface TiEditor {
+  isEditable: (node: Node) => boolean
+
   // https://github.com/634750802/a-editor/issues/5
   isContent: (node: Node, type: MdastContentType) => node is Element | Text
   canContainsContent: (node: Node, type: MdastContentType) => node is Editor | Element | Text

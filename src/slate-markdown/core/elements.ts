@@ -68,6 +68,7 @@ export interface ICustomConfig<E extends SlateElement | SlateText> {
   isLeaf: boolean
   contentType: MdastContentType
   contentModelType: MdastContentType | null
+  isEditable?: boolean | undefined
 
   normalize?: CustomElementNormalizer<E>
 
@@ -125,7 +126,7 @@ export function defineNode<C extends AnyConfig> (config: Omit<C, 'register'>): C
   return {
     ...config,
     register (editorFactory: EditorFactory) {
-      editorFactory.define(config as never)
+      editorFactory.define({ ...config, isEditable: typeof config.isEditable === 'boolean' ? config.isEditable : true } as never)
     },
   } as C
 }

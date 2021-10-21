@@ -19,6 +19,7 @@ export default defineNode<CustomBlockElements['section']>({
   type: 'section',
   isLeaf: false,
   isInline: false,
+  isEditable: false,
   contentType: MdastContentType.flow,
   contentModelType: MdastContentType.flow,
   wrappingParagraph: false,
@@ -32,7 +33,7 @@ export default defineNode<CustomBlockElements['section']>({
     return (
       <section
         {...attributes}
-        contentEditable={false}
+        data-slate-zero-width
         onBeforeInputCapture={onBeforeInputCapture}
       >
         {children}

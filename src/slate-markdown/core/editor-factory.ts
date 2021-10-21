@@ -30,6 +30,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
 
   private inlineSet: Set<string> = new Set()
   private voidSet: Set<string> = new Set()
+  private nonEditableSet: Set<string> = new Set()
 
   readonly customElementMap: Map<string, ICustomElementConfig<IE | BE>> = new Map()
   readonly contentTypeMap: Map<string, MdastContentType> = new Map()
@@ -91,6 +92,10 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
       this.contentTypeMap.set(config.type, config.contentType)
       if (config.contentModelType === null) {
         this.voidSet.add(config.type)
+      }
+
+      if (config.isEditable) {
+        this.nonEditableSet.add(config.type)
       }
     }
     return this
@@ -374,6 +379,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
 
     editor.isVoid = element => this.voidSet.has(element.type) || isVoid(element)
     editor.isInline = element => this.inlineSet.has(element.type) || isInline(element)
+    editor.isEditable = node => Element.isElement(node) ? this.nonEditableSet.has(node.type) : true
     editor.normalizeNode = (entry) => {
       let shouldNormalizeDefaults = true
       const preventDefaults = () => {
