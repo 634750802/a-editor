@@ -3,7 +3,6 @@ import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } 
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react'
 import { BaseEditor, createEditor, Descendant, Editor, Element, Node, NodeEntry, Text } from 'slate'
 import { HistoryEditor, withHistory } from 'slate-history'
-import PropTypes from 'prop-types'
 import './editor.less'
 import { EditorFactory } from '@/slate-markdown/core/editor-factory'
 import register from '@/slate-markdown/elements/register'
@@ -209,13 +208,5 @@ const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false,
 })
 
 TiEditor.displayName = 'TiEditor'
-TiEditor.propTypes = {
-  disabled: PropTypes.bool,
-  initialMarkdown: PropTypes.string
-}
-TiEditor.defaultProps = {
-  disabled: false,
-  initialMarkdown: ''
-}
 
 export default TiEditor
