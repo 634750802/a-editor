@@ -8,7 +8,7 @@ import Sections from '@/Sections'
 
 ReactDOM.render(
   <React.StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <div>
         <nav>
           <Link to="/">
