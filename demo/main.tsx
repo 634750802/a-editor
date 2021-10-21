@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom'
 import App from './App'
 import { BrowserRouter, Link } from 'react-router-dom'
 import { Route, Switch } from 'react-router'
-import Empty from '@/Empty'
-import Sections from '@/Sections'
+import Empty from './Empty'
+import Sections from './Sections'
 
 ReactDOM.render(
   <React.StrictMode>

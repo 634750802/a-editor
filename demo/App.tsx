@@ -1,12 +1,12 @@
 import React, { useCallback, useState } from 'react'
-import TiEditor from './index'
+import TiEditor from '@/index'
 import './app.less'
 import { EditorFactory } from '@/slate-markdown/core/editor-factory'
 import layoutPlugin from '@/plugins/layout'
 import { HistoryEditor } from 'slate-history'
 import { Descendant } from 'slate'
 import VirtualSectionInput from '@/plugins/layout/virtual-section-input'
-import { instructionsMd } from '@/instructions'
+import { instructionsMd } from './instructions'
 
 function config (factory: EditorFactory) {
   factory.use(layoutPlugin)

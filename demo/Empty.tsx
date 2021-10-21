@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react'
-import TiEditor from './index'
+import TiEditor from '@/index'
 import './app.less'
 import { Descendant } from 'slate'
 

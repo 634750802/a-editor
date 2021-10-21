@@ -17,7 +17,7 @@ function isIn (source: string, dep: typeof dependencies | typeof peerDependencie
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react({}), typescript({ ...tsConfig.compilerOptions, rootDir: './src' }), visualizer()],
+  plugins: [react({}), typescript({ ...tsConfig.compilerOptions, rootDir: './src', include: '**/*' }), visualizer()],
   base: 'https://634750802.github.io/a-editor/',
   build: {
     lib: {
