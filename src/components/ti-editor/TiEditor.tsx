@@ -24,6 +24,9 @@ declare module 'slate' {
 }
 
 export interface TiCommunityEditorProps {
+  /**
+   * @deprecated
+   */
   config?: (factory: EditorFactory) => void
   uploadFile?: (file: File) => Promise<string>
   disabled?: boolean
@@ -31,6 +34,7 @@ export interface TiCommunityEditorProps {
   value: Descendant[]
   onChange: (value: Descendant[]) => void
   children?: JSX.Element | JSX.Element[]
+  factory: EditorFactory
 }
 
 export const enum ToggleStrategy {
@@ -104,18 +108,18 @@ export interface TiEditor {
 
 }
 
+export function createFactory (config?: (factory: EditorFactory) => void): EditorFactory {
+  const editorFactory = new EditorFactory()
+  editorFactory.use(coreRemarkPlugin)
+  editorFactory.use(coreActionsPlugin)
+  editorFactory.use(coreSelectionToolbarPlugin)
+  register(editorFactory)
+  config && config(editorFactory)
+  editorFactory.freezeProcessors()
+  return editorFactory
+}
 
-const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false, initialMarkdown = '', config, uploadFile, value, onChange: propOnChange, children }: TiCommunityEditorProps, ref): JSX.Element => {
-  const editorFactory = useMemo(() => {
-    const editorFactory = new EditorFactory()
-    editorFactory.use(coreRemarkPlugin)
-    editorFactory.use(coreActionsPlugin)
-    editorFactory.use(coreSelectionToolbarPlugin)
-    register(editorFactory)
-    config && config(editorFactory)
-    editorFactory.freezeProcessors()
-    return editorFactory
-  }, [])
+const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ factory: editorFactory, disabled = false, initialMarkdown = '', config, uploadFile, value, onChange: propOnChange, children }: TiCommunityEditorProps, ref): JSX.Element => {
 
   const editor = useMemo(() => {
     const editor = withReact(withHistory(createEditor()))

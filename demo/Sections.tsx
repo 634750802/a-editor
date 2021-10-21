@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react'
-import TiEditor from '@/index'
+import TiEditor, { createFactory } from '@/index'
 import './app.less'
 import { EditorFactory } from '@/slate-markdown/core/editor-factory'
 import layoutPlugin from '@/plugins/layout'
@@ -71,6 +71,8 @@ async function uploadFile (file: File): Promise<string> {
   })
 }
 
+const factory = createFactory(config)
+
 function App (): JSX.Element {
   const [value, setValue] = useState<Descendant[]>([])
 
@@ -85,7 +87,7 @@ function App (): JSX.Element {
   return (
     <div>
       <TiEditor
-        config={config}
+        factory={factory}
         onChange={onChange}
         uploadFile={uploadFile}
         value={value}

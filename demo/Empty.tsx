@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react'
-import TiEditor from '@/index'
+import TiEditor, { createFactory } from '@/index'
 import './app.less'
 import { Descendant } from 'slate'
 
@@ -18,6 +18,8 @@ async function uploadFile (file: File): Promise<string> {
   })
 }
 
+const factory = createFactory()
+
 function App (): JSX.Element {
   const [value, setValue] = useState<Descendant[]>([{
     type: 'paragraph',
@@ -31,6 +33,7 @@ function App (): JSX.Element {
   return (
     <div>
       <TiEditor
+        factory={factory}
         onChange={onChange}
         uploadFile={uploadFile}
         value={value}
