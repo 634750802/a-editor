@@ -1,7 +1,7 @@
 import { BlockEventHandler, CustomBlockElementEvents, ICustomBlockElementConfig, ICustomElementConfig, ICustomInlineElementConfig, ICustomTextConfig, isContentTypeConforms, MdastContentType, RemarkBlockElement, RemarkElement, RemarkElementProps, RemarkInlineElement, RemarkText, TypedRenderLeafProps } from '@/slate-markdown/core/elements'
-import { Ancestor, Descendant, Editor, Element, Node, NodeEntry, Path, Point, Range, Text, Transforms } from 'slate'
+import { Ancestor, Editor, Element, Node, NodeEntry, Path, Point, Range, Text, Transforms } from 'slate'
 import type { EditableProps } from 'slate-react/dist/components/editable'
-import { ClipboardEvent, createElement, Dispatch, DragEvent, KeyboardEvent, SetStateAction } from 'react'
+import { ClipboardEvent, createElement, DragEvent, KeyboardEvent } from 'react'
 import isHotkey from 'is-hotkey'
 import TextNode, { TextNodeDecorator } from '@/slate-markdown/elements/text/TextNode'
 import LinkNode from '@/slate-markdown/elements/link/LinkNode'
@@ -9,17 +9,9 @@ import DecorationStack from '@/slate-markdown/core/decoration-stack'
 import { ReactEditor } from 'slate-react'
 import { isElementType } from '@/slate-markdown/slate-utils'
 import { ToggleStrategy } from '@/components/ti-editor/TiEditor'
-import { Plugin, Processor, unified } from 'unified'
-import { remarkToSlate, slateToRemark } from 'remark-slate-transformer'
-import remarkStringify from 'remark-stringify'
-import remarkParse from 'remark-parse'
-import rehypeParse from 'rehype-parse'
-import rehypeRemark from 'rehype-remark'
+import { Processor } from 'unified'
 import { Image } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
-import remarkGfm from 'remark-gfm'
-import rfdc from 'rfdc'
 
-const clone = rfdc({ proto: false, circles: false })
 
 type ProcessorHandler = (processor: Processor) => void
 
@@ -36,40 +28,8 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
   readonly contentTypeMap: Map<string, MdastContentType> = new Map()
   readonly contentModelTypeMap: Map<string, MdastContentType | null> = new Map()
 
-  private serializerPlugins: Plugin[] = []
-  private deserializerPlugins: Plugin[] = []
-
-  private serializeProcessor: Processor = unified()
-  private deserializeProcessor: Processor = unified()
-  private deserializeHTMLProcessor: Processor = unified()
-
-
-  freezeProcessors () {
-    this.serializeProcessor.use(this.serializerPlugins).use(slateToRemark).use(remarkGfm).use(remarkStringify, {
-      emphasis: '*',
-      strong: '*',
-      listItemIndent: 'one',
-      fence: '`',
-      bullet: '-',
-    }).freeze()
-    this.deserializeProcessor.use(remarkParse).use(remarkGfm).use(remarkToSlate).use(this.deserializerPlugins).freeze()
-    this.deserializeHTMLProcessor.use(rehypeParse).use(rehypeRemark).use(remarkGfm).use(remarkToSlate).use(this.deserializerPlugins).freeze()
-  }
-
-  configProcessor (...plugins: Plugin[]) {
-    this.configSerializeProcessor(...plugins)
-    this.configDeserializeProcessor(...plugins)
-  }
-
-  configSerializeProcessor (...plugins: Plugin []) {
-    this.serializerPlugins.push(...plugins)
-  }
-
-  configDeserializeProcessor (...plugins: Plugin[]) {
-    this.deserializerPlugins.push(...plugins)
-  }
-
   use (plugin: (factory: this) => void): this {
+    console.debug('factory.use', plugin.name)
     plugin(this)
     return this
   }
@@ -117,19 +77,8 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
     this.editorMountedHandlers.forEach(handler => handler(editor))
   }
 
-  generateMarkdown (fragment: Descendant[]): string {
-    return this.serializeProcessor.stringify(this.serializeProcessor.runSync({
-      type: 'root',
-      children: clone(fragment), // processors may change the ast.
-    } as never)) as string
-  }
-
-  parseMarkdown (value: string): Descendant[] {
-    return this.deserializeProcessor.processSync(value).result as Descendant[]
-  }
-
   wrapEditor<E extends Editor> (editor: E): E {
-    const { isVoid, isInline, normalizeNode, insertBreak, insertFragment, setFragmentData } = editor
+    const { isVoid, isInline, normalizeNode, insertBreak } = editor
 
     editor.factory = this as never
 
@@ -149,10 +98,6 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
 
     (window as any).debugPrintTree = () => debugPrintTree(editor);
     (window as any).debugEditor = editor
-
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    editor.updateSelectionToolbar = editor.hideSelectionToolbar = editor.toggleSelectionToolbar = () => {
-    }
 
     editor.isContent = (node, type): node is Element | Text => {
       if (Element.isElement(node)) {
@@ -427,29 +372,6 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
       insertBreak()
     }
 
-    editor.insertFragment = (fragment) => {
-      if (editor.selection) {
-        const el = Node.parent(editor, editor.selection.anchor.path)
-        const cmt = editor.getContentModelType(el)
-        if (cmt === MdastContentType.value) {
-          const data = this.serializeProcessor.stringify(this.serializeProcessor.runSync({
-            type: 'root',
-            children: fragment
-          } as never)) as string
-          Transforms.insertText(editor, data)
-          return
-        }
-      }
-
-      insertFragment(fragment)
-    }
-
-    editor.setFragmentData = (dt) => {
-      setFragmentData(dt)
-      // copy the markdown content
-      dt.setData('text/plain', this.generateMarkdown(editor.getFragment()))
-    }
-
     this.editorWrapHandlers.forEach(handler => handler(editor))
 
     return editor
@@ -642,21 +564,6 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
       if (!dt) {
         return
       }
-      // from outside of the document
-      if (dt.types.indexOf('application/x-slate-fragment') < 0) {
-        if (dt.types.indexOf('text/html') >= 0) {
-          const htmlData = dt.getData('text/html')
-          const nodes = this.deserializeHTMLProcessor.processSync(htmlData).result as Descendant[]
-          editor.insertFragment(nodes)
-          event.preventDefault()
-        } else if (dt.types.indexOf('text/plain') >= 0) {
-          const textData = dt.getData('text/plain')
-          const nodes = this.deserializeProcessor.processSync(textData).result as Descendant[]
-          editor.insertFragment(nodes)
-          event.preventDefault()
-        }
-      }
-
       handleFiles(dt, editor.selection)
     }
 

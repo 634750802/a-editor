@@ -19,4 +19,10 @@ export function coreSelectionToolbarPlugin (factory: EditorFactory): void {
     children.push(createElement(SelectionToolbar, { key: 'selection-toolbar' }))
     return children
   }
+
+  factory.onWrapEditor(editor => {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    editor.updateSelectionToolbar = editor.hideSelectionToolbar = editor.toggleSelectionToolbar = () => {
+    }
+  })
 }

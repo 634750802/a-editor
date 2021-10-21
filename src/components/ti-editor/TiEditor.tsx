@@ -1,5 +1,5 @@
 /* eslint-disable react/forbid-component-props */
-import React, { forwardRef, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react'
 import { BaseEditor, createEditor, Descendant, Editor, Element, Node, NodeEntry, Text } from 'slate'
 import { HistoryEditor, withHistory } from 'slate-history'
@@ -13,6 +13,7 @@ import 'github-markdown-css/github-markdown.css'
 import UIContext, { UIContextProps } from '@/components/ti-editor/ui-context'
 import { coreActionsPlugin } from '@/slate-markdown/core/actions'
 import { coreSelectionToolbarPlugin } from '@/slate-markdown/core/selection-toolbar'
+import { coreRemarkPlugin } from '@/slate-markdown/core/remark'
 
 // see https://docs.slatejs.org/walkthroughs/01-installing-slate
 declare module 'slate' {
@@ -108,6 +109,7 @@ export interface TiEditor {
 const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ disabled = false, initialMarkdown = '', config, uploadFile, value, onChange: propOnChange, children }: TiCommunityEditorProps, ref): JSX.Element => {
   const editorFactory = useMemo(() => {
     const editorFactory = new EditorFactory()
+    editorFactory.use(coreRemarkPlugin)
     editorFactory.use(coreActionsPlugin)
     editorFactory.use(coreSelectionToolbarPlugin)
     register(editorFactory)
