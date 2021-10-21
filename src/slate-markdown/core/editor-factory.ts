@@ -3,7 +3,7 @@ import { Ancestor, Editor, Element, Node, NodeEntry, Path, Point, Range, Text, T
 import type { EditableProps } from 'slate-react/dist/components/editable'
 import { ClipboardEvent, createElement, DragEvent, KeyboardEvent } from 'react'
 import isHotkey from 'is-hotkey'
-import TextNode, { TextNodeDecorator } from '@/slate-markdown/elements/text/TextNode'
+import TextNode from '@/slate-markdown/elements/text/TextNode'
 import LinkNode from '@/slate-markdown/elements/link/LinkNode'
 import DecorationStack from '@/slate-markdown/core/decoration-stack'
 import { ReactEditor } from 'slate-react'
@@ -429,7 +429,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
         }
         // like links, if you input at the end of a link, slate will add the text to next text node.
         if (Editor.isInline(editor, parentNode)) {
-          const path = Path.parent(point.path).concat(parentNode.children.length)
+          const path = Path.next(Path.parent(point.path))
           Transforms.insertNodes(editor, { text: event.data || '' }, { at: path })
           Transforms.move(editor, { distance: 1 })
           event.preventDefault()
@@ -448,7 +448,15 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
 
           if (Element.isElement(parentNode)) {
             const config = this.customElementMap.get(parentNode.type) as ICustomBlockElementConfig<BE> | undefined
-            if (!config || config.isInline) {
+            if (!config) {
+              return
+            }
+            if (config.isInline) {
+              if (Editor.isEnd(editor, point, parentPath)) {
+                Transforms.move(editor, { unit: 'offset' })
+                editor.insertBreak()
+                event.preventDefault()
+              }
               return
             }
             const handler = get(config.events)
