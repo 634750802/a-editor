@@ -10,6 +10,8 @@ import { Descendant, Node, Transforms } from 'slate'
 import rfdc from 'rfdc'
 import { override } from '@/utils/override'
 import { MdastContentType } from '@/slate-markdown/core/elements'
+import remarkRehype from 'remark-rehype'
+import rehypeStringify from 'rehype-stringify'
 
 const clone = rfdc({ proto: false, circles: false })
 
@@ -20,6 +22,7 @@ declare module '@/slate-markdown/core/editor-factory' {
     configSerializeProcessor: (...plugins: Plugin[]) => void
     configDeserializeProcessor: (...plugins: Plugin[]) => void
     generateMarkdown: (fragment: Descendant[]) => string
+    generateHtml: (fragment: Descendant[]) => string
     parseMarkdown: (value: string) => Descendant[]
     parseHtml: (value: string) => Descendant[]
   }
@@ -30,6 +33,7 @@ export function coreRemarkPlugin (factory: EditorFactory): void {
   const deserializerPlugins: Plugin[] = []
 
   const serializeProcessor: Processor = unified()
+  const serializeHTMLProcessor: Processor = unified()
   const deserializeProcessor: Processor = unified()
   const deserializeHTMLProcessor: Processor = unified()
 
@@ -41,6 +45,7 @@ export function coreRemarkPlugin (factory: EditorFactory): void {
       fence: '`',
       bullet: '-',
     }).freeze()
+    serializeHTMLProcessor.use(serializerPlugins).use(slateToRemark).use(remarkGfm).use(remarkRehype).use(rehypeStringify).freeze()
     deserializeProcessor.use(remarkParse).use(remarkGfm).use(remarkToSlate).use(deserializerPlugins).freeze()
     deserializeHTMLProcessor.use(rehypeParse).use(rehypeRemark).use(remarkGfm).use(remarkToSlate).use(deserializerPlugins).freeze()
   }
@@ -60,6 +65,13 @@ export function coreRemarkPlugin (factory: EditorFactory): void {
 
   factory.generateMarkdown = (fragment: Descendant[]): string => {
     return serializeProcessor.stringify(serializeProcessor.runSync({
+      type: 'root',
+      children: clone(fragment), // processors may change the ast.
+    } as never)) as string
+  }
+
+  factory.generateHtml = (fragment: Descendant[]): string => {
+    return serializeHTMLProcessor.stringify(serializeHTMLProcessor.runSync({
       type: 'root',
       children: clone(fragment), // processors may change the ast.
     } as never)) as string

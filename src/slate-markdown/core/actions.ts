@@ -1,9 +1,11 @@
-import { SyntheticEvent } from 'react'
+import { KeyboardEvent, SyntheticEvent } from 'react'
 import { Editor, Location, Node, Path, Range, Text } from 'slate'
 import { EditorFactory } from '@/slate-markdown/core/editor-factory'
 import { MdastContentType } from '@/slate-markdown/core/elements'
 import { createSyntheticEvent } from '@/utils/react'
 import { TextNodeDecorator } from '@/slate-markdown/elements/text/TextNode'
+import { override } from '@/utils/override'
+import isHotkey from 'is-hotkey'
 
 declare module '../../components/ti-editor/TiEditor' {
   interface TiEditor {
@@ -28,6 +30,7 @@ declare module './editor-factory' {
       [ActionType.phrasing]: BaseAction<never, Record<string, unknown>>[],
       [ActionType.toplevel]: BaseAction<never, Record<string, unknown>>[],
     }
+    actionHotKeysHas: (event: KeyboardEvent) => string | undefined
   }
 }
 
@@ -66,7 +69,7 @@ export interface BaseActionConfig<K extends keyof ActionTypeMap, P extends Recor
   action: (editor: Editor, location: ActionTypeMap[K], state: ActionState<P>, event: SyntheticEvent) => boolean
 }
 
-export interface BaseAction<K extends keyof ActionTypeMap, P extends Record<string, unknown>> {
+export interface BaseAction<K extends keyof ActionTypeMap = keyof ActionTypeMap, P extends Record<string, unknown> = Record<string, unknown>> {
   key: string
   type: K
   hotkeys: string[]
@@ -159,12 +162,25 @@ export function coreActionsPlugin (factory: EditorFactory): void {
     [ActionType.phrasing]: [],
     [ActionType.toplevel]: [],
   }
+  const hotkeyMaps = new Map<string, string>()
 
   factory.defineAction = (config) => {
     const baseAction = createAction(config)
     factory.actionMap.set(baseAction.key, baseAction as never)
     factory.actionTypes[baseAction.type].push(baseAction as never)
     factory.actions.push(baseAction as never)
+    for (const hotkey of baseAction.hotkeys) {
+      hotkeyMaps.set(hotkey, baseAction.key)
+    }
+  }
+
+  factory.actionHotKeysHas = (event: KeyboardEvent) => {
+    for (const key of hotkeyMaps.keys()) {
+      if (isHotkey(key, event)) {
+        return key
+      }
+    }
+    return undefined
   }
 
   factory.onWrapEditor(editor => {
@@ -207,11 +223,24 @@ export function coreActionsPlugin (factory: EditorFactory): void {
     }
   })
 
+  override(factory, 'createDefaultEditableProps', (props) =>
+    editor =>
+      override(props(editor), 'onKeyDown', onKeyDown =>
+        event => {
+          const action = factory.actionHotKeysHas(event)
+          if (action && editor.runAction(action, undefined, event)) {
+            event.preventDefault()
+            event.stopPropagation()
+            return
+          }
+          onKeyDown?.(event)
+        }))
+
   if (!factory.lineActions) {
     factory.lineActions = [
       ['toggle-heading-1', 'toggle-heading-2', 'toggle-heading-3', 'toggle-heading-4', 'toggle-heading-5', 'toggle-heading-6'],
       ['toggle-ordered-list', 'toggle-unordered-list', 'indent-list', 'outdent-list'],
-      ['toggle-blockquote', 'toggle-codeblock', 'toggle-table']
+      ['toggle-blockquote', 'toggle-codeblock', 'toggle-table'],
     ]
   }
   if (!factory.selectionActions) {

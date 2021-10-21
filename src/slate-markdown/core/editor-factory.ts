@@ -617,18 +617,6 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
             Transforms.insertText(editor, '\n')
             return
           }
-          if (editor.selection) {
-            if (isHotkey('meta+b', event)) {
-              TextNode.toggleDecorator(editor, editor.selection, TextNodeDecorator.strong)
-              event.preventDefault()
-              return
-            }
-            if (isHotkey('meta+i', event)) {
-              TextNode.toggleDecorator(editor, editor.selection, TextNodeDecorator.emphasis)
-              event.preventDefault()
-              return
-            }
-          }
         })
       },
       onSelect: (e) => {

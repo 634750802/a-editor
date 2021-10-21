@@ -11,11 +11,13 @@ export function register (factory: EditorFactory) {
       key: TextNodeDecorator.strong,
       icon: faBold,
       tips: <>加粗</>,
+      hotkeys: ['meta+b'],
     },
     {
       key: TextNodeDecorator.emphasis,
       icon: faItalic,
       tips: <>斜体</>,
+      hotkeys: ['meta+i'],
     },
     {
       key: TextNodeDecorator.inlineCode,
@@ -27,12 +29,13 @@ export function register (factory: EditorFactory) {
       icon: faStrikethrough,
       tips: <>删除</>,
     },
-  ].forEach(({ icon, key, tips }) => {
+  ].forEach(({ icon, key, tips, hotkeys }) => {
     factory.defineAction({
       key,
       type: ActionType.selection,
       icon: <FontAwesomeIcon icon={icon} />,
       tips,
+      hotkeys,
       computeState: (editor, range) => {
         const active = isDecoratorActive(editor, range, key)
         const disabled = !isRangeCustomTextPropsEnabled(editor, range)

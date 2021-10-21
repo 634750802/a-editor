@@ -2,9 +2,11 @@ import { EditorFactory } from '@/slate-markdown/core/editor-factory'
 import el from './register-elements'
 import remarkSectionPlugin from '@/plugins/layout/remark-utils'
 import { CustomBlockElements } from '@/slate-markdown/core/elements'
-import { Descendant, Editor, Node, Path, PathRef, Range, Span, Transforms } from 'slate'
+import { Descendant, Editor, Path, PathRef, Range, Span, Transforms } from 'slate'
 import { isElementType } from '@/slate-markdown/slate-utils'
 import { HistoryEditor } from 'slate-history'
+import { override } from '@/utils/override'
+import './style.less'
 
 declare module '@/components/ti-editor/TiEditor' {
   interface TiEditor {
@@ -47,7 +49,7 @@ export default function layoutPlugin (factory: EditorFactory): void {
   const PATH_REFS = new WeakMap<Editor, PathRef[]>()
 
   factory.onWrapEditor(editor => {
-    const { normalizeNode, deleteFragment, deleteBackward, deleteForward, insertFragment, runAction, onChange } = editor
+    const { normalizeNode, deleteFragment, deleteBackward, deleteForward, insertFragment, runAction, onChange, insertText, insertBreak } = editor
 
     const pathRefs: PathRef[] = []
     PATH_REFS.set(editor, pathRefs)
@@ -258,6 +260,29 @@ export default function layoutPlugin (factory: EditorFactory): void {
       delete onSectionLayoutMap[i]
     }
   }
+
+  override(factory, 'createDefaultEditableProps', createDefaultEditableProps => {
+    return editor => override(createDefaultEditableProps(editor), 'onKeyDown', onKeyDown => {
+      return event => {
+        if ((!event.metaKey || factory.actionHotKeysHas(event)) && editor.selection) {
+          let exists = false
+          for (const pathRef of PATH_REFS.get(editor) || []) {
+            if (pathRef.current && Range.intersection(editor.selection, Editor.range(editor, pathRef.current))) {
+              exists = true
+              break
+            }
+          }
+          if (exists) {
+            editor.onAlert('无法编辑固定内容', '')
+            event.preventDefault()
+            event.stopPropagation()
+            return
+          }
+        }
+        onKeyDown?.(event)
+      }
+    })
+  })
 
 }
 

@@ -11,10 +11,6 @@ declare module '@/slate-markdown/core/elements' {
   }
 }
 
-const onBeforeInputCapture = (event: FormEvent) => {
-  console.log(event)
-}
-
 export default defineNode<CustomBlockElements['section']>({
   type: 'section',
   isLeaf: false,
@@ -31,11 +27,7 @@ export default defineNode<CustomBlockElements['section']>({
   },
   render (editor: Editor, { attributes, children }): JSX.Element {
     return (
-      <section
-        {...attributes}
-        data-slate-zero-width
-        onBeforeInputCapture={onBeforeInputCapture}
-      >
+      <section {...attributes}>
         {children}
       </section>
     )
