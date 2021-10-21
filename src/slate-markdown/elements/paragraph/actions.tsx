@@ -38,7 +38,7 @@ export function register (editorFactory: EditorFactory): void {
     icon: <FontAwesomeIcon icon={faParagraph} />,
     computeState: () => ({ active: false, disabled: false }),
     action: (editor, path, state) => {
-      Transforms.insertNodes(editor, { type: 'paragraph', children: [{ text: '' }] }, { at: path })
+      Transforms.insertNodes(editor, { type: 'paragraph', children: [{ text: '' }] }, { at: path, select: true })
       return true
     },
   })

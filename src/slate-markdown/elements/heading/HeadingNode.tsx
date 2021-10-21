@@ -3,6 +3,7 @@ import { Heading } from 'remark-slate-transformer/lib/transformers/mdast-to-slat
 import { createElement } from 'react'
 import LineWrapper from '@/components/line-wrapper/LineWrapper'
 import classNames from 'classnames'
+import { Editor, Path, Transforms } from 'slate'
 
 
 const HeadingNode = defineNode<Heading>({
@@ -35,9 +36,21 @@ const HeadingNode = defineNode<Heading>({
     },
   },
   events: {
-    onStartEnter: (editor, path) => {
-      return editor.runAction('toggle-paragraph', path)
-    },
+    onInsertParagraph: (editor) => {
+      if (!editor.selection) {
+        return false
+      }
+      const point = Editor.point(editor, editor.selection)
+      const path = Path.parent(Editor.path(editor, editor.selection))
+      if (Editor.isStart(editor, point, path)) {
+        return editor.runAction('toggle-paragraph', path)
+      } else if (Editor.isEnd(editor, point, path)) {
+        return editor.runAction('insert-paragraph', Path.next(path))
+      } else {
+        Transforms.splitNodes(editor, { at: editor.selection })
+        return editor.runAction('toggle-paragraph', Path.next(path))
+      }
+    }
   },
 })
 
