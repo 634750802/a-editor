@@ -5,6 +5,7 @@ import { BrowserRouter, Link } from 'react-router-dom'
 import { Route, Switch } from 'react-router'
 import Empty from './Empty'
 import Sections from './Sections'
+import LinkBlock from './LinkBlock'
 
 ReactDOM.render(
   <React.StrictMode>
@@ -22,6 +23,10 @@ ReactDOM.render(
           <Link to="/sections">
             Sections example
           </Link>
+
+          <Link to="/linkblock">
+            LinkBlock example
+          </Link>
         </nav>
 
         <main>
@@ -36,6 +41,12 @@ ReactDOM.render(
               component={Sections}
               exact
               path="/sections"
+            />
+
+            <Route
+              component={LinkBlock}
+              exact
+              path="/linkblock"
             />
 
             <Route
