@@ -8,7 +8,7 @@ import { HistoryEditor } from 'slate-history'
 import { override } from '@/utils/override'
 import './style.less'
 
-declare module '@/components/ti-editor/TiEditor' {
+declare module '../../components/ti-editor/TiEditor' {
   interface TiEditor {
     getSectionRange (index: number): Range | undefined
 
@@ -26,7 +26,7 @@ declare module '@/components/ti-editor/TiEditor' {
   }
 }
 
-declare module '@/slate-markdown/core/editor-factory' {
+declare module '../../slate-markdown/core/editor-factory' {
   interface EditorFactory {
     configSections (sections: CustomBlockElements['section'][]): void
 

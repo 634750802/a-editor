@@ -3,7 +3,7 @@ import { createElement } from 'react'
 import SelectionToolbar from '@/components/selection-toolbar/SelectionToolbar'
 import { DOMRange } from 'slate-react/dist/utils/dom'
 
-declare module '@/components/ti-editor/TiEditor' {
+declare module '../../../components/ti-editor/TiEditor' {
   interface TiEditor {
     updateSelectionToolbar: (range?: DOMRange) => void
     hideSelectionToolbar: () => void

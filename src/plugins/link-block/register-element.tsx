@@ -2,7 +2,7 @@ import { CustomBlockElements, defineNode, MdastContentType } from '@/slate-markd
 import { Editor, Path, Transforms } from 'slate'
 
 
-declare module '@/slate-markdown/core/elements' {
+declare module '../../slate-markdown/core/elements' {
   export interface CustomBlockElements {
     linkBlock: {
       type: 'linkBlock'

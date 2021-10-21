@@ -15,7 +15,7 @@ import rehypeStringify from 'rehype-stringify'
 
 const clone = rfdc({ proto: false, circles: false })
 
-declare module '@/slate-markdown/core/editor-factory' {
+declare module '../../../slate-markdown/core/editor-factory' {
   interface EditorFactory {
     freezeProcessors: () => void
     configProcessor: (...plugins: Plugin[]) => void
