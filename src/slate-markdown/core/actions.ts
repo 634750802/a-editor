@@ -117,10 +117,13 @@ export function createAction<K extends keyof ActionTypeMap, P extends Record<str
 
 
 export function getActionLocation<K extends keyof ActionTypeMap> (editor: Editor, actionType: K, from: Location | undefined): ActionTypeMap[K] | undefined {
-  const location = from ?? editor.selection
+  let location = from ?? editor.selection
 
   if (!location) {
     return undefined
+  }
+  if (Range.isRange(location)) {
+    location = Editor.unhangRange(editor, location)
   }
   switch (actionType) {
     case ActionType.phrasing: {
@@ -250,10 +253,14 @@ export function coreActionsPlugin (factory: EditorFactory): void {
       TextNodeDecorator.delete,
       TextNodeDecorator.inlineCode,
       'toggle-link',
+      'toggle-image',
+      'remove-selection-table',
       'table-insert-row-right',
       'table-insert-row-left',
       'table-insert-row-above',
       'table-insert-row-below',
+      'table-delete-row',
+      'table-delete-col',
     ]
   }
 }

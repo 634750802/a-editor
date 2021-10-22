@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-max-depth */
-import { defineNode, MdastContentType } from '@/slate-markdown/core/elements'
+import { defineNode, isContentTypeConforms, MdastContentType } from '@/slate-markdown/core/elements'
 import { Table } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import LineWrapper from '@/components/line-wrapper/LineWrapper'
 import { TableContext } from '@/slate-markdown/elements/table/context'
@@ -7,6 +7,8 @@ import { faTable } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import classNames from 'classnames'
 import { useSelected } from 'slate-react'
+import { Transforms } from 'slate'
+import TableRowNode from '@/slate-markdown/elements/table/TableRowNode'
 
 library.add(faTable)
 
@@ -19,6 +21,20 @@ const TableNode = defineNode<Table>({
   wrappingParagraph: false,
   events: {},
   toggle: {},
+  normalize: (editor, table, path, preventDefaults) => {
+    /// TODO: normalize table
+    if (table.children.length === 0) {
+      Transforms.removeNodes(editor, { at: path })
+      preventDefaults()
+    }
+    for (let i = table.children.length - 1; i >= 0; --i) {
+      const child = table.children[i]
+      const contentType = editor.getContentType(child)
+      if (!contentType || !isContentTypeConforms(contentType, TableRowNode.contentType)) {
+        Transforms.removeNodes(editor, { at: path.concat(i) })
+      }
+    }
+  },
 
   render: (editor, { element, attributes, children }) => {
     const selected = useSelected()
@@ -34,11 +50,13 @@ const TableNode = defineNode<Table>({
           className={className}
           {...attributes}
         >
-          <TableContext.Provider value={headerContextProps}>
-            <thead>
-              {heading}
-            </thead>
-          </TableContext.Provider>
+          {heading && (
+            <TableContext.Provider value={headerContextProps}>
+              <thead>
+                {heading}
+              </thead>
+            </TableContext.Provider>
+          )}
 
           <TableContext.Provider value={bodyContextProps}>
             <tbody>

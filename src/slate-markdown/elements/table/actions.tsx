@@ -9,8 +9,9 @@ import { isContentTypeConforms } from '@/slate-markdown/core/elements'
 import { requireFields } from '@/components/form'
 import createSchema from '@/slate-markdown/elements/table/create-schema.json'
 import { isElementType } from '@/slate-markdown/slate-utils'
-import { InsertRowAboveOutlined, InsertRowBelowOutlined, InsertRowLeftOutlined, InsertRowRightOutlined } from '@ant-design/icons'
+import { DeleteColumnOutlined, DeleteRowOutlined, InsertRowAboveOutlined, InsertRowBelowOutlined, InsertRowLeftOutlined, InsertRowRightOutlined } from '@ant-design/icons'
 import TableCellNode from '@/slate-markdown/elements/table/TableCellNode'
+import { ReactEditor } from 'slate-react'
 
 type ToggleTablePrams = {
   tableEntry: NodeEntry<Table> | undefined
@@ -111,7 +112,6 @@ export function register (factory: EditorFactory) {
       return { active, disabled, tableEntry }
     },
     action: (editor, path, state, event) => {
-      const { cols, rows } = getActionParams(editor)
       if (state.active) {
         if (!state.tableEntry) {
           return false
@@ -150,6 +150,28 @@ export function register (factory: EditorFactory) {
           .finally(() => pathRef.unref())
         return true
       }
+    },
+  })
+
+  factory.defineAction<ActionType.selection, TableOperationProps>({
+    key: 'remove-selection-table',
+    type: ActionType.selection,
+    icon: <FontAwesomeIcon icon={faTable} />,
+    computeState: (editor, range) => {
+      const [tableEntry] = Editor.nodes(editor, { at: range, match: node => isElementType<Table>(node, 'table') })
+      const active = !!tableEntry
+      const disabled = !tableEntry
+      return { active, disabled, tableEntry: tableEntry as NodeEntry<Table> }
+    },
+    action: (editor, location, state) => {
+      if (!state.tableEntry) {
+        return false
+      }
+      const [node, path] = state.tableEntry
+      const text = [...Node.texts(node)].map(([node]) => node.text).join(' ')
+      Transforms.removeNodes(editor, { at: path })
+      Transforms.insertNodes(editor, { type: 'paragraph', children: [{ text }] }, { at: path, select: true })
+      return true
     },
   })
 
@@ -233,4 +255,45 @@ export function register (factory: EditorFactory) {
       return true
     },
   })
+
+  factory.defineAction<ActionType.selection, TableOperationProps>({
+    key: 'table-delete-row',
+    type: ActionType.selection,
+    icon: <DeleteRowOutlined />,
+    computeState: (editor, range) => {
+      const [tableEntry] = Editor.nodes<Table>(editor, { at: range, mode: 'lowest', match: node => isElementType<Table>(node, 'table') })
+      return { active: false, disabled: !tableEntry || tableEntry[0].children.length <= 1, tableEntry }
+    },
+    action: (editor, location, state) => {
+      if (!state.tableEntry) {
+        return false
+      }
+      const [, tablePath] = state.tableEntry
+      const path = getRowPath(editor, tablePath, 0)
+      Transforms.removeNodes(editor, { at: path })
+      Transforms.deselect(editor)
+      return true
+    },
+  })
+
+  factory.defineAction<ActionType.selection, TableOperationProps>({
+    key: 'table-delete-col',
+    type: ActionType.selection,
+    icon: <DeleteColumnOutlined />,
+    computeState: (editor, range) => {
+      const [tableEntry] = Editor.nodes<Table>(editor, { at: range, mode: 'lowest', match: node => isElementType<Table>(node, 'table') })
+      return { active: false, disabled: !tableEntry || getTableCols(tableEntry[0]) <= 1, tableEntry }
+    },
+    action: (editor, location, state) => {
+      if (!state.tableEntry) {
+        return false
+      }
+      const [, tablePath] = state.tableEntry
+      const colId = getColIndex(editor, 0)
+      Transforms.removeNodes(editor, { at: tablePath, match: (node, path) => isElementType(node, 'tableCell') && path[path.length - 1] === colId })
+      Transforms.deselect(editor)
+      return true
+    },
+  })
+
 }
