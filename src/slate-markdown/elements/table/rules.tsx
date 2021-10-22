@@ -1,70 +1,123 @@
 import { EditorFactory } from '@/slate-markdown/core/editor-factory'
 import { override } from '@/utils/override'
-import { Editor, Path, Point, Range, Transforms } from 'slate'
+import { Editor, Node, Path, Point, Range, Transforms } from 'slate'
 import { isElementType } from '@/slate-markdown/slate-utils'
+
+function clearTablePart (editor: Editor, range: Range, tablePath: Path) {
+  const entries = Editor.nodes(editor, {
+    at: tablePath,
+    mode: 'highest',
+    match: (node, path) => {
+      return path.length > 2 && Path.isParent(tablePath, Path.parent(Path.parent(path)))
+    },
+  })
+  for (const [, path] of entries) {
+    const common = Range.intersection(range, Editor.range(editor, path))
+    if (common && !Range.isCollapsed(common)) {
+      // only delete all table cell data.
+      Transforms.delete(editor, { at: common })
+    }
+  }
+}
+
+function parentTablePath (editor: Editor, point: Point, checkEdge: 'start' | 'end'): [path: Path, isEdge: boolean] | undefined {
+  for (const [node, path] of Node.ancestors(editor, point.path, { reverse: true })) {
+    if (isElementType(node, 'table')) {
+      const edge = checkEdge === 'start' ? Editor.isStart(editor, point, path) : Editor.isEnd(editor, point, path)
+      return [path, edge]
+    }
+  }
+  return undefined
+}
+
+function isTableCellEdge (editor: Editor, point: Point, checkEdge: 'start' | 'end'): boolean {
+  for (const [node, path] of Node.ancestors(editor, point.path, { reverse: true })) {
+    if (isElementType(node, 'tableCell')) {
+      return checkEdge === 'start' ? Editor.isStart(editor, point, path) : Editor.isEnd(editor, point, path)
+    }
+  }
+  return false
+}
 
 export function register (factory: EditorFactory) {
   factory.onWrapEditor(editor => {
     override(editor, 'deleteFragment', deleteFragment => {
       return dir => {
         if (editor.selection) {
-          const [...tables] = Editor.nodes(editor, { at: editor.selection, match: node => isElementType(node, 'table'), mode: 'highest' })
-          if (tables.length) {
-            const selectionRef = Editor.rangeRef(editor, editor.selection)
-            // range set excludes table regions (or includes a whole table)
-            const rangeSet: Range[] = []
-            const [rangeStart, rangeEnd] = Editor.edges(editor, editor.selection)
-            let currentStart = rangeStart
-            for (const [, tablePath] of tables) {
-              let shouldHandleTable = true
-              const end = Editor.point(editor, Path.next(tablePath), { edge: 'start' })
-              if (Path.hasPrevious(tablePath)) {
-                const start = Editor.point(editor, Path.previous(tablePath), { edge: 'end' })
-                if (Point.isBefore(currentStart, start)) {
-                  if (Point.isBefore(end, rangeEnd)) {
-                    // entire table should be deleted
-                    rangeSet.push(Editor.range(editor, tablePath))
-                    shouldHandleTable = false
-                  } else {
-                    // part of table should deleted
-                    rangeSet.push(Editor.unhangRange(editor, { anchor: currentStart, focus: start }))
-                  }
-                }
+          const { anchor, focus } = editor.selection
+          const reverse = Point.isAfter(anchor, focus)
+          const anchorMatch = parentTablePath(editor, anchor, reverse ? 'start' : 'end')
+          const focusMatch = parentTablePath(editor, focus, reverse ? 'end' : 'start')
+          if (anchorMatch && focusMatch && Path.equals(anchorMatch[0], focusMatch[0])) {
+            clearTablePart(editor, editor.selection, anchorMatch[0])
+            return
+          }
+          const range = { ...editor.selection }
+          if (anchorMatch) {
+            const [path, isEdge] = anchorMatch
+            if (!isEdge) {
+              clearTablePart(editor, editor.selection, path)
+            }
+            range.anchor = Editor.point(editor, Path[reverse ? 'previous' : 'next'](path), { edge: reverse ? 'end' : 'start' })
+          }
+          if (focusMatch) {
+            const [path, isEdge] = focusMatch
+            if (!isEdge) {
+              clearTablePart(editor, editor.selection, path)
+            }
+            range.focus = Editor.point(editor, Path[reverse ? 'next' : 'previous'](path), { edge: reverse ? 'start' : 'end' })
+          }
+          Transforms.select(editor, Editor.unhangRange(editor, range))
+        }
+        deleteFragment(dir)
+      }
+    })
+    override(editor, 'deleteForward', deleteForward => {
+      return (unit) => {
+        if (editor.selection) {
+          const after = Editor.after(editor, editor.selection, { unit })
+          if (after) {
+            const matchedTable = parentTablePath(editor, after, 'start')
+            if (matchedTable) {
+              const [tablePath, isTableEdge] = matchedTable
+              if (isTableEdge) {
+                // delete table if delete before table
+                Transforms.removeNodes(editor, { at: tablePath })
+                return
               }
-              currentStart = end
-              if (!shouldHandleTable) {
-                continue
-              }
-              const entries = Editor.nodes(editor, {
-                match: (node, path) => {
-                  return path.length > 2 && Path.isParent(tablePath, Path.parent(Path.parent(path)))
-                },
-              })
-              for (const [, path] of entries) {
-                const common = Range.intersection(editor.selection, Editor.range(editor, path))
-                if (common && !Range.isCollapsed(common)) {
-                  // only delete all table cell data.
-                  Transforms.delete(editor, { at: common })
-                }
-              }
             }
-            if (Point.isBefore(currentStart, rangeEnd)) {
-              rangeSet.push({ anchor: currentStart, focus: rangeEnd })
-            }
-            for (const range of rangeSet.reverse()) {
-              // delete all other regions
-              Transforms.select(editor, Editor.unhangRange(editor, range))
-              deleteFragment(dir)
-            }
-            // recover selections
-            if (selectionRef.current) {
-              Transforms.select(editor, selectionRef.current)
-            }
-            selectionRef.unref()
+          }
+          const isCellEnd = isTableCellEdge(editor, Editor.point(editor, editor.selection, { edge: 'end' }), 'end')
+          if (isCellEnd) {
+            // prevent delete table cell
             return
           }
         }
-        deleteFragment(dir)
+        deleteForward(unit)
+      }
+    })
+    override(editor, 'deleteBackward', deleteBackward => {
+      return (unit) => {
+        if (editor.selection) {
+          const before = Editor.before(editor, editor.selection, { unit })
+          if (before) {
+            const matchedTable = parentTablePath(editor, before, 'end')
+            if (matchedTable) {
+              const [tablePath, isTableEdge] = matchedTable
+              if (isTableEdge) {
+                // delete table if delete before table
+                Transforms.removeNodes(editor, { at: tablePath })
+                return
+              }
+            }
+          }
+          const isCellStart = isTableCellEdge(editor, Editor.point(editor, editor.selection, { edge: 'start' }), 'start')
+          if (isCellStart) {
+            // prevent delete table cell
+            return
+          }
+        }
+        deleteBackward(unit)
       }
     })
   })

@@ -50,7 +50,7 @@ export default function layoutPlugin (factory: EditorFactory): void {
   const PATH_REFS = new WeakMap<Editor, PathRef[]>()
 
   factory.onWrapEditor(editor => {
-    const { normalizeNode, deleteFragment, deleteBackward, deleteForward, insertFragment, runAction, onChange } = editor
+    const { normalizeNode, deleteBackward, deleteForward, insertFragment, runAction, onChange } = editor
 
     const pathRefs: PathRef[] = []
     PATH_REFS.set(editor, pathRefs)
@@ -79,43 +79,6 @@ export default function layoutPlugin (factory: EditorFactory): void {
 
     override(editor, 'deleteFragment', deleteFragment => {
       return dir => {
-        if (editor.selection) {
-          const paths = pathRefs.map(ref => ref.current).filter(Path.isPath)
-          if (pathRefs.length) {
-            const selectionRef = Editor.rangeRef(editor, editor.selection)
-            // range set excludes section regions (or includes a whole section)
-            const rangeSet: Range[] = []
-            const [rangeStart, rangeEnd] = Range.edges(editor.selection)
-            let currentStart = rangeStart
-            for (const sectionPath of paths) {
-              if (Point.isAfter(currentStart, rangeEnd)) {
-                break
-              }
-              const start = Editor.start(editor, sectionPath)
-              const end = Editor.point(editor, Path.next(sectionPath), { edge: 'start' })
-              if (Point.isBefore(currentStart, start)) {
-                const prevBlockEnd = Editor.point(editor, Path.previous(sectionPath), { edge: 'end' })
-                rangeSet.push({ anchor: currentStart, focus: prevBlockEnd })
-              }
-              currentStart = end
-
-            }
-            if (Point.isBefore(currentStart, rangeEnd)) {
-              rangeSet.push({ anchor: currentStart, focus: rangeEnd })
-            }
-            for (const range of rangeSet.reverse()) {
-              // delete all other regions
-              Transforms.select(editor, Editor.unhangRange(editor, range))
-              deleteFragment(dir)
-            }
-            // recover selections
-            if (selectionRef.current) {
-              Transforms.select(editor, selectionRef.current)
-            }
-            selectionRef.unref()
-            return
-          }
-        }
         deleteFragment(dir)
       }
     })
