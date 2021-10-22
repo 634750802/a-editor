@@ -15,6 +15,8 @@ import { Image } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 
 type ProcessorHandler = (processor: Processor) => void
 
+let id = 0
+
 export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkBlockElement = RemarkBlockElement, IE extends RemarkInlineElement = RemarkInlineElement> {
   readonly blockConfigs: ICustomBlockElementConfig<BE>[] = []
   readonly inlineConfigs: ICustomInlineElementConfig<IE>[] = []
@@ -28,8 +30,15 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
   readonly contentTypeMap: Map<string, MdastContentType> = new Map()
   readonly contentModelTypeMap: Map<string, MdastContentType | null> = new Map()
 
+  private id: number
+
+  constructor () {
+    this.id = ++id
+  }
+
+
   use (plugin: (factory: this) => void): this {
-    console.debug('factory.use', plugin.name)
+    console.debug(`factory@${this.id}.use`, plugin.name)
     plugin(this)
     return this
   }

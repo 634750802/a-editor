@@ -2,11 +2,12 @@ import { EditorFactory } from '@/slate-markdown/core/editor-factory'
 import el from './register-elements'
 import remarkSectionPlugin from '@/plugins/layout/remark-utils'
 import { CustomBlockElements } from '@/slate-markdown/core/elements'
-import { Descendant, Editor, Path, PathRef, Range, Span, Transforms } from 'slate'
+import { Descendant, Editor, Path, PathRef, Point, Range, Span, Transforms } from 'slate'
 import { isElementType } from '@/slate-markdown/slate-utils'
 import { HistoryEditor } from 'slate-history'
 import { override } from '@/utils/override'
 import './style.less'
+import isHotkey from 'is-hotkey'
 
 declare module '../../components/ti-editor/TiEditor' {
   interface TiEditor {
@@ -49,7 +50,7 @@ export default function layoutPlugin (factory: EditorFactory): void {
   const PATH_REFS = new WeakMap<Editor, PathRef[]>()
 
   factory.onWrapEditor(editor => {
-    const { normalizeNode, deleteFragment, deleteBackward, deleteForward, insertFragment, runAction, onChange, insertText, insertBreak } = editor
+    const { normalizeNode, deleteFragment, deleteBackward, deleteForward, insertFragment, runAction, onChange } = editor
 
     const pathRefs: PathRef[] = []
     PATH_REFS.set(editor, pathRefs)
@@ -76,22 +77,48 @@ export default function layoutPlugin (factory: EditorFactory): void {
       return runAction(key, location, event)
     }
 
-    editor.deleteFragment = (dir) => {
-      if (editor.selection) {
-        let exists = false
-        for (const pathRef of pathRefs) {
-          if (pathRef.current && Range.includes(editor.selection, pathRef.current)) {
-            exists = true
-            break
+    override(editor, 'deleteFragment', deleteFragment => {
+      return dir => {
+        if (editor.selection) {
+          const paths = pathRefs.map(ref => ref.current).filter(Path.isPath)
+          if (pathRefs.length) {
+            const selectionRef = Editor.rangeRef(editor, editor.selection)
+            // range set excludes section regions (or includes a whole section)
+            const rangeSet: Range[] = []
+            const [rangeStart, rangeEnd] = Range.edges(editor.selection)
+            let currentStart = rangeStart
+            for (const sectionPath of paths) {
+              if (Point.isAfter(currentStart, rangeEnd)) {
+                break
+              }
+              const start = Editor.start(editor, sectionPath)
+              const end = Editor.point(editor, Path.next(sectionPath), { edge: 'start' })
+              if (Point.isBefore(currentStart, start)) {
+                const prevBlockEnd = Editor.point(editor, Path.previous(sectionPath), { edge: 'end' })
+                rangeSet.push({ anchor: currentStart, focus: prevBlockEnd })
+              }
+              currentStart = end
+
+            }
+            if (Point.isBefore(currentStart, rangeEnd)) {
+              rangeSet.push({ anchor: currentStart, focus: rangeEnd })
+            }
+            for (const range of rangeSet.reverse()) {
+              // delete all other regions
+              Transforms.select(editor, Editor.unhangRange(editor, range))
+              deleteFragment(dir)
+            }
+            // recover selections
+            if (selectionRef.current) {
+              Transforms.select(editor, selectionRef.current)
+            }
+            selectionRef.unref()
+            return
           }
         }
-        if (exists) {
-          editor.onAlert('无法删除固定内容', '')
-          return
-        }
+        deleteFragment(dir)
       }
-      deleteFragment(dir)
-    }
+    })
 
     editor.deleteBackward = (unit) => {
       if (editor.selection) {
@@ -262,26 +289,56 @@ export default function layoutPlugin (factory: EditorFactory): void {
   }
 
   override(factory, 'createDefaultEditableProps', createDefaultEditableProps => {
-    return editor => override(createDefaultEditableProps(editor), 'onKeyDown', onKeyDown => {
-      return event => {
-        if ((!event.metaKey || factory.actionHotKeysHas(event)) && editor.selection) {
-          let exists = false
-          for (const pathRef of PATH_REFS.get(editor) || []) {
-            if (pathRef.current && Range.intersection(editor.selection, Editor.range(editor, pathRef.current))) {
-              exists = true
-              break
-            }
-          }
-          if (exists) {
-            editor.onAlert('无法编辑固定内容', '')
+    return editor => {
+      const props = createDefaultEditableProps(editor)
+
+      override(props, 'onDrag', onDrag => {
+        return event => {
+          const [section] = Editor.nodes(editor, { match: node => isElementType(node, 'section') })
+          if (section) {
             event.preventDefault()
             event.stopPropagation()
-            return
           }
+          onDrag?.(event)
         }
-        onKeyDown?.(event)
-      }
-    })
+      })
+
+      override(props, 'onDrop', onDrag => {
+        return event => {
+          const [section] = Editor.nodes(editor, { match: node => isElementType(node, 'section') })
+          if (section) {
+            event.preventDefault()
+            event.stopPropagation()
+          }
+          onDrag?.(event)
+        }
+      })
+
+      override(props, 'onKeyDown', onKeyDown => {
+        return event => {
+          if ((!event.metaKey || factory.actionHotKeysHas(event)) && editor.selection) {
+            if (!(isHotkey(['backspace', 'delete'], event) && !Range.isCollapsed(editor.selection))) {
+              let exists = false
+              for (const pathRef of PATH_REFS.get(editor) || []) {
+                if (pathRef.current && Range.intersection(editor.selection, Editor.range(editor, pathRef.current))) {
+                  exists = true
+                  break
+                }
+              }
+              if (exists) {
+                editor.onAlert('无法编辑固定内容', '')
+                event.preventDefault()
+                event.stopPropagation()
+                return
+              }
+            }
+          }
+          onKeyDown?.(event)
+        }
+      })
+
+      return props
+    }
   })
 
 }

@@ -113,7 +113,7 @@ export function createFactory (config?: (factory: EditorFactory) => void): Edito
   editorFactory.use(coreRemarkPlugin)
   editorFactory.use(coreActionsPlugin)
   editorFactory.use(coreSelectionToolbarPlugin)
-  register(editorFactory)
+  editorFactory.use(register)
   config && config(editorFactory)
   editorFactory.freezeProcessors()
   return editorFactory

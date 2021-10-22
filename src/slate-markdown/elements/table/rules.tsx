@@ -57,7 +57,9 @@ export function register (factory: EditorFactory) {
               deleteFragment(dir)
             }
             // recover selections
-            Transforms.select(editor, selectionRef.current ?? Editor.end(editor, []))
+            if (selectionRef.current) {
+              Transforms.select(editor, selectionRef.current)
+            }
             selectionRef.unref()
             return
           }
