@@ -3,7 +3,7 @@ import { Ancestor, Editor, Element, Node, NodeEntry, Path, Point, Range, Text, T
 import type { EditableProps } from 'slate-react/dist/components/editable'
 import { ClipboardEvent, createElement, DragEvent, KeyboardEvent } from 'react'
 import isHotkey from 'is-hotkey'
-import TextNode from '@/slate-markdown/elements/text/TextNode'
+import TextNode, { TextNodeDecorator } from '@/slate-markdown/elements/text/TextNode'
 import LinkNode from '@/slate-markdown/elements/link/LinkNode'
 import DecorationStack from '@/slate-markdown/core/decoration-stack'
 import { ReactEditor } from 'slate-react'
@@ -436,13 +436,27 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
             }
           }
         }
+        if (Text.isText(node)) {
+          if (Editor.isEdge(editor, point, point.path)) {
+            if (node.inlineCode) {
+              editor.addMark(TextNodeDecorator.inlineCode, undefined)
+            }
+          }
+        }
         // like links, if you input at the end of a link, slate will add the text to next text node.
         if (Editor.isInline(editor, parentNode)) {
-          const path = Path.next(Path.parent(point.path))
-          Transforms.insertNodes(editor, { text: event.data || '' }, { at: path })
-          Transforms.move(editor, { distance: 1 })
-          event.preventDefault()
-          return
+          if (Editor.isEnd(editor, point, point.path)) {
+            const path = Path.next(Path.parent(point.path))
+            Transforms.insertNodes(editor, { text: event.data || '' }, { at: path })
+            Transforms.move(editor, { distance: 1 })
+            event.preventDefault()
+            return
+          }
+          if (Editor.isStart(editor, point, point.path)) {
+            const path = Path.parent(point.path)
+            Transforms.insertNodes(editor, { text: event.data || '' }, { at: path, select: true })
+            event.preventDefault()
+          }
         }
       }
     }

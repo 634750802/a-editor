@@ -199,6 +199,7 @@ const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ factory: editorFa
             as="article"
             className="ti-community-editor markdown-body"
             readOnly={disabled}
+            placeholder='Input...'
             {...editableProps}
           />
         </div>
