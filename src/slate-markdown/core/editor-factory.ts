@@ -563,7 +563,10 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
             children: [{ text: '' }],
           } as Image)))
           .then(fragment => {
-            Transforms.insertNodes(editor, fragment, { at: ref?.current ?? Editor.last(editor, [])[1] })
+            if (ref?.current) {
+              Transforms.select(editor, ref.current)
+            }
+            editor.insertFragment(fragment)
           })
           .catch(console.error)
       }

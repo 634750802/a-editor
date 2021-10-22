@@ -2,7 +2,7 @@ import { EditorFactory } from '@/slate-markdown/core/editor-factory'
 import el from './register-elements'
 import remarkSectionPlugin from '@/plugins/layout/remark-utils'
 import { CustomBlockElements } from '@/slate-markdown/core/elements'
-import { Descendant, Editor, Path, PathRef, Point, Range, Span, Transforms } from 'slate'
+import { Descendant, Editor, Path, PathRef, Range, Span, Transforms } from 'slate'
 import { isElementType } from '@/slate-markdown/slate-utils'
 import { HistoryEditor } from 'slate-history'
 import { override } from '@/utils/override'
@@ -56,6 +56,18 @@ export default function layoutPlugin (factory: EditorFactory): void {
     PATH_REFS.set(editor, pathRefs)
 
     editor.insertFragment = fragment => {
+      if (editor.selection) {
+        for (let j = 0; j < pathRefs.length; j++) {
+          const path = pathRefs[j].current
+          if (path) {
+            const range = Editor.range(editor, path)
+            if (Range.includes(range, editor.selection)) {
+              // prevent insert fragment into sections
+              return
+            }
+          }
+        }
+      }
       insertFragment(fragment.filter(node => !isElementType(node, 'section')))
     }
 
@@ -79,6 +91,24 @@ export default function layoutPlugin (factory: EditorFactory): void {
 
     override(editor, 'deleteFragment', deleteFragment => {
       return dir => {
+        if (editor.selection) {
+          const rangeRef = Editor.rangeRef(editor, editor.selection)
+          for (let j = pathRefs.length - 1; j >= 0; --j) {
+            const range = editor.getSectionRange(j)
+            if (range && rangeRef.current) {
+              const common = Range.intersection(range, rangeRef.current)
+              if (common && !Range.isCollapsed(common)) {
+                Transforms.select(editor, common)
+                deleteFragment(dir)
+              }
+            }
+          }
+          if (rangeRef.current) {
+            Transforms.select(editor, rangeRef.current)
+          }
+          rangeRef.unref()
+          return
+        }
         deleteFragment(dir)
       }
     })
