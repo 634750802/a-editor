@@ -330,6 +330,23 @@ export default function layoutPlugin (factory: EditorFactory): void {
         }
       })
 
+      // https://monorail-prod.appspot.com/p/chromium/issues/detail?id=689541
+      override(props, 'onCompositionStart', onCompositionStart => {
+        return event => {
+          if (editor.selection) {
+            for (const pathRef of PATH_REFS.get(editor) || []) {
+              if (pathRef.current && Range.intersection(editor.selection, Editor.range(editor, pathRef.current))) {
+                editor.onAlert('无法编辑固定内容', '')
+                event.preventDefault()
+                event.stopPropagation()
+                // return
+              }
+            }
+          }
+          onCompositionStart?.(event)
+        }
+      })
+
       return props
     }
   })
