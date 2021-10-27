@@ -105,8 +105,10 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
       }
     }
 
-    (window as any).debugPrintTree = () => debugPrintTree(editor);
-    (window as any).debugEditor = editor
+    if (typeof window !== 'undefined') {
+      (window as any).debugPrintTree = () => debugPrintTree(editor);
+      (window as any).debugEditor = editor
+    }
 
     editor.isContent = (node, type): node is Element | Text => {
       if (Element.isElement(node)) {
