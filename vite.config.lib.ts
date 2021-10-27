@@ -22,9 +22,9 @@ export default defineConfig({
   build: {
     lib: {
       entry: 'src/index.ts',
-      formats: ['es'],
+      formats: ['es', 'cjs'],
       name: 'index',
-      fileName: () => "index.js"
+      fileName: (format) => `index.${format}.js`
     },
     rollupOptions: {
       external: source => {
