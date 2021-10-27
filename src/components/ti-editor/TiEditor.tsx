@@ -35,6 +35,7 @@ export interface TiCommunityEditorProps {
   onChange: (value: Descendant[]) => void
   children?: JSX.Element | JSX.Element[]
   factory: EditorFactory
+  placeholder?: string
 }
 
 export const enum ToggleStrategy {
@@ -119,7 +120,7 @@ export function createFactory (config?: (factory: EditorFactory) => void): Edito
   return editorFactory
 }
 
-const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ factory: editorFactory, disabled = false, initialMarkdown = '', config, uploadFile, value, onChange: propOnChange, children }: TiCommunityEditorProps, ref): JSX.Element => {
+const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ factory: editorFactory, disabled = false, initialMarkdown = '', config, uploadFile, value, onChange: propOnChange, placeholder, children }: TiCommunityEditorProps, ref): JSX.Element => {
 
   const editor = useMemo(() => {
     const editor = withReact(withHistory(createEditor()))
@@ -198,8 +199,8 @@ const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ factory: editorFa
           <Editable
             as="article"
             className="ti-community-editor markdown-body"
+            placeholder={placeholder}
             readOnly={disabled}
-            placeholder='Input...'
             {...editableProps}
           />
         </div>

@@ -45,6 +45,9 @@ export default function LineWrapper ({ element, children }: TopLevelBlockProps):
   }, [getEditorDOMRect, el])
 
   useLayoutEffect(() => {
+    if (typeof document === 'undefined') {
+      return
+    }
     if (el) {
       const dr = document.createRange()
       dr.selectNode(el.childNodes.item(0))
@@ -81,7 +84,7 @@ export default function LineWrapper ({ element, children }: TopLevelBlockProps):
 
   return (
     <Tippy
-      appendTo={document.body}
+      appendTo={typeof document === 'undefined' ? 'parent' : document.body}
       arrow={false}
       getReferenceClientRect={getRect}
       hideOnClick={false}
