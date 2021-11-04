@@ -24,11 +24,12 @@ const LinkNode = defineNode({
     return (
       <a
         href={element.url}
-        onClick={() => window.open(element.url, '_blank')}
+        rel='noreferrer'
         style={{ display: 'inline-flex', cursor: 'pointer' }}
+        target='_blank'
         {...attributes}
       >
-         {children}
+        {children}
       </a>
     )
   },
