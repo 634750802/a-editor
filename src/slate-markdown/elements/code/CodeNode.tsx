@@ -2,7 +2,7 @@ import { defineNode, MdastContentType, TypedRenderElementProps } from '@/slate-m
 import { Code } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import React from 'react'
 import LineWrapper from '@/components/line-wrapper/LineWrapper'
-import { Range, Text } from 'slate'
+import { Editor, Node, Path, Range, Text, Transforms } from 'slate'
 import Prism, { Token } from 'prismjs'
 import 'prismjs/components/prism-markdown.js'
 import 'prismjs/components/prism-javascript.js'
@@ -20,6 +20,7 @@ import Tippy from '@tippyjs/react'
 import './style.less'
 import { useFocused, useReadOnly, useSelected } from 'slate-react'
 import LangSelect from '@/slate-markdown/elements/code/LangSelect'
+import { isElementType } from '@/slate-markdown/slate-utils'
 
 const options = [
   'markdown',

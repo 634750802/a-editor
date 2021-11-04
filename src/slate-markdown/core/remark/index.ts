@@ -44,6 +44,7 @@ export function coreRemarkPlugin (factory: EditorFactory): void {
       listItemIndent: 'one',
       fence: '`',
       bullet: '-',
+      fences: true
     }).freeze()
     serializeHTMLProcessor.use(serializerPlugins).use(slateToRemark).use(remarkGfm).use(remarkRehype).use(rehypeStringify).freeze()
     deserializeProcessor.use(remarkParse).use(remarkGfm).use(remarkToSlate).use(deserializerPlugins).freeze()
@@ -88,27 +89,27 @@ export function coreRemarkPlugin (factory: EditorFactory): void {
   override(factory, 'createDefaultEditableProps', createDefaultEditableProps => {
     return editor => {
       return override(createDefaultEditableProps(editor), 'onPaste', onPaste => {
-         return event => {
-           const dt = event.clipboardData
-           if (dt) {
-             if (dt.types.indexOf('application/x-slate-fragment') < 0) {
-               if (dt.types.indexOf('text/html') >= 0) {
-                 const htmlData = dt.getData('text/html')
-                 const nodes = factory.parseHtml(htmlData)
-                 editor.insertFragment(nodes)
-                 event.preventDefault()
-                 return
-               } else if (dt.types.indexOf('text/plain') >= 0) {
-                 const textData = dt.getData('text/plain')
-                 const nodes = factory.parseMarkdown(textData)
-                 editor.insertFragment(nodes)
-                 event.preventDefault()
-                 return
-               }
-             }
-           }
-           onPaste?.(event)
-         }
+        return event => {
+          const dt = event.clipboardData
+          if (dt) {
+            if (dt.types.indexOf('application/x-slate-fragment') < 0) {
+              if (dt.types.indexOf('text/html') >= 0) {
+                const htmlData = dt.getData('text/html')
+                const nodes = factory.parseHtml(htmlData)
+                editor.insertFragment(nodes)
+                event.preventDefault()
+                return
+              } else if (dt.types.indexOf('text/plain') >= 0) {
+                const textData = dt.getData('text/plain')
+                const nodes = factory.parseMarkdown(textData)
+                editor.insertFragment(nodes)
+                event.preventDefault()
+                return
+              }
+            }
+          }
+          onPaste?.(event)
+        }
       })
     }
   })

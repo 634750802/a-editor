@@ -5,6 +5,7 @@ import { isElementType } from '@/slate-markdown/slate-utils'
 import React from 'react'
 import { faIndent, faOutdent } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
+import ListNode from '@/slate-markdown/elements/list/ListNode'
 
 library.add(faIndent, faOutdent)
 
@@ -29,6 +30,13 @@ const ListItemNode = defineNode<ListItem>({
           Transforms.wrapNodes(editor, { type: 'listItem', checked: node.checked, spread: node.spread, children: [] }, { at: newPath })
           preventDefaults()
           return
+        }
+        if (node.children.length >= 1 && !isElementType(node.children[0], 'paragraph')) {
+          const parent = Node.parent(editor, path)
+          if (editor.unwrap([parent, Path.parent(path)], [ListNode, ListItemNode])) {
+            preventDefaults()
+            return
+          }
         }
       }
     } else {
