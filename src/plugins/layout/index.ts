@@ -165,7 +165,7 @@ export default function layoutPlugin (factory: EditorFactory): void {
       if (i < pathRefs.length - 1) {
         end = pathRefs[i + 1].current
       } else {
-        end = [editor.children.length - 1]
+        end = [editor.children.length]
       }
       if (!end) {
         return undefined
