@@ -210,13 +210,22 @@ export default function layoutPlugin (factory: EditorFactory): void {
     }
 
     editor.setSection = (i, fragments) => {
-      const range = editor.getSectionRange(i)
-      if (!range) {
+      const span = editor.getSectionSpan(i)
+      if (!span) {
         return
       }
 
-      Transforms.select(editor, range)
-      editor.insertFragment(fragments)
+      const [startPath, endPath] = span
+      let path = endPath
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        Transforms.removeNodes(editor, { at: path })
+        if (Path.equals(startPath, path)) {
+          break
+        }
+        path = Path.previous(path)
+      }
+      Transforms.insertNodes(editor, fragments, { at: path })
     }
 
     editor.setSectionMarkdown = (i, markdown) => {

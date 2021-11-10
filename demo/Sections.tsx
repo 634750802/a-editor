@@ -45,15 +45,6 @@ function config (factory: EditorFactory) {
       ],
     },
   ])
-  factory.onEditorMounted(editor => {
-    setTimeout(() => {
-      HistoryEditor.withoutSaving(editor, () => {
-        editor.setSectionMarkdown(0, 'write something here')
-        editor.setSectionMarkdown(1, 'write something here')
-        editor.setSectionMarkdown(2, 'write something here')
-      })
-    })
-  })
 }
 
 async function uploadFile (file: File): Promise<string> {
@@ -80,9 +71,9 @@ function App (): JSX.Element {
     setValue(newValue)
   }, [value])
 
-  const [first, setFirst] = useState<Descendant[]>([])
-  const [second, setSecond] = useState<Descendant[]>([])
-  const [third, setThird] = useState<Descendant[]>([])
+  const [first, setFirst] = useState<Descendant[]>([{ type: 'paragraph', children: [{ text: 'write something here' }] }])
+  const [second, setSecond] = useState<Descendant[]>([{ type: 'paragraph', children: [{ text: 'write something here' }] }])
+  const [third, setThird] = useState<Descendant[]>([{ type: 'paragraph', children: [{ text: 'write something here' }] }])
 
   return (
     <div>
