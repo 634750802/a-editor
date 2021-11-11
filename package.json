@@ -1,6 +1,6 @@
 {
   "name": "@634750802/a-editor",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "scripts": {
     "dev": "vite -c vite.config.dev.ts",
     "build": "tsc --noEmit && vite build -c vite.config.lib.ts && vite build -c vite.config.full-lib.ts && tsc-alias",

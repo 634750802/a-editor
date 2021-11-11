@@ -55,6 +55,8 @@ export default function layoutPlugin (factory: EditorFactory): void {
     const pathRefs: PathRef[] = []
     PATH_REFS.set(editor, pathRefs)
 
+    editor.customLayout = true
+
     editor.insertFragment = fragment => {
       if (editor.selection) {
         for (let j = 0; j < pathRefs.length; j++) {
@@ -215,17 +217,19 @@ export default function layoutPlugin (factory: EditorFactory): void {
         return
       }
 
-      const [startPath, endPath] = span
-      let path = endPath
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        Transforms.removeNodes(editor, { at: path })
-        if (Path.equals(startPath, path)) {
-          break
+      Editor.withoutNormalizing(editor, () => {
+        const [startPath, endPath] = span
+        let path = endPath
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+          Transforms.removeNodes(editor, { at: path })
+          if (Path.equals(startPath, path)) {
+            break
+          }
+          path = Path.previous(path)
         }
-        path = Path.previous(path)
-      }
-      Transforms.insertNodes(editor, fragments, { at: path })
+        Transforms.insertNodes(editor, fragments, { at: path })
+      })
     }
 
     editor.setSectionMarkdown = (i, markdown) => {
