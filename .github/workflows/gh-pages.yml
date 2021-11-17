@@ -34,5 +34,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          email: 634750802@qq.com
+          email: gaolinjie@pingcap.com
           build_dir: dist

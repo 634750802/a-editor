@@ -1,5 +1,5 @@
 {
-  "name": "@634750802/a-editor",
+  "name": "@pingcap-inc/tidb-community-editor",
   "version": "0.2.5",
   "scripts": {
     "dev": "vite -c vite.config.dev.ts",
@@ -82,7 +82,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/634750802/a-editor"
+    "url": "https://github.com/pingcap-inc/tidb-community-editor"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"

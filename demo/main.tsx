@@ -9,7 +9,7 @@ import LinkBlock from './LinkBlock'
 
 ReactDOM.render(
   <React.StrictMode>
-    <BrowserRouter basename={import.meta.env.BASE_URL}>
+    <BrowserRouter basename='/tidb-community-editor'>
       <div>
         <nav>
           <Link to="/">

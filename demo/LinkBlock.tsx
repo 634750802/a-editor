@@ -58,7 +58,7 @@ const factory = createFactory(factory => {
 function App (): JSX.Element {
   const [value, setValue] = useState<Descendant[]>([
     ...factory.parseMarkdown(`# LinkBlock example\n`),
-    { type: 'linkBlock', link: 'https://github.com/634750802/a-editor', children: [{ text: '' }] } as Descendant,
+    { type: 'linkBlock', link: 'https://github.com/pingcap-inc/tidb-community-editor', children: [{ text: '' }] } as Descendant,
     { type: 'paragraph', children: [{ text: '' }] },
   ])
 
