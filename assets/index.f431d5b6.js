@@ -101,7 +101,7 @@ SELECT * FROM hello_world;
 | :-- | :-: |
 | baz | qux |
 
-`;var Yr=Object.freeze({__proto__:null,[Symbol.toStringTag]:"Module",plainText:Kr});const Xr=`# a-editor
+`;var Yr=Object.freeze({__proto__:null,[Symbol.toStringTag]:"Module",plainText:Kr});const Xr=`# tidb-community-editor
 
 ## \u6280\u672F\u6808
 
