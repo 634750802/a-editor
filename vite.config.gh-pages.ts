@@ -6,7 +6,7 @@ import { resolve } from 'path'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react({}), plainText(/\.md$/)],
-  base: 'https://pingcap-inc.github.io/a-editor/',
+  base: 'https://pingcap-inc.github.io/tidb-community-editor/',
   resolve: {
     alias: [
       { find: '@', replacement: resolve(__dirname, 'src') },

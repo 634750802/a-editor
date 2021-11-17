@@ -1,4 +1,4 @@
-# a-editor
+# tidb-community-editor
 
 ## 技术栈
 

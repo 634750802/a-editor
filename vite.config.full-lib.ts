@@ -5,7 +5,7 @@ import { resolve } from 'path'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react({})],
-  base: 'https://pingcap-inc.github.io/a-editor/',
+  base: 'https://pingcap-inc.github.io/tidb-community-editor/',
   build: {
     lib: {
       entry: 'src/index.ts',
