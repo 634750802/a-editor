@@ -52,6 +52,8 @@ export interface TiEditor {
 }
 
 export interface TiEditor {
+  insertFragment: (fragment: Node[], plainText?: void) => void;
+
   onAlert: (title: string, message: string) => void
   uploadFile?: (file: File) => Promise<string>
   factory: EditorFactory

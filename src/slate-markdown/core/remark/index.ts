@@ -86,6 +86,8 @@ export function coreRemarkPlugin (factory: EditorFactory): void {
     return deserializeHTMLProcessor.processSync(value).result as Descendant[]
   }
 
+  let __tempPlainText = ''
+
   override(factory, 'createDefaultEditableProps', createDefaultEditableProps => {
     return editor => {
       return override(createDefaultEditableProps(editor), 'onPaste', onPaste => {
@@ -93,6 +95,9 @@ export function coreRemarkPlugin (factory: EditorFactory): void {
           const dt = event.clipboardData
           if (dt) {
             if (dt.types.indexOf('application/x-slate-fragment') < 0) {
+              if (dt.types.indexOf('text/plain') >= 0) {
+                __tempPlainText = dt.getData('text/plain')
+              }
               if (dt.types.indexOf('text/html') >= 0) {
                 const htmlData = dt.getData('text/html')
                 const nodes = factory.parseHtml(htmlData)
@@ -116,12 +121,16 @@ export function coreRemarkPlugin (factory: EditorFactory): void {
 
   factory.onWrapEditor(editor => {
     override(editor, 'insertFragment', insertFragment => {
-      return fragment => {
+      return (fragment) => {
         if (editor.selection) {
           const el = Node.parent(editor, editor.selection.anchor.path)
           const cmt = editor.getContentModelType(el)
           if (cmt === MdastContentType.value) {
-            Transforms.insertText(editor, factory.generateMarkdown(fragment as Descendant[]))
+            if (__tempPlainText) {
+              Transforms.insertText(editor, __tempPlainText)
+            } else {
+              Transforms.insertText(editor, factory.generateMarkdown(fragment as Descendant[]))
+            }
             return
           }
         }
