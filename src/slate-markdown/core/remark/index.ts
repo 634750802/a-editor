@@ -142,7 +142,9 @@ export function coreRemarkPlugin (factory: EditorFactory): void {
       return (dt) => {
         setFragmentData(dt)
         // copy the markdown content
-        dt.setData('text/plain', factory.generateMarkdown(editor.getFragment()))
+        const fragment = editor.getFragment()
+        dt.setData('text/plain', factory.generateMarkdown(fragment))
+        __tempPlainText = fragment.map(Node.string).join('\n')
       }
     })
   })
