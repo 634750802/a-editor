@@ -12,6 +12,7 @@ import { override } from '@/utils/override'
 import { MdastContentType } from '@/slate-markdown/core/elements'
 import remarkRehype from 'remark-rehype'
 import rehypeStringify from 'rehype-stringify'
+import rehypeRemoveComments from 'rehype-remove-comments'
 
 const clone = rfdc({ proto: false, circles: false })
 
@@ -44,11 +45,11 @@ export function coreRemarkPlugin (factory: EditorFactory): void {
       listItemIndent: 'one',
       fence: '`',
       bullet: '-',
-      fences: true
+      fences: true,
     }).freeze()
     serializeHTMLProcessor.use(serializerPlugins).use(slateToRemark).use(remarkGfm).use(remarkRehype).use(rehypeStringify).freeze()
     deserializeProcessor.use(remarkParse).use(remarkGfm).use(remarkToSlate).use(deserializerPlugins).freeze()
-    deserializeHTMLProcessor.use(rehypeParse).use(rehypeRemark).use(remarkGfm).use(remarkToSlate).use(deserializerPlugins).freeze()
+    deserializeHTMLProcessor.use(rehypeParse).use(rehypeRemoveComments, ({ removeConditional: true })).use(rehypeRemark).use(remarkGfm).use(remarkToSlate).use(deserializerPlugins).freeze()
   }
 
   factory.configProcessor = (...plugins) => {

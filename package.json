@@ -1,6 +1,6 @@
 {
   "name": "@pingcap-inc/tidb-community-editor",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "scripts": {
     "dev": "vite -c vite.config.dev.ts",
     "build": "tsc --noEmit && vite build -c vite.config.lib.ts && vite build -c vite.config.full-lib.ts && tsc-alias",
@@ -23,6 +23,7 @@
     "react-popper": "^2.2.5",
     "rehype-parse": "^8.0.3",
     "rehype-remark": "^9.0.0",
+    "rehype-remove-comments": "^5.0.0",
     "rehype-stringify": "^9.0.2",
     "remark": "^14.0.1",
     "remark-gfm": "^3.0.0",

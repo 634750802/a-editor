@@ -1,8 +1,10 @@
 /* eslint-disable react/no-danger */
 import { defineNode, MdastContentType, TypedRenderElementProps } from '@/slate-markdown/core/elements'
-import { Editor } from 'slate'
+import { Editor, Node, Transforms } from 'slate'
 import { Html } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import VoidElement from '@/components/void-element/void-element'
+
+const COMMENT_REGEXP = /^<!--/
 
 export default defineNode<Html>({
   type: 'html',
