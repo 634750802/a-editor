@@ -13,6 +13,7 @@ import UIContext, { UIContextProps } from '@/components/ti-editor/ui-context'
 import { coreActionsPlugin } from '@/slate-markdown/core/actions'
 import { coreSelectionToolbarPlugin } from '@/slate-markdown/core/selection-toolbar'
 import { coreRemarkPlugin } from '@/slate-markdown/core/remark'
+import useForceUpdate from '@/hooks/forceUpdate'
 
 // see https://docs.slatejs.org/walkthroughs/01-installing-slate
 declare module 'slate' {
@@ -125,6 +126,8 @@ export function createFactory (config?: (factory: EditorFactory) => void): Edito
 
 const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ factory: editorFactory, disabled = false, initialMarkdown = '', config, uploadFile, value, onChange: propOnChange, placeholder, children }: TiCommunityEditorProps, ref): JSX.Element => {
 
+  const forceUpdate = useForceUpdate()
+
   const editor = useMemo(() => {
     const editor = withReact(withHistory(createEditor()))
     editor.onAlert = (title, message) => {
@@ -182,6 +185,11 @@ const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ factory: editorFa
   useEffect(() => {
     editorFactory.triggerEditorMounted(editor)
   }, [editor])
+
+  useEffect(() => {
+    editor.children = value
+    forceUpdate()
+  }, [editor, value])
 
   const defaultChildren = useMemo(() => editorFactory.createDefaultChildren(editor), [editorFactory, editor])
 
