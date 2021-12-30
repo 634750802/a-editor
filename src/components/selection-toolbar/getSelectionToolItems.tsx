@@ -34,7 +34,7 @@ export default function getSelectionToolItems (editor: Editor, domRange: DOMRang
   if (!domRange) {
     return []
   }
-  const range = ReactEditor.toSlateRange(editor, domRange, { exactMatch: true }) ?? editor.selection
+  const range = ReactEditor.toSlateRange(editor, domRange, { exactMatch: true, suppressThrow: true }) ?? editor.selection
 
   if (range) {
     if (!isRangeEditable(editor, range)) {

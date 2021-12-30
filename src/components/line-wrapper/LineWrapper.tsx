@@ -51,15 +51,21 @@ export default function LineWrapper ({ element, children }: TopLevelBlockProps):
     if (el) {
       const dr = document.createRange()
       dr.selectNode(el.childNodes.item(0))
-      const range = ReactEditor.toSlateRange(editor, dr, { exactMatch: false })
-
-      let path = Path.common(range.anchor.path, range.focus.path)
-      while (path.length !== 0) {
-        if (Editor.isBlock(editor, Node.get(editor, path))) {
-          pathRef.current = Editor.pathRef(editor, path)
-          break
+      const range = ReactEditor.toSlateRange(editor, dr, { exactMatch: false, suppressThrow: true })
+      if (range) {
+        let path = Path.common(range.anchor.path, range.focus.path)
+        while (path.length !== 0) {
+          if (Editor.isBlock(editor, Node.get(editor, path))) {
+            pathRef.current = Editor.pathRef(editor, path)
+            break
+          }
+          path = Path.parent(path)
         }
-        path = Path.parent(path)
+      } else {
+        if (pathRef.current) {
+          pathRef.current.unref?.()
+        }
+        pathRef.current = undefined
       }
     } else {
       if (pathRef.current) {
