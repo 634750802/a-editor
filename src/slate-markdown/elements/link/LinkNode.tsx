@@ -2,7 +2,7 @@ import { defineNode, ICustomInlineElementConfig, MdastContentType, RemarkElement
 import { Link } from 'remark-slate-transformer/lib/transformers/mdast-to-slate'
 import { Editor, Location, Node, Point, Transforms } from 'slate'
 import React from 'react'
-import createUrlRegExp from 'url-regex-safe'
+// import createUrlRegExp from 'url-regex-safe'
 import { faLink } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
 
@@ -46,9 +46,9 @@ const LinkNode = defineNode({
       Transforms.move(editor, { distance: 1 })
     }
   }) as never,
-  match: {
-    regexp: createUrlRegExp(),
-  },
+  // match: {
+  //   regexp: createUrlRegExp(),
+  // },
 } as Omit<ICustomInlineElementConfig<Link, { text: string }>, 'register'>)
 
 export default LinkNode

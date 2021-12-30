@@ -424,22 +424,22 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
             }
           }
         }
-        if (Text.isText(node) && !isElementType(parentNode, 'link') && event.data === ' ') {
-          for (const inlineConfig of this.inlineConfigs) {
-            if (inlineConfig.match) {
-              const matched = inlineConfig.match.regexp.exec(node.text.slice(0, point.offset))
-              if (matched) {
-                const url = matched[0]
-                const start = matched.index
-                const end = matched.index + url.length
-                const range = { anchor: { path: point.path, offset: start }, focus: { path: point.path, offset: end } }
-                LinkNode.insert(editor, range, { url, title: '', text: url })
-                event.preventDefault()
-                return
-              }
-            }
-          }
-        }
+        // if (Text.isText(node) &&! isElementType(parentNode, 'code') && !isElementType(parentNode, 'link') && event.data === ' ') {
+        //   for (const inlineConfig of this.inlineConfigs) {
+        //     if (inlineConfig.match) {
+        //       const matched = inlineConfig.match.regexp.exec(node.text.slice(0, point.offset))
+        //       if (matched) {
+        //         const url = matched[0]
+        //         const start = matched.index
+        //         const end = matched.index + url.length
+        //         const range = { anchor: { path: point.path, offset: start }, focus: { path: point.path, offset: end } }
+        //         LinkNode.insert(editor, range, { url, title: '', text: url })
+        //         event.preventDefault()
+        //         return
+        //       }
+        //     }
+        //   }
+        // }
         if (Text.isText(node)) {
           if (Editor.isEdge(editor, point, point.path)) {
             if (node.inlineCode) {
