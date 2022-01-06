@@ -23,5 +23,6 @@
     "experimentalDecorators": true,
     "declaration": true,
     "declarationDir": "./dist"
-  }
+  },
+  "exclude": ["../../node_modules", "node_modules", "dist"]
 }
