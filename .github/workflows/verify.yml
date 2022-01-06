@@ -27,5 +27,5 @@ jobs:
         uses: actions/setup-node@v2.4.1
       - name: Build
         run: |
-          npm ci
-          npm run build
+          pnpm i
+          pnpm run build

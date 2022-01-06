@@ -6,7 +6,8 @@
     "build:remark": "pnpm run build --filter ./packages/ti-remark",
     "build:editor": "pnpm run build --filter ./packages/ti-editor -C ./packages/ti-editor",
     "dev": "pnpm run dev --filter ./packages/ti-editor -C ./packages/ti-editor",
-    "build": "pnpm run build:remark && pnpm run build:editor"
+    "build": "pnpm run build:remark && pnpm run build:editor",
+    "build:gh-pages": "pnpm run build:remark && pnpm run build:gh-pages --filter ./packages/ti-editor -C ./packages/ti-editor"
   },
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
@@ -17,8 +18,5 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/pingcap-inc/tidb-community-editor"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
   }
 }

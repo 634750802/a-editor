@@ -27,12 +27,12 @@ jobs:
         uses: actions/setup-node@v2.4.1
       - name: Build
         run: |
-          npm ci
-          npm run build:gh-pages
+          npmp i
+          npmp run build:gh-pages
       - name: Deploy to GitHub Pages
         uses: Cecilapp/GitHub-Pages-deploy@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           email: gaolinjie@pingcap.com
-          build_dir: dist
+          build_dir: packages/ti-editor/dist
