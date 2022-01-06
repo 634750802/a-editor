@@ -1,4 +1,5 @@
 import { Descendant } from 'slate'
+import { toString } from 'mdast-util-to-string'
 import { Plugin, Processor, unified } from 'unified'
 import { remarkToSlate, slateToRemark } from 'remark-slate-transformer'
 import remarkGfm from 'remark-gfm'
@@ -30,6 +31,7 @@ export interface TiRemark {
 
   generateHtml (descendants: Descendant[]): string
 
+  generateText (descendants: Descendant[]): string
 }
 
 const clone = rfdc({ proto: false, circles: false })
@@ -40,6 +42,7 @@ export function withTiRemark<T> (target: T): T & TiRemark {
 
   const serializeProcessor: Processor = unified()
   const serializeHTMLProcessor: Processor = unified()
+  const serializeTextProcessor: Processor = unified()
   const deserializeProcessor: Processor = unified()
   const deserializeHTMLProcessor: Processor = unified()
 
@@ -56,6 +59,7 @@ export function withTiRemark<T> (target: T): T & TiRemark {
       fences: true,
     }).freeze()
     serializeHTMLProcessor.use(serializerPlugins).use(slateToRemark).use(remarkGfm).use(remarkRehype).use(rehypeStringify).freeze()
+    serializeTextProcessor.use(serializerPlugins).use(slateToRemark).use(remarkGfm).freeze()
     deserializeProcessor.use(remarkParse).use(remarkGfm).use(remarkToSlate).use(deserializerPlugins).freeze()
     deserializeHTMLProcessor.use(rehypeParse).use(rehypeRemoveComments, ({ removeConditional: true })).use(rehypeRemark).use(remarkGfm).use(remarkToSlate).use(deserializerPlugins).freeze()
   }
@@ -95,5 +99,12 @@ export function withTiRemark<T> (target: T): T & TiRemark {
     return deserializeHTMLProcessor.processSync(value).result as Descendant[]
   }
 
+  res.generateText = (fragment: Descendant[]): string => {
+    const ast = serializeTextProcessor.runSync({
+      type: 'root',
+      children: fragment
+    } as never)
+    return toString(ast)
+  }
   return res
 }
