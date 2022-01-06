@@ -27,6 +27,7 @@ jobs:
         uses: actions/setup-node@v2.4.1
       - name: Build
         run: |
+          npm i -g pnpm
           npmp i
           npmp run build:gh-pages
       - name: Deploy to GitHub Pages
