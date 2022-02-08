@@ -1,3 +1,4 @@
+import { resolve } from 'path'
 import packageJson from './package.json'
 import alias from '@rollup/plugin-alias'
 import commonjs from '@rollup/plugin-commonjs'
@@ -63,7 +64,12 @@ export default defineConfig([
       }),
       nodePolyfills(),
       commonjs()
-    ]
+    ],
+    resolve: {
+      alias: [
+        { find: 'decode-named-character-reference', replacement: 'node_modules/decode-named-character-reference/index.js' }
+      ],
+    },
   }, {
     input: 'src/index.ts',
     output: {

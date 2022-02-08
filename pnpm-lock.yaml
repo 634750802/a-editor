@@ -30,6 +30,7 @@ importers:
       '@vitejs/plugin-react': ^1.0.4
       assert: ^2.0.0
       classnames: ^2.3.1
+      decode-named-character-reference: ^1.0.1
       eslint: ^7.32.0
       eslint-plugin-react: ^7.26.1
       github-markdown-css: ^4.0.0
@@ -66,6 +67,7 @@ importers:
       '@rjsf/core': 3.2.1_react@17.0.2
       '@tippyjs/react': 4.2.6_react-dom@17.0.2+react@17.0.2
       classnames: 2.3.1
+      decode-named-character-reference: 1.0.1
       is-hotkey: 0.2.0
       lodash-es: 4.17.21
       prismjs: 1.25.0
@@ -113,6 +115,7 @@ importers:
       '@rollup/plugin-alias': ^3.1.9
       '@rollup/plugin-commonjs': ^21.0.1
       '@rollup/plugin-node-resolve': ^13.1.2
+      decode-named-character-reference: ^1.0.1
       mdast-util-to-string: ^3.1.0
       rehype-parse: ^8.0.3
       rehype-remark: ^9.1.2
@@ -136,6 +139,7 @@ importers:
       unist-util-remove: ^3.1.0
       unist-util-visit: ^4.1.0
     dependencies:
+      decode-named-character-reference: 1.0.1
       mdast-util-to-string: 3.1.0
       rehype-parse: 8.0.3
       rehype-remark: 9.1.2
