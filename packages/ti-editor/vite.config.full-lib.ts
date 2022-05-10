@@ -24,6 +24,7 @@ export default defineConfig({
       { find: '@', replacement: resolve(__dirname, 'src') },
       { find: 'node:url', replacement: 'url' },
       { find: 'lodash', replacement: 'lodash-es' },
+      { find: 'decode-named-character-reference', replacement: 'node_modules/decode-named-character-reference/index.js' }
     ],
   },
 })
