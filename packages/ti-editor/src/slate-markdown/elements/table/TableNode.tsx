@@ -41,9 +41,9 @@ const TableNode = defineNode<Table>({
     const className = classNames({ selected })
     const [heading, ...body] = children
     // eslint-disable-next-line react/jsx-no-constructed-context-values
-    const headerContextProps = { isHeader: true, align: element.align }
+    const headerContextProps = { isHeader: true, align: element.align ?? undefined }
     // eslint-disable-next-line react/jsx-no-constructed-context-values
-    const bodyContextProps = { isHeader: false, align: element.align }
+    const bodyContextProps = { isHeader: false, align: element.align ?? undefined }
     return (
       <LineWrapper element={element}>
         <table

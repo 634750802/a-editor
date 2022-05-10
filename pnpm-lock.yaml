@@ -146,7 +146,7 @@ importers:
       rollup-plugin-polyfill-node: ^0.8.0
       rollup-plugin-terser: ^7.0.2
       rollup-plugin-ts: ^2.0.5
-      slate: ^0.72.3
+      slate: 0.77.2
       typescript: ^4.5.4
       unified: ^10.1.1
       unist-util-is: ^5.1.1
@@ -178,7 +178,7 @@ importers:
       rollup-plugin-polyfill-node: 0.8.0_rollup@2.62.0
       rollup-plugin-terser: 7.0.2_rollup@2.62.0
       rollup-plugin-ts: 2.0.5_rollup@2.62.0+typescript@4.5.4
-      slate: 0.72.3
+      slate: 0.77.2
       typescript: 4.5.4
 
 packages:
@@ -4208,21 +4208,12 @@ packages:
       tiny-invariant: 1.0.6
     dev: false
 
-  /slate/0.72.3:
-    resolution: {integrity: sha512-ALsYQHKTN4rC+iHnOJzV+aC4AHdhoPkBWrfEK3W/LbXOzPrR+wL80a66OZiYg9Xb0QeGzlLSGdOOFQd2ix9Wmg==}
-    dependencies:
-      immer: 9.0.7
-      is-plain-object: 5.0.0
-      tiny-warning: 1.0.3
-    dev: true
-
   /slate/0.77.2:
     resolution: {integrity: sha512-raG/eyYyRDThz+r/opUD+wxWxwXQi4fH0ViZh41x8qBu8uOPMTBYl10RA7KsF8IK48DS207uPrvWGGBsnMCLwg==}
     dependencies:
       immer: 9.0.7
       is-plain-object: 5.0.0
       tiny-warning: 1.0.3
-    dev: false
 
   /slice-ansi/4.0.0:
     resolution: {integrity: sha512-qMCMfhY040cVHT43K9BFygqYbUPFZKHOg7K73mtTWJRb8pyP3fzf4Ixd5SzdEJQ6MRUg/WBnOLxghZtKKurENQ==}

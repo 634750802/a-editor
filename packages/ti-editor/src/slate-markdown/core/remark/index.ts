@@ -9,6 +9,7 @@ import { MdastContentType } from '../elements'
 import { TiRemark, withTiRemark } from '@pingcap-inc/tidb-community-remark'
 
 declare module '../editor-factory' {
+  // eslint-disable-next-line
   interface EditorFactory extends TiRemark {
   }
 }

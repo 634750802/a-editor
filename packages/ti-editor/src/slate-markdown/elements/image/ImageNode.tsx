@@ -22,10 +22,10 @@ const ImageNode = defineNode<Image>({
     return (
       <VoidElement attributes={attributes}>
         <img
-          alt={element.alt}
+          alt={element.alt ?? undefined}
           className={classNames({ selected })}
           src={element.url}
-          title={element.title}
+          title={element.title ?? undefined}
         />
 
         {children}

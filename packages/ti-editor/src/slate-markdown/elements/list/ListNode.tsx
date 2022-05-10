@@ -37,7 +37,7 @@ const ListNode = defineNode<List>({
       return (
         <ol
           {...attributes}
-          start={element.start}
+          start={element.start ?? undefined}
         >
           {children}
         </ol>

@@ -611,11 +611,11 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
 
     return {
       renderElement: (props) => {
-        const config = this.customElementMap.get(props.element.type)
+        const config = this.customElementMap.get((props.element as any).type)
         if (config) {
           return config.render(editor, props as any)
         } else {
-          console.warn(`${props.element.type} not impl`)
+          console.warn(`${(props.element as any).type} not impl`)
           return createElement('div', props.attributes, props.children)
         }
       },
@@ -626,7 +626,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
           return createElement('span', props.attributes, props.children)
         }
       },
-      decorate,
+      decorate: decorate as any,
       onDOMBeforeInput: event => {
         console.debug(event)
         batch(editor, () => {
