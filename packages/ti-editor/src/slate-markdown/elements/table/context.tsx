@@ -1,5 +1,5 @@
 import { createContext } from 'react'
-import { AlignType } from 'remark-slate-transformer/lib/models/mdast'
+import { AlignType } from 'mdast'
 
 export interface TableContextProps {
   isHeader: boolean

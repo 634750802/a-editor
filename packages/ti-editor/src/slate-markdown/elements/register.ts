@@ -10,5 +10,4 @@ export default function coreRemarkElements (editorFactory: EditorFactory): void 
       reg(editorFactory)
     }
   }
-  console.debug('auto detected', keys)
 }

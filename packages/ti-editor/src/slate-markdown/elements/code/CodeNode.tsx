@@ -75,7 +75,7 @@ const CodeNode = defineNode<Code>({
             content={(
               <LangSelect
                 editor={editor}
-                lang={element.lang}
+                lang={element.lang ?? undefined}
                 options={options}
                 pathRef={pathRef}
               />

@@ -1,80 +1,36 @@
-import React, { useCallback, useState } from 'react'
-import TiEditor, { createFactory } from '@/index'
-import './app.less'
-import { EditorFactory } from '@/slate-markdown/core/editor-factory'
-import layoutPlugin from '@/plugins/layout'
-import { HistoryEditor } from 'slate-history'
-import { Descendant } from 'slate'
-import VirtualSectionInput from '@/plugins/layout/virtual-section-input'
-import { instructionsMd } from './instructions'
+import TiEditor, { createFactory } from '@/index';
+import { EditorFactory } from '@/slate-markdown/core/editor-factory';
+import React, { useCallback, useState } from 'react';
+import { Descendant } from 'slate';
+import './app.less';
 
-function config (factory: EditorFactory) {
-  factory.use(layoutPlugin)
-  factory.configSections([
-    {
-      type: 'section', children: [
-        {
-          type: 'heading', depth: 1, children: [
-            { text: 'section 1', inlineCode: true },
-            { text: ' 无法修改或删除，使用方法查看 ' },
-            { text: 'plugins/layout', inlineCode: true },
-          ],
-        },
-        {
-          type: 'blockquote', children: [{
-            type: 'paragraph', children: [
-              { text: '用于固定的内容结构' },
-            ],
-          }],
-        },
-      ],
-    },
-    {
-      type: 'section', children: [
-        {
-          type: 'heading', depth: 1, children: [
-            { text: 'section 2', inlineCode: true },
-          ],
-        },
-      ],
-    },
-  ])
-  factory.onEditorMounted(editor => {
-    setTimeout(() => {
-      HistoryEditor.withoutSaving(editor, () => {
-        editor.setSectionMarkdown(0, 'write something here')
-        editor.setSectionMarkdown(1, instructionsMd)
-      })
-    })
-  })
+function config(factory: EditorFactory) {
+
 }
 
-async function uploadFile (file: File): Promise<string> {
+async function uploadFile(file: File): Promise<string> {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
-    reader.onloadend = function() {
+    reader.onloadend = function () {
       setTimeout(() => {
-        resolve(reader.result as string)
-      }, 500)
-    }
+        resolve(reader.result as string);
+      }, 500);
+    };
     reader.onerror = function () {
-      reject(reader.error)
-    }
-    reader.readAsDataURL(file)
-  })
+      reject(reader.error);
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
-const factory = createFactory(config)
+const factory = createFactory(config);
 
-function App (): JSX.Element {
-  const [value, setValue] = useState<Descendant[]>([])
+function App(): JSX.Element {
+  const [value, setValue] = useState<Descendant[]>([{ type: 'paragraph', children: [{ text: 'hi' }] }]);
 
   const onChange = useCallback((newValue: Descendant[]) => {
-    setValue(newValue)
-  }, [value])
-
-  const [first, setFirst] = useState<Descendant[]>([])
-  const [second, setSecond] = useState<Descendant[]>([])
+    setValue(newValue);
+  }, [value]);
 
   return (
     <div>
@@ -83,21 +39,9 @@ function App (): JSX.Element {
         onChange={onChange}
         uploadFile={uploadFile}
         value={value}
-      >
-        <VirtualSectionInput
-          onChange={setFirst}
-          section={0}
-          value={first}
-        />
-
-        <VirtualSectionInput
-          onChange={setSecond}
-          section={1}
-          value={second}
-        />
-      </TiEditor>
+      />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
