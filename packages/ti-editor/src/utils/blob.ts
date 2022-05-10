@@ -14,8 +14,12 @@ export function urlToFile (url: string): Promise<File> {
 
 function getUrlName(url: string): string {
   try {
-    const pathname = (new URL(url)).pathname
-    return pathname.split('/').reverse()[0] || 'unnamed'
+    const { protocol, pathname } = (new URL(url))
+    if (/https?/.test(protocol)) {
+      return pathname.split('/').reverse()[0] || 'unnamed'
+    } else {
+      return 'unnamed'
+    }
   } catch (e) {
     return 'unnamed'
   }
