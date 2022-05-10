@@ -30,6 +30,9 @@ export interface TiCommunityEditorProps {
    */
   config?: (factory: EditorFactory) => void
   uploadFile?: (file: File) => Promise<string>
+  onAlert?: (title: string, message: string) => void
+  isCdnHost?: (url: string) => boolean
+  setHang?: (hanging: boolean) => boolean
   disabled?: boolean
   initialMarkdown?: string
   value: Descendant[]
@@ -127,15 +130,17 @@ export function createFactory (config?: (factory: EditorFactory) => void): Edito
   return editorFactory
 }
 
-const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ factory: editorFactory, disabled = false, initialMarkdown = '', config, uploadFile, value, onChange: propOnChange, placeholder, children }: TiCommunityEditorProps, ref): JSX.Element => {
+const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ factory: editorFactory, disabled = false, initialMarkdown = '', config, uploadFile, value, onChange: propOnChange, placeholder, isCdnHost, setHang, onAlert, children }: TiCommunityEditorProps, ref): JSX.Element => {
 
   const forceUpdate = useForceUpdate()
 
   const editor = useMemo(() => {
     const editor = withReact(withHistory(createEditor()))
-    editor.onAlert = (title, message) => {
+    editor.setHang = setHang
+    editor.isCdnHost = isCdnHost
+    editor.onAlert = onAlert ?? ((title, message) => {
       console.warn(title, message)
-    }
+    })
     return editorFactory.wrapEditor(editor)
   }, [editorFactory])
 

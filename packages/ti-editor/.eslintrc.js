@@ -13,6 +13,7 @@ module.exports = {
   ],
   rules: {
     'react/react-in-jsx-scope': 0,
+    'react/prop-types': 0,
     'react/jsx-filename-extension': [1, { 'extensions': ['.tsx'] }],
     'react/jsx-indent': [1, 2],
     'react/jsx-indent-props': [1, 2],
