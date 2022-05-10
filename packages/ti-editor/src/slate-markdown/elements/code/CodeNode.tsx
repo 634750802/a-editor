@@ -71,7 +71,7 @@ const CodeNode = defineNode<Code>({
       <LineWrapper element={element}>
         {({ active, pathRef }) => (
           <Tippy
-            appendTo={document.body}
+            appendTo={typeof document === 'undefined' ? 'parent' : document.body}
             content={(
               <LangSelect
                 editor={editor}
