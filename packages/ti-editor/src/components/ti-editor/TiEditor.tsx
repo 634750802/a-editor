@@ -57,8 +57,11 @@ export interface TiEditor {
 
   onAlert: (title: string, message: string) => void
   uploadFile?: (file: File) => Promise<string>
+  isCdnHost?: (url: string) => boolean
   factory: EditorFactory
   setActionForm: (form: JSX.Element | undefined) => void
+
+  setHang?: (hanging: boolean) => boolean
 
   nearest: <E extends RemarkElement>(entry: NodeEntry, config: ICustomElementConfig<E>) => NodeEntry<E> | undefined
 }
