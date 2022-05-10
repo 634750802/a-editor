@@ -628,8 +628,8 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
       },
       decorate,
       onDOMBeforeInput: event => {
+        console.debug(event)
         batch(editor, () => {
-          console.log(event.inputType)
           switch (event.inputType) {
             case 'insertText':
               handleInsertText(event)
