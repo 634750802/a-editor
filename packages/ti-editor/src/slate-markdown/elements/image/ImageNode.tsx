@@ -65,10 +65,12 @@ const ImageNode = defineNode<Image>({
       setSize(size)
       setAspect(img.naturalWidth / img.naturalHeight)
       setResizable(true)
-      const path = ReactEditor.findPath(editor, element)
-      Editor.withoutNormalizing(editor, () => {
-        Transforms.setNodes<Image & ImageExtension>(editor, { size }, { at: path })
-      })
+      if (!element.size) {
+        const path = ReactEditor.findPath(editor, element)
+        Editor.withoutNormalizing(editor, () => {
+          Transforms.setNodes<Image & ImageExtension>(editor, { size }, { at: path })
+        })
+      }
     }, [])
 
     const enable: Enable = useMemo(() => {
