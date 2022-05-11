@@ -1,5 +1,5 @@
 {
-  "title": "添加图片",
+  "title": "添加表格",
   "type": "object",
   "properties": {
     "cols": {
