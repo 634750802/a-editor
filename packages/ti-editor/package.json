@@ -1,6 +1,6 @@
 {
   "name": "@pingcap-inc/tidb-community-editor",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "scripts": {
     "dev": "vite -c vite.config.dev.ts",
     "build": "tsc --noEmit && vite build -c vite.config.lib.ts && vite build -c vite.config.full-lib.ts && tsc-alias",
