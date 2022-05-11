@@ -573,18 +573,21 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
       const ref = range ? Editor.rangeRef(editor, range) : null
       if (editor.uploadFile) {
         Promise.all(images.map(editor.uploadFile))
-          .then((urls) => urls.map((url, i) => ({
-            type: 'image',
-            url,
-            title: undefined,
-            alt: images[i].name,
-            children: [{ text: '' }],
-          } as Image)))
+          .then((urls) => urls.flatMap((url, i) => ([
+            { text: ''},
+            {
+              type: 'image',
+              url,
+              title: undefined,
+              alt: images[i].name,
+              children: [{ text: '' }],
+            } as Image,
+          ])))
           .then(fragment => {
             if (ref?.current) {
               Transforms.select(editor, ref.current)
             }
-            editor.insertFragment(fragment)
+            editor.insertFragment(fragment.concat({ text: '' }))
           })
           .catch(console.error)
       }
