@@ -5,12 +5,12 @@
     "cols": {
       "title": "列数",
       "type": "number",
-      "min": 2
+      "minimum": 2
     },
     "rows": {
       "title": "行数",
       "type": "number",
-      "min": 2
+      "minimum": 2
     }
   },
   "required": [
