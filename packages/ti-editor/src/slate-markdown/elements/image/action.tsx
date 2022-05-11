@@ -88,7 +88,7 @@ export function register (factory: EditorFactory) {
     },
     action: (editor, location, state, event) => {
       const input = document.createElement('input')
-      input.accept = 'image/*'
+      input.accept = '.jpg,.jpeg,.png,.gif,.webp'
       input.type = 'file'
       input.onchange = () => {
         if (input.files) {
