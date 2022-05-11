@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import { Enable, Resizable, ResizeCallback } from 're-resizable';
 import React, { ReactEventHandler, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { Image } from 'remark-slate-transformer/lib/transformers/mdast-to-slate';
-import { Editor, Transforms } from 'slate';
+import { Editor, Node, Transforms } from 'slate';
 import { ReactEditor, useSelected } from 'slate-react';
 import VoidElement from '../../../components/void-element/void-element';
 import {
@@ -58,12 +58,17 @@ const ImageNode = defineNode<Image>({
 
     const onLoad: ReactEventHandler<HTMLImageElement> = useCallback((event) => {
       const img = event.currentTarget
-      setSize({
+      const size = {
         width: img.width,
         height: img.height,
-      })
+      }
+      setSize(size)
       setAspect(img.naturalWidth / img.naturalHeight)
       setResizable(true)
+      const path = ReactEditor.findPath(editor, element)
+      Editor.withoutNormalizing(editor, () => {
+        Transforms.setNodes<Image & ImageExtension>(editor, { size }, { at: path })
+      })
     }, [])
 
     const enable: Enable = useMemo(() => {
@@ -108,19 +113,18 @@ const ImageNode = defineNode<Image>({
       return (
         <VoidElement attributes={attributes}>
           <Resizable
-            className='resizable'
+            className={classNames('resizable', { selected })}
             defaultSize={size}
             enable={enable}
             handleClasses={{ bottomRight: 'resize-handle-bottom-right' }}
             lockAspectRatio={aspect}
-            maxWidth={containerWidth}
+            maxWidth={containerWidth || 640}
             onResize={onResize}
             onResizeStop={onResizeStop}
             size={realSize}
           >
             <img
               alt={element.alt ?? undefined}
-              className={classNames({ selected })}
               height={realSize?.height}
               onLoad={onLoad}
               src={element.url}

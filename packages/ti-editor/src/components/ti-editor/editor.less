@@ -10,10 +10,10 @@
     background: rgba(51,112,255,.34);
   }
 
-  pre, img, table {
+  pre, img, table, .resizable {
     transition: box-shadow .2s ease;
   }
-  pre.selected, img.selected, table.selected {
+  pre.selected, img.selected, table.selected, .resizable.selected {
     box-shadow: rgba(51,112,255,.34) 0 0 1px 2px;
   }
 
@@ -36,9 +36,17 @@
     }
   }
 
-  .resizable:hover {
-    .resize-handle-bottom-right:before{
-      opacity: 0.6;
+  .resizable:not(.selected) {
+    .resize-handle-bottom-right {
+      pointer-events: none;
+    }
+  }
+
+  .resizable.selected {
+    .resize-handle-bottom-right {
+      &:before {
+        opacity: 0.6;
+      }
     }
   }
 }
