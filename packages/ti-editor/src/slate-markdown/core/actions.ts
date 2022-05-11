@@ -243,7 +243,7 @@ export function coreActionsPlugin (factory: EditorFactory): void {
     factory.lineActions = [
       ['toggle-heading-1', 'toggle-heading-2', 'toggle-heading-3', 'toggle-heading-4', 'toggle-heading-5', 'toggle-heading-6'],
       ['toggle-ordered-list', 'toggle-unordered-list', 'indent-list', 'outdent-list'],
-      ['toggle-blockquote', 'toggle-codeblock', 'toggle-table'],
+      ['toggle-blockquote', 'toggle-codeblock', 'toggle-table', 'insert-image'],
     ]
   }
   if (!factory.selectionActions) {
@@ -253,7 +253,7 @@ export function coreActionsPlugin (factory: EditorFactory): void {
       TextNodeDecorator.delete,
       TextNodeDecorator.inlineCode,
       'toggle-link',
-      'toggle-image',
+      // 'toggle-image',
       'remove-selection-table',
       'table-insert-row-right',
       'table-insert-row-left',

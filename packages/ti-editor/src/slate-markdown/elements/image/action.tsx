@@ -1,14 +1,16 @@
-import { EditorFactory } from '../../core/editor-factory'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faImage } from '@fortawesome/free-solid-svg-icons'
-import React from 'react'
-import { ActionType } from '../../core/actions'
-import { isElementActive, isRangeCustomTextPropsEnabled } from '../text/TextNode'
-import { Editor, Element, Path, Transforms } from 'slate'
-import { requireFields } from '../../../components/form'
-import createSchema from './create-schema.json'
-import { JSONSchema7 } from 'json-schema'
-import ImageNode from './ImageNode'
+import { isElementType } from '@/slate-markdown/slate-utils';
+import { faImage } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { JSONSchema7 } from 'json-schema';
+import React from 'react';
+import { Image, Paragraph } from 'remark-slate-transformer/lib/transformers/mdast-to-slate';
+import { Editor, Element, Node, Path, Transforms } from 'slate';
+import { requireFields } from '../../../components/form';
+import { ActionType } from '../../core/actions';
+import { EditorFactory } from '../../core/editor-factory';
+import { isElementActive, isRangeCustomTextPropsEnabled } from '../text/TextNode';
+import createSchema from './create-schema.json';
+import ImageNode from './ImageNode';
 
 export function register (factory: EditorFactory) {
   factory.defineAction({
@@ -51,5 +53,59 @@ export function register (factory: EditorFactory) {
         return false
       }
     },
+  })
+
+  factory.defineAction({
+    key: 'insert-image',
+    type: ActionType.toplevel,
+    icon: <FontAwesomeIcon icon={faImage} />,
+    computeState: (editor, location) => {
+      const node = Node.get(editor, location)
+      if (isElementType<Paragraph>(node, 'paragraph')) {
+        let hasImg = false
+        let hasText = false
+        for (const child of node.children) {
+          if ('text' in child) {
+            if (child.text) {
+              hasText = true
+            }
+          } else if (isElementType<Image>(child, 'image')) {
+            hasImg = true
+          } else {
+            hasText = true
+          }
+        }
+        return {
+          active: hasImg,
+          disabled: hasImg || hasText
+        }
+      } else {
+        return {
+          active: false,
+          disabled: true,
+        }
+      }
+    },
+    action: (editor, location, state, event) => {
+      const input = document.createElement('input')
+      input.accept = 'image/*'
+      input.type = 'file'
+      input.onchange = () => {
+        if (input.files) {
+          const file = input.files.item(0)
+          if (file) {
+            (async () => {
+              const url = await editor.uploadFile?.(file)
+              if (url) {
+                Transforms.insertNodes(editor, { type: 'paragraph', children: [{ text: '' }]}, { at: location })
+                ImageNode.insert(editor, location.concat(0), { url, title: '', alt: 'no-alt' })
+              }
+            })();
+          }
+        }
+      }
+      input.click()
+      return false
+    }
   })
 }
