@@ -1,5 +1,5 @@
 /* eslint-disable react/forbid-component-props */
-import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { forwardRef, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Editable, ReactEditor, Slate, withReact } from 'slate-react'
 import { BaseEditor, createEditor, Descendant, Editor, Element, Node, NodeEntry, Text } from 'slate'
 import { HistoryEditor, withHistory } from 'slate-history'
@@ -14,6 +14,7 @@ import { coreActionsPlugin } from '../../slate-markdown/core/actions'
 import { coreSelectionToolbarPlugin } from '../../slate-markdown/core/selection-toolbar'
 import { coreRemarkPlugin } from '../../slate-markdown/core/remark'
 import useForceUpdate from '../../hooks/forceUpdate'
+import useDimensions from "react-cool-dimensions";
 
 // see https://docs.slatejs.org/walkthroughs/01-installing-slate
 declare module 'slate' {
@@ -164,12 +165,20 @@ const TiEditor = forwardRef<Editor, TiCommunityEditorProps>(({ factory: editorFa
     return editorFactory.createDefaultEditableProps(editor)
   }, [editorFactory, editor])
 
+  const { observe, unobserve, width } = useDimensions()
   const containerRef = useRef<HTMLDivElement>(null)
+
+  useLayoutEffect(() => {
+    observe(containerRef.current)
+    return unobserve
+  }, [])
+
   const uiContextProps = useMemo<UIContextProps>(() => ({
     getEditorDOMRect (): DOMRect {
       return containerRef.current?.getBoundingClientRect() ?? new DOMRect()
     },
-  }), [containerRef])
+    containerWidth: width,
+  }), [containerRef, width])
 
   const [form, setForm] = useState<JSX.Element>()
 
