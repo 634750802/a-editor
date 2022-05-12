@@ -32,8 +32,8 @@ jobs:
           cache: pnpm
       - name: Build
         run: |
-          pnmp i --frozen-lockfile --strict-peer-dependencies
-          pnmp run build:gh-pages
+          pnpm i --frozen-lockfile --strict-peer-dependencies
+          pnpm run build:gh-pages
       - name: Deploy to GitHub Pages
         uses: Cecilapp/GitHub-Pages-deploy@v3
         env:
