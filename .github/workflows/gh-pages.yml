@@ -23,13 +23,17 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@v2
+      - uses: pnpm/action-setup@v2.1.0
+        with:
+          version: 6.0.2
       - name: Setup Node.js environment
         uses: actions/setup-node@v2.4.1
+        with:
+          cache: pnpm
       - name: Build
         run: |
-          npm i -g pnpm
-          npmp i
-          npmp run build:gh-pages
+          pnmp i --frozen-lockfile --strict-peer-dependencies
+          pnmp run build:gh-pages
       - name: Deploy to GitHub Pages
         uses: Cecilapp/GitHub-Pages-deploy@v3
         env:
