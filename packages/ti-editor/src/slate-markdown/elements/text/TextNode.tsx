@@ -40,6 +40,11 @@ const TextNode = defineNode<RemarkText, TextApi>({
       if (deleting.length > 0) {
         Transforms.unsetNodes(editor, deleting, { at: path })
       }
+    } if (node.inlineCode) {
+      const deleting = [TextNodeDecorator.strong, TextNodeDecorator.emphasis, TextNodeDecorator.delete].filter(decorator => !!node[decorator])
+      if (deleting.length > 0) {
+        Transforms.unsetNodes(editor, deleting, { at: path })
+      }
     }
   },
   render (editor: Editor, { leaf, children, attributes }: TypedRenderLeafProps<RemarkText>): JSX.Element {
