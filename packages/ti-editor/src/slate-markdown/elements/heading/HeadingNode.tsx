@@ -4,10 +4,13 @@ import { createElement } from 'react'
 import LineWrapper from '../../../components/line-wrapper/LineWrapper'
 import classNames from 'classnames'
 import { Editor, Path, Transforms } from 'slate'
+import { ReactEditor } from "slate-react";
 
-let index = 0;
+type HeadingWithId = Heading & {
+  id?: string
+}
 
-const HeadingNode = defineNode<Heading>({
+const HeadingNode = defineNode<HeadingWithId>({
   type: 'heading',
   isInline: false,
   isLeaf: false,
@@ -15,11 +18,27 @@ const HeadingNode = defineNode<Heading>({
   contentType: MdastContentType.flow,
   contentModelType: MdastContentType.phrasing,
   render: (editor, { element, children, attributes }) => {
-    console.log('element', element)
-    console.log('attributes', attributes)
+    const readonly = ReactEditor.isReadOnly(editor)
     return (
       <LineWrapper element={element}>
-        {({ active }) => createElement(`h${element.depth}`, Object.assign(attributes, index++, { className: classNames({ active })}), children)}
+        {({ active }) => {
+          const heading = createElement(`h${element.depth}`, Object.assign(attributes, { className: classNames({ active }), id: element.id }), children)
+          if (!readonly) {
+            return heading
+          }
+          if (element.id) {
+            return (
+              <a
+                className={`heading-href heading-href-${element.depth}`}
+                href={`#${element.id}`}
+              >
+                {heading}
+              </a>
+            )
+          } else {
+            return heading
+          }
+        }}
       </LineWrapper>
     )
   },

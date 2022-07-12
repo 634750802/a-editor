@@ -15,6 +15,7 @@ import { coreSelectionToolbarPlugin } from '../../slate-markdown/core/selection-
 import { coreRemarkPlugin } from '../../slate-markdown/core/remark'
 import useForceUpdate from '../../hooks/forceUpdate'
 import useDimensions from "react-cool-dimensions";
+import { TiRemark } from "@pingcap-inc/tidb-community-remark";
 
 // see https://docs.slatejs.org/walkthroughs/01-installing-slate
 declare module 'slate' {
@@ -120,8 +121,8 @@ export interface TiEditor {
 
 }
 
-export function createFactory (config?: (factory: EditorFactory) => void): EditorFactory {
-  const editorFactory = new EditorFactory()
+export function createFactory (config?: (factory: EditorFactory) => void): EditorFactory & TiRemark {
+  const editorFactory: EditorFactory & TiRemark = new EditorFactory() as EditorFactory & TiRemark
   editorFactory.use(coreRemarkPlugin)
   editorFactory.use(coreActionsPlugin)
   editorFactory.use(coreSelectionToolbarPlugin)
