@@ -5,6 +5,7 @@ import LineWrapper from '../../../components/line-wrapper/LineWrapper'
 import classNames from 'classnames'
 import { Editor, Path, Transforms } from 'slate'
 
+let index = 0;
 
 const HeadingNode = defineNode<Heading>({
   type: 'heading',
@@ -14,9 +15,11 @@ const HeadingNode = defineNode<Heading>({
   contentType: MdastContentType.flow,
   contentModelType: MdastContentType.phrasing,
   render: (editor, { element, children, attributes }) => {
+    console.log('element', element)
+    console.log('attributes', attributes)
     return (
       <LineWrapper element={element}>
-        {({ active }) => createElement(`h${element.depth}`, Object.assign(attributes, { className: classNames({ active })}), children)}
+        {({ active }) => createElement(`h${element.depth}`, Object.assign(attributes, index++, { className: classNames({ active })}), children)}
       </LineWrapper>
     )
   },
