@@ -1,6 +1,6 @@
 {
   "name": "@pingcap-inc/tidb-community-remark",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "scripts": {
     "build": "rollup -c rollup.js"
   },
