@@ -1,6 +1,6 @@
 {
   "name": "@pingcap-inc/tidb-community-editor",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "scripts": {
     "dev": "vite -c vite.config.dev.ts",
     "build": "tsc --noEmit && vite build -c vite.config.lib.ts && vite build -c vite.config.full-lib.ts && tsc-alias",
@@ -20,6 +20,7 @@
     "classnames": "^2.3.1",
     "decode-named-character-reference": "^1.0.1",
     "is-hotkey": "^0.2.0",
+    "json-schema": "^0.4.0",
     "lodash-es": "^4.17.21",
     "prismjs": "^1.25.0",
     "re-resizable": "^6.9.9",
@@ -37,6 +38,8 @@
   "devDependencies": {
     "@rollup/plugin-typescript": "^8.3.0",
     "@types/babel__core": "^7.1.16",
+    "@types/is-hotkey": "^0.1.7",
+    "@types/json-schema": "^7.0.11",
     "@types/mdast": "^3.0.10",
     "@types/node": "^16.10.2",
     "@types/prismjs": "^1.16.6",
