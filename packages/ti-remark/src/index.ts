@@ -1,16 +1,16 @@
-import { Descendant } from 'slate'
-import { toString } from 'mdast-util-to-string'
-import { Plugin, Processor, unified } from 'unified'
-import { remarkToSlate, slateToRemark } from 'remark-slate-transformer'
-import remarkGfm from 'remark-gfm'
-import remarkStringify from 'remark-stringify'
-import remarkRehype from 'remark-rehype'
-import rehypeStringify from 'rehype-stringify'
-import remarkParse from 'remark-parse'
-import rehypeParse from 'rehype-parse'
-import rehypeRemoveComments from 'rehype-remove-comments'
-import rehypeRemark from 'rehype-remark'
-import rfdc from 'rfdc'
+import { Descendant } from 'slate';
+import { toString } from 'mdast-util-to-string';
+import { Plugin, Processor, unified } from 'unified';
+import { remarkToSlate, slateToRemark } from 'remark-slate-transformer';
+import remarkGfm from 'remark-gfm';
+import remarkStringify from 'remark-stringify';
+import remarkRehype from 'remark-rehype';
+import rehypeStringify from 'rehype-stringify';
+import remarkParse from 'remark-parse';
+import rehypeParse from 'rehype-parse';
+import rehypeRemoveComments from 'rehype-remove-comments';
+import rehypeRemark from 'rehype-remark';
+import rfdc from 'rfdc';
 
 export interface TiRemark {
   // configure methods
@@ -32,6 +32,9 @@ export interface TiRemark {
   generateHtml (descendants: Descendant[]): string
 
   generateText (descendants: Descendant[]): string
+
+  // will mutate original data
+  generateHeadingId (descendants: Descendant[], level?: number): void
 }
 
 const clone = rfdc({ proto: false, circles: false })
@@ -105,6 +108,44 @@ export function withTiRemark<T> (target: T): T & TiRemark {
       children: fragment
     } as never)
     return toString(ast)
+  }
+
+  res.generateHeadingId = (fragment: Descendant[], level: number = 3) => {
+    let current: (string | undefined)[] = []
+    let idSet = new Set<string>()
+
+    function string (node: any) {
+      if (node.text) {
+        return node.text
+      } else if (node.children) {
+        return node.children.map(string).join(' ')
+      }
+    }
+
+    function iter (node: any) {
+      if (node.type === 'heading') {
+        if (node.depth > level) {
+          return
+        }
+        current[node.depth - 1] = string(node)
+        let id = current.slice(0, node.depth).filter(t => !!t).join('/')
+        if (idSet.has(id)) {
+          let i = 0
+          while (idSet.has(`${id}-${i}`)) {
+            i++
+          }
+          id = `${id}-${i}`
+        }
+        idSet.add(id)
+        node.id = id
+        return
+      }
+      if (node.children) {
+        node.children.forEach(iter)
+      }
+    }
+
+    fragment.forEach(iter)
   }
   return res
 }
