@@ -1,6 +1,6 @@
 import TiEditor, { createFactory } from '@/index';
 import { EditorFactory } from '@/slate-markdown/core/editor-factory';
-import React, { ChangeEvent, useCallback, useLayoutEffect, useState } from 'react';
+import React, { ChangeEvent, useCallback, useState } from 'react';
 import { Descendant, Transforms } from 'slate';
 import './app.less';
 import { HistoryEditor } from 'slate-history';
