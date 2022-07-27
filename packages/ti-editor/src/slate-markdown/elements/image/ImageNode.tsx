@@ -60,7 +60,7 @@ const ImageNode = defineNode<Image>({
       const img = event.currentTarget
       const size = {
         width: img.width,
-        height: img.height,
+        height: img.width / img.naturalWidth * img.naturalHeight,
       }
       setSize(size)
       setAspect(img.naturalWidth / img.naturalHeight)
