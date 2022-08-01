@@ -3,9 +3,17 @@ import { library } from '@fortawesome/fontawesome-svg-core';
 import { faImage } from '@fortawesome/free-solid-svg-icons';
 import classNames from 'classnames';
 import { Enable, Resizable, ResizeCallback } from 're-resizable';
-import React, { ReactEventHandler, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import React, {
+  ReactEventHandler,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Image } from 'remark-slate-transformer/lib/transformers/mdast-to-slate';
-import { Editor, Node, Transforms } from 'slate';
+import { Editor, Transforms } from 'slate';
 import { ReactEditor, useSelected } from 'slate-react';
 import VoidElement from '../../../components/void-element/void-element';
 import {
@@ -39,6 +47,20 @@ function applyDelta (size: Size | undefined, delta: Size | undefined): Size | un
   return undefined
 }
 
+// https://stackoverflow.com/questions/1977871/check-if-an-image-is-loaded-no-errors-with-jquery
+function isImgOk(img?: HTMLImageElement | null) {
+  if (!img) {
+    return false
+  }
+  if (!img.complete) {
+    return false
+  }
+  if (img.naturalWidth === 0) {
+    return false
+  }
+  return true
+}
+
 const ImageNode = defineNode<Image>({
   type: 'image',
   isInline: true,
@@ -48,37 +70,89 @@ const ImageNode = defineNode<Image>({
   render: (editor: Editor, { element, attributes, children }: TypedRenderElementProps<Image & ImageExtension>): JSX.Element => {
     const selected = useSelected()
     const readonly = ReactEditor.isReadOnly(editor)
-    
+
     const { containerWidth } = useContext(UIContext)
 
     const [resizable, setResizable] = useState(false)
     const [size, setSize] = useState<Size | undefined>(element.size)
     const [aspect, setAspect] = useState<number>()
+    const aspectRef = useRef<number>()
     const [delta, setDelta] = useState<Size>()
+    const [loaded, setLoaded] = useState(false)
+    const imgRef = useRef<HTMLImageElement>(null)
 
-    const onLoad: ReactEventHandler<HTMLImageElement> = useCallback((event) => {
-      const img = event.currentTarget
+    // determine if img is loaded
+    const onLoad: ReactEventHandler<HTMLImageElement> = useCallback(() => {
+      setLoaded(true)
+    }, [])
+
+    useEffect(() => {
+      if (isImgOk(imgRef.current)) {
+        setLoaded(true)
+      }
+      return () => {
+        setLoaded(false)
+        setResizable(false)
+      }
+    }, [element.url])
+
+    // set initial info if loaded
+    useEffect(() => {
+      setResizable(true)
+      const img = imgRef.current
+      if (!img) {
+        return
+      }
+      const aspect = img.naturalWidth / img.naturalHeight
+      aspectRef.current = aspect
       const size = {
         width: img.width,
-        height: img.width / img.naturalWidth * img.naturalHeight,
+        height: img.height,
       }
       setSize(size)
-      setAspect(img.naturalWidth / img.naturalHeight)
-      setResizable(true)
+      setAspect(aspect)
       if (!element.size) {
         const path = ReactEditor.findPath(editor, element)
         Editor.withoutNormalizing(editor, () => {
           Transforms.setNodes<Image & ImageExtension>(editor, { size }, { at: path })
         })
       }
+    }, [loaded])
+
+    // resize image to fit parent size
+    const onElementResize = useCallback(() => {
+      const img = imgRef.current
+      if (!img) {
+        return
+      }
+      img.height = img.clientWidth / (aspectRef.current ?? 1)
     }, [])
+
+    // add size observer (use window.onresize instead of ResizeObserver if not exists)
+    useEffect(() => {
+      if (!readonly || (!loaded && !isImgOk(imgRef.current))) {
+        return
+      }
+      onElementResize()
+      if (typeof ResizeObserver === 'undefined') {
+        window.addEventListener('resize', onElementResize)
+        return () => {
+          window.removeEventListener('resize', onElementResize)
+        }
+      } else {
+        if (imgRef.current) {
+          const ro = new ResizeObserver(onElementResize)
+          ro.observe(imgRef.current)
+        }
+      }
+    }, [readonly, loaded])
 
     const enable: Enable = useMemo(() => {
       return {
         bottomRight: !readonly && resizable,
       }
     }, [resizable, readonly])
-    
+
     const onResize: ResizeCallback = useCallback((_e, _d, _el, delta) => {
       setDelta(delta)
     }, [])
@@ -94,7 +168,7 @@ const ImageNode = defineNode<Image>({
       })
       setDelta(undefined)
     }, [])
-    
+
     if (readonly) {
       return (
         <VoidElement attributes={attributes}>
@@ -102,6 +176,7 @@ const ImageNode = defineNode<Image>({
             alt={element.alt ?? undefined}
             className={classNames({ selected })}
             height={size?.height}
+            ref={imgRef}
             src={element.url}
             title={element.title ?? undefined}
             width={size?.width}
@@ -129,6 +204,7 @@ const ImageNode = defineNode<Image>({
               alt={element.alt ?? undefined}
               height={realSize?.height}
               onLoad={onLoad}
+              ref={imgRef}
               src={element.url}
               title={element.title ?? undefined}
               width={realSize?.width}
