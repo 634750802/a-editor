@@ -5,6 +5,7 @@ import React from 'react'
 // import createUrlRegExp from 'url-regex-safe'
 import { faLink } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
+import { isElementType } from "@/slate-markdown/slate-utils";
 
 library.add(faLink)
 
@@ -15,7 +16,7 @@ const LinkNode = defineNode({
   contentType: MdastContentType.phrasing,
   contentModelType: MdastContentType.staticPhrasing,
   normalize: (editor, element, path, preventDefaults) => {
-    if (Node.string(element).trim().length === 0) {
+    if (Node.string(element).trim().length === 0 && element.children.findIndex(node => isElementType(node, 'image')) !== -1) {
       Transforms.removeNodes(editor, { at: path })
       preventDefaults()
     }
