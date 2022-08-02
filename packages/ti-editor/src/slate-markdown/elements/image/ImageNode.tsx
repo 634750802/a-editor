@@ -101,7 +101,6 @@ const ImageNode = defineNode<Image>({
           <img
             alt={element.alt ?? undefined}
             className={classNames({ selected })}
-            height={size?.height}
             src={element.url}
             title={element.title ?? undefined}
             width={size?.width}
