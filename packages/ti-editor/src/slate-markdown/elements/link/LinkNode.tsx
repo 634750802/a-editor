@@ -16,7 +16,7 @@ const LinkNode = defineNode({
   contentType: MdastContentType.phrasing,
   contentModelType: MdastContentType.staticPhrasing,
   normalize: (editor, element, path, preventDefaults) => {
-    if (Node.string(element).trim().length === 0 && element.children.findIndex(node => isElementType(node, 'image')) !== -1) {
+    if (Node.string(element).trim().length === 0 && element.children.findIndex(node => isElementType(node, 'image')) === -1) {
       Transforms.removeNodes(editor, { at: path })
       preventDefaults()
     }
