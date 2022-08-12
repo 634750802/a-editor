@@ -30,7 +30,7 @@ const HeadingNode = defineNode<HeadingWithId>({
             return (
               <a
                 className={`heading-href heading-href-${element.depth}`}
-                href={`#${element.id}`}
+                href={`#${encodeURI(element.id)}`}
               >
                 {heading}
               </a>
