@@ -137,7 +137,7 @@ export function withTiRemark<T> (target: T): T & TiRemark {
           id = `${id}-${i}`
         }
         idSet.add(id)
-        node.id = encodeURI(id)
+        node.id = id
         return
       }
       if (node.children) {
