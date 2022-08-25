@@ -23,14 +23,17 @@ const HeadingNode = defineNode<HeadingWithId>({
     return (
       <LineWrapper element={element}>
         {({ active }) => {
-          const heading = createElement(`h${element.depth}`, Object.assign(attributes, { className: classNames({ active }), id: element.id }), children)
+          const heading = createElement(`h${element.depth}`, Object.assign(attributes, { className: classNames({ active }) }), children)
           if (!readonly) {
             return heading
           }
           if (element.id) {
             return (
               <>
-                <a className={styles.target_fix} />
+                <a
+                  className={styles.target_fix}
+                  id={element.id}
+                />
 
                 <a
                   className={`heading-href heading-href-${element.depth}`}
