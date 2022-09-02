@@ -5,7 +5,7 @@ import LineWrapper from '../../../components/line-wrapper/LineWrapper'
 import classNames from 'classnames'
 import { Editor, Path, Transforms } from 'slate'
 import { ReactEditor } from "slate-react";
-import * as styles from './HeadingNode.module.less'
+import styles from './HeadingNode.module.less'
 
 type HeadingWithId = Heading & {
   id?: string
@@ -30,7 +30,7 @@ const HeadingNode = defineNode<HeadingWithId>({
           if (element.id) {
             return (
               <>
-                <a
+                <span
                   className={styles.target_fix}
                   id={element.id}
                 />
