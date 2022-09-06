@@ -23,7 +23,7 @@ const HeadingNode = defineNode<HeadingWithId>({
     return (
       <LineWrapper element={element}>
         {({ active }) => {
-          const heading = createElement(`h${element.depth}`, Object.assign(attributes, { className: classNames({ active }) }), children)
+          const heading = createElement(`h${element.depth}`, Object.assign({...attributes}, { className: classNames({ active }) }), children)
           if (!readonly) {
             return heading
           }
