@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "vite -c vite.config.dev.ts",
     "build": "tsc --noEmit && vite build -c vite.config.lib.ts && vite build -c vite.config.full-lib.ts && tsc-alias",
+    "build:for-windows": "./node_modules/.bin/tsc --noEmit && ./node_modules/.bin/vite build -c vite.config.lib.ts && ./node_modules/.bin/vite build -c vite.config.full-lib.ts && ./node_modules/.bin/tsc-alias",
     "build:gh-pages": "tsc && vite build -c vite.config.gh-pages.ts",
     "build:check": "tsc",
     "serve": "vite preview"
