@@ -5,6 +5,7 @@ import LineWrapper from '../../../components/line-wrapper/LineWrapper'
 import classNames from 'classnames'
 import { Editor, Path, Transforms } from 'slate'
 import { ReactEditor } from "slate-react";
+import styles from './HeadingNode.module.less'
 
 type HeadingWithId = Heading & {
   id?: string
@@ -22,18 +23,25 @@ const HeadingNode = defineNode<HeadingWithId>({
     return (
       <LineWrapper element={element}>
         {({ active }) => {
-          const heading = createElement(`h${element.depth}`, Object.assign(attributes, { className: classNames({ active }), id: element.id }), children)
+          const heading = createElement(`h${element.depth}`, Object.assign({...attributes}, { className: classNames({ active }) }), children)
           if (!readonly) {
             return heading
           }
           if (element.id) {
             return (
-              <a
-                className={`heading-href heading-href-${element.depth}`}
-                href={`#${element.id}`}
-              >
-                {heading}
-              </a>
+              <>
+                <span
+                  className={styles.target_fix}
+                  id={element.id}
+                />
+
+                <a
+                  className={`heading-href heading-href-${element.depth}`}
+                  href={`#${encodeURI(element.id)}`}
+                >
+                  {heading}
+                </a>
+              </>
             )
           } else {
             return heading
