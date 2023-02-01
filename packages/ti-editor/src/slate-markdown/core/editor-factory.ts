@@ -38,7 +38,7 @@ export class EditorFactory<T extends RemarkText = RemarkText, BE extends RemarkB
 
 
   use (plugin: (factory: this) => void): this {
-    console.debug(`factory@${this.id}.use`, plugin.name)
+    // console.debug(`factory@${this.id}.use`, plugin.name)
     plugin(this)
     return this
   }

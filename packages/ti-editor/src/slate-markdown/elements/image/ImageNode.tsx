@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import { Enable, Resizable, ResizeCallback } from 're-resizable';
 import React, { ReactEventHandler, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { Image } from 'remark-slate-transformer/lib/transformers/mdast-to-slate';
-import { Editor, Node, Transforms } from 'slate';
+import { Editor, Node, Path, Transforms } from 'slate';
 import { ReactEditor, useSelected } from 'slate-react';
 import VoidElement from '../../../components/void-element/void-element';
 import {
@@ -15,6 +15,7 @@ import {
   RemarkElementProps,
   TypedRenderElementProps,
 } from '../../core/elements';
+import { isElementType } from '@/slate-markdown/slate-utils';
 
 
 library.add(faImage)
@@ -48,7 +49,7 @@ const ImageNode = defineNode<Image>({
   render: (editor: Editor, { element, attributes, children }: TypedRenderElementProps<Image & ImageExtension>): JSX.Element => {
     const selected = useSelected()
     const readonly = ReactEditor.isReadOnly(editor)
-    
+
     const { containerWidth } = useContext(UIContext)
 
     const [resizable, setResizable] = useState(false)
@@ -78,7 +79,7 @@ const ImageNode = defineNode<Image>({
         bottomRight: !readonly && resizable,
       }
     }, [resizable, readonly])
-    
+
     const onResize: ResizeCallback = useCallback((_e, _d, _el, delta) => {
       setDelta(delta)
     }, [])
@@ -94,7 +95,7 @@ const ImageNode = defineNode<Image>({
       })
       setDelta(undefined)
     }, [])
-    
+
     if (readonly) {
       return (
         <VoidElement attributes={attributes}>
@@ -137,6 +138,12 @@ const ImageNode = defineNode<Image>({
           {children}
         </VoidElement>
       )
+    }
+  },
+  normalize: (editor, element, path) => {
+    const p = Editor.parent(editor, path)
+    if (p && isElementType(p[0], 'link')) {
+      Transforms.moveNodes(editor, { at: path, to: p[1]})
     }
   },
   insert: (editor, location, params: RemarkElementProps<Image>) => {
